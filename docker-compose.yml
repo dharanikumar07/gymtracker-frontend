@@ -1,0 +1,19 @@
+services:
+  frontend:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: gymtracker_frontend
+    ports:
+      - "5174:5173" # Vite dev server port (5174 to avoid conflict with yuko-frontend)
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules # prevent overwriting container node_modules
+    stdin_open: true
+    tty: true
+    networks:
+      - gym-network
+
+networks:
+  gym-network:
+    driver: bridge
