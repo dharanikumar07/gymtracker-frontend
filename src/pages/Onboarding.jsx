@@ -1,200 +1,261 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-    Plus, 
-    Trash2, 
     ArrowRight, 
     ArrowLeft, 
-    Dumbbell,
-    Check,
-    Loader2
+    Loader2, 
+    Dumbbell, 
+    Star,
+    ShieldCheck
 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../lib/api';
 import ThemeToggle from '../components/ThemeToggle';
 import { cn } from '../lib/utils';
+import { useAuth } from '../context/AuthContext';
 
-const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const FULL_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+// Import sub-steps
+import Step1 from './Onboarding/Step1';
+import Step2 from './Onboarding/Step2';
+import Step3 from './Onboarding/Step3';
 
 const Onboarding = () => {
     const navigate = useNavigate();
+    const { fetchUser } = useAuth();
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
-    const [activeDay, setActiveDay] = useState('Monday');
+    
+    const [formData, setFormData] = useState({
+        age: '',
+        gender: '',
+        height: '',
+        weight: '',
+        fitness_goal: 'muscle_gain',
+        physical_activity_type: 'strength_training',
+        weekly_split: {},
+        track_expenses: null,
+        expense_categories: []
+    });
 
-    const [basicInfo, setBasicInfo] = useState({ age: '', height: '', weight: '', fitness_goal: 'muscle_gain' });
-    const [weeklySplit, setWeeklySplit] = useState(
-        FULL_DAYS.reduce((acc, day) => ({ ...acc, [day]: ['', '', '', '', ''] }), {})
-    );
+    // Track which steps were actually completed
+    const [stepsStatus, setStepsStatus] = useState({
+        'step-1': false,
+        'step-2': false,
+        'step-3': false
+    });
 
-    const handleAddSlot = (day) => {
-        setWeeklySplit(prev => ({ ...prev, [day]: [...prev[day], ''] }));
+    const updateFormData = (newData) => {
+        setFormData(prev => ({ ...prev, ...newData }));
     };
 
-    const handleRemoveSlot = (day, index) => {
-        if (weeklySplit[day].length <= 1) return;
-        setWeeklySplit(prev => ({ ...prev, [day]: prev[day].filter((_, i) => i !== index) }));
+    const handleNext = async () => {
+        if (step === 1) {
+            if (!formData.age || !formData.height || !formData.weight) {
+                toast.error("Please fill in all profile fields");
+                return;
+            }
+            setStepsStatus(prev => ({ ...prev, 'step-1': true }));
+            setStep(2);
+            window.scrollTo(0, 0);
+        } else if (step === 2) {
+            setStepsStatus(prev => ({ ...prev, 'step-2': true }));
+            setStep(3);
+            window.scrollTo(0, 0);
+        } else if (step === 3) {
+            setStepsStatus(prev => ({ ...prev, 'step-3': true }));
+            await handleFinalSubmit({ ...stepsStatus, 'step-3': true });
+        }
     };
 
-    const handleWorkoutChange = (day, index, value) => {
-        const updatedDay = [...weeklySplit[day]];
-        updatedDay[index] = value;
-        setWeeklySplit(prev => ({ ...prev, [day]: updatedDay }));
+    const handleSkip = async () => {
+        switch (step) {
+            case 1:
+                setStepsStatus(prev => ({ ...prev, 'step-1': false }));
+                setStep(2);
+                break;
+            case 2:
+                setStepsStatus(prev => ({ ...prev, 'step-2': false }));
+                setStep(3);
+                break;
+            case 3:
+                const finalSteps = { ...stepsStatus, 'step-3': false };
+                setStepsStatus(finalSteps);
+                await handleFinalSubmit(finalSteps);
+                break;
+            default:
+                break;
+        }
     };
 
-    const handleFinish = async (isSkipping = false) => {
+    const handleFinalSubmit = async (finalStepsStatus) => {
         setLoading(true);
         try {
-            if (!isSkipping) {
-                const data = step === 1 ? basicInfo : { weekly_split: weeklySplit };
-                await api.post('/onboarding/step', { step, data });
-            }
-            if (step === 1) {
-                setStep(2);
-                window.scrollTo(0, 0);
-            } else {
-                toast.success('Ready to work!');
-                navigate('/dashboard');
-            }
+            const payload = {
+                profile: {
+                    age: formData.age,
+                    gender: formData.gender,
+                    height: formData.height,
+                    weight: formData.weight,
+                    fitness_goal: formData.fitness_goal,
+                    physical_activity_type: formData.physical_activity_type
+                },
+                routine: formData.weekly_split,
+                expenses: {
+                    track_expenses: formData.track_expenses,
+                    expense_categories: formData.expense_categories
+                },
+                steps_completed: finalStepsStatus // Send the dynamic status
+            };
+
+            await api.post('/onboarding/complete', payload);
+            
+            await fetchUser(); // Refresh user object in context
+            
+            toast.success('Onboarding complete! Welcome to GymOS.');
+            navigate('/dashboard');
         } catch (err) {
-            toast.error('Sync failed.');
+            console.error(err);
+            toast.error('Failed to complete onboarding. Please try again.');
         } finally {
             setLoading(false);
         }
     };
 
+    const handleBack = () => {
+        if (step > 1) setStep(prev => prev - 1);
+    };
+
+    const steps = [
+        { title: 'Profile', icon: '01' },
+        { title: 'Routine', icon: '02' },
+        { title: 'Expenses', icon: '03' }
+    ];
+
     return (
-        <div className="min-h-screen bg-[#f8f9fa] dark:bg-zinc-950 flex items-center justify-center p-6 transition-colors duration-500">
-            <ThemeToggle />
+        <div className="min-h-screen w-full flex bg-background text-foreground transition-colors duration-500 font-sans">
             
-            <div className="w-full max-w-[440px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden animate-in fade-in zoom-in-95 duration-500">
-                
-                {/* Compact Progress Header */}
-                <div className="px-8 pt-8 pb-4 flex justify-between items-end">
-                    <div className="space-y-1">
-                        <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">Step {step}/2</span>
-                        <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-50 tracking-tight">
-                            {step === 1 ? 'Personal Profile' : 'Workout Routine'}
-                        </h1>
+            {/* Left Panel */}
+            <div className="hidden lg:flex w-[35%] bg-secondary relative overflow-hidden flex-col justify-between p-12 border-r border-border transition-colors duration-500">
+                <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-20">
+                        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/20">
+                            <Dumbbell className="w-4 h-4 text-white" />
+                        </div>
+                        <span className="text-xl font-black tracking-tighter uppercase italic text-foreground">GymOS</span>
                     </div>
-                    <button onClick={() => handleFinish(true)} className="text-[10px] font-bold text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 uppercase transition-colors">Skip</button>
+                    
+                    <div className="space-y-6">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-[10px] font-black uppercase tracking-widest text-primary border border-primary/20">
+                            <Star className="w-3 h-3 fill-primary" /> Professional Grade
+                        </div>
+                        <h1 className="text-5xl font-black tracking-tighter leading-[0.9] mb-4 text-foreground uppercase italic text-balance">
+                            TRANSFORM <br/>
+                            YOUR <br/>
+                            LIFESTYLE.
+                        </h1>
+                        <p className="text-muted-foreground text-sm leading-relaxed max-w-xs font-medium">
+                            Join elite athletes who monitor their gains, optimize routines, and manage fitness finances with precision.
+                        </p>
+                    </div>
                 </div>
 
-                <div className="px-8 py-6">
-                    {/* Step 1: Compact Essentials */}
-                    {step === 1 ? (
-                        <div className="space-y-4">
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-1.5">
-                                    <label className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 ml-0.5">Age</label>
-                                    <input 
-                                        type="number" 
-                                        placeholder="24"
-                                        className="w-full h-10 px-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 rounded-lg focus:ring-1 focus:ring-primary outline-none font-semibold text-sm transition-all"
-                                        value={basicInfo.age}
-                                        onChange={(e) => setBasicInfo({...basicInfo, age: e.target.value})}
-                                    />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 ml-0.5">Height (cm)</label>
-                                    <input 
-                                        type="number" 
-                                        placeholder="175"
-                                        className="w-full h-10 px-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 rounded-lg focus:ring-1 focus:ring-primary outline-none font-semibold text-sm transition-all"
-                                        value={basicInfo.height}
-                                        onChange={(e) => setBasicInfo({...basicInfo, height: e.target.value})}
-                                    />
-                                </div>
-                                <div className="col-span-2 space-y-1.5">
-                                    <label className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 ml-0.5">Weight (kg)</label>
-                                    <input 
-                                        type="number" 
-                                        placeholder="70.5"
-                                        className="w-full h-10 px-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 rounded-lg focus:ring-1 focus:ring-primary outline-none font-semibold text-sm transition-all"
-                                        value={basicInfo.weight}
-                                        onChange={(e) => setBasicInfo({...basicInfo, weight: e.target.value})}
-                                    />
-                                </div>
-                                <div className="col-span-2 space-y-1.5">
-                                    <label className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 ml-0.5">Fitness Goal</label>
-                                    <select 
-                                        className="w-full h-10 px-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 rounded-lg focus:ring-1 focus:ring-primary outline-none font-semibold text-sm appearance-none cursor-pointer transition-all"
-                                        value={basicInfo.fitness_goal}
-                                        onChange={(e) => setBasicInfo({...basicInfo, fitness_goal: e.target.value})}
-                                    >
-                                        <option value="muscle_gain">Gain Muscle</option>
-                                        <option value="weight_loss">Lose Weight</option>
-                                        <option value="maintenance">Maintenance</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        /* Step 2: Neat Routine UI */
-                        <div className="space-y-5 animate-in slide-in-from-right-2 duration-300">
-                            {/* Mini Day Tabs */}
-                            <div className="flex bg-zinc-100 dark:bg-zinc-800 p-0.5 rounded-lg overflow-x-auto no-scrollbar">
-                                {DAYS.map((day, i) => (
-                                    <button
-                                        key={day}
-                                        onClick={() => setActiveDay(FULL_DAYS[i])}
-                                        className={cn(
-                                            "flex-1 py-1.5 px-1.5 rounded-md text-[10px] font-bold transition-all whitespace-nowrap",
-                                            activeDay === FULL_DAYS[i] ? "bg-white dark:bg-zinc-700 text-primary shadow-sm" : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
-                                        )}
-                                    >
-                                        {day}
-                                    </button>
-                                ))}
-                            </div>
+                <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none" 
+                    style={{ backgroundImage: 'radial-gradient(var(--foreground) 1px, transparent 0)', backgroundSize: '24px 24px' }} 
+                />
+                
+                <div className="relative z-10 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    <ShieldCheck className="w-3 h-3 text-emerald-500" />
+                    Secure & Private Data
+                </div>
+            </div>
 
-                            <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1 custom-scrollbar">
-                                {weeklySplit[activeDay].map((workout, index) => (
-                                    <div key={index} className="flex items-center gap-2 group animate-in slide-in-from-bottom-1 duration-200" style={{animationDelay: `${index * 30}ms`}}>
-                                        <div className="h-8 w-8 bg-zinc-100 dark:bg-zinc-800 rounded flex items-center justify-center text-[10px] font-bold text-zinc-400 flex-none">{index+1}</div>
-                                        <input 
-                                            type="text"
-                                            placeholder="Exercise..."
-                                            className="flex-1 h-8 px-3 bg-zinc-50 dark:bg-zinc-800/30 border border-zinc-200 dark:border-zinc-800 rounded focus:ring-1 focus:ring-primary outline-none text-xs font-medium transition-all"
-                                            value={workout}
-                                            onChange={(e) => handleWorkoutChange(activeDay, index, e.target.value)}
-                                        />
-                                        <button onClick={() => handleRemoveSlot(activeDay, index)} className="p-1.5 text-zinc-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
-                                            <Trash2 className="h-3.5 w-3.5" />
-                                        </button>
+            {/* Right Panel */}
+            <div className="flex-1 flex flex-col relative overflow-y-auto bg-background">
+                <div className="absolute top-6 right-6 z-50 flex items-center gap-4">
+                    <ThemeToggle />
+                </div>
+
+                <div className="flex-1 flex flex-col justify-center px-6 sm:px-12 lg:px-20 py-12 max-w-3xl mx-auto w-full">
+                    
+                    {/* Stepper */}
+                    <div className="mb-12">
+                        <div className="flex items-center justify-between mb-4 relative">
+                            <div className="absolute top-4 left-0 w-full h-[1px] bg-border -z-10" />
+                            
+                            {steps.map((s, i) => (
+                                <div key={i} className="flex flex-col items-center gap-3 bg-background px-4">
+                                    <div className={cn(
+                                        "w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-black transition-all border-2",
+                                        step > i + 1 ? "bg-emerald-500 border-emerald-500 text-white" : (step === i + 1 ? "bg-primary border-primary text-white scale-110 shadow-lg shadow-primary/20" : "bg-background border-border text-muted-foreground")
+                                    )}>
+                                        {s.icon}
                                     </div>
-                                ))}
+                                    <span className={cn("text-[10px] font-black uppercase tracking-widest", step === i + 1 ? "text-primary" : "text-muted-foreground")}>
+                                        {s.title}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="space-y-10">
+                        <div className="space-y-2">
+                            <h2 className="text-4xl font-black text-foreground tracking-tighter uppercase italic">
+                                {step === 1 && "Personal Profile"}
+                                {step === 2 && "Weekly Routine"}
+                                {step === 3 && "Finance Setup"}
+                            </h2>
+                            <p className="text-muted-foreground text-sm font-medium">
+                                {step === 1 && "Let's calibrate your experience based on your specific metrics."}
+                                {step === 2 && "A pre-filled structure based on your goals. Fully editable."}
+                                {step === 3 && "Take control of your gym budget and supplement expenses."}
+                            </p>
+                        </div>
+
+                        {/* Step Components */}
+                        <div className="min-h-[400px]">
+                            {step === 1 && <Step1 data={formData} updateData={updateFormData} />}
+                            {step === 2 && <Step2 data={formData} updateData={updateFormData} />}
+                            {step === 3 && <Step3 data={formData} updateData={updateFormData} />}
+                        </div>
+
+                        {/* Footer Actions */}
+                        <div className="flex flex-col gap-6 pt-8 border-t border-border">
+                            <div className="flex items-center gap-3">
+                                {step > 1 && (
+                                    <button 
+                                        onClick={handleBack}
+                                        className="h-12 px-8 bg-secondary text-foreground rounded-xl font-black text-xs uppercase tracking-widest hover:bg-secondary/80 transition-all flex items-center gap-2 border border-border"
+                                    >
+                                        <ArrowLeft className="h-3 w-3" /> Back
+                                    </button>
+                                )}
                                 <button 
-                                    onClick={() => handleAddSlot(activeDay)}
-                                    className="w-full py-2 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-lg text-[10px] font-bold text-zinc-400 hover:text-primary hover:border-primary transition-all flex items-center justify-center gap-2"
+                                    onClick={handleNext}
+                                    disabled={loading}
+                                    className="flex-1 h-12 bg-primary text-white rounded-xl font-black text-xs uppercase tracking-[0.25em] shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-3"
                                 >
-                                    <Plus className="h-3 w-3" /> Add Exercise
+                                    {loading ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                        <>
+                                            {step === 3 ? "Launch App" : "Next Step"}
+                                            <ArrowRight className="h-4 w-4" />
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                            
+                            <div className="text-center">
+                                <button 
+                                    onClick={handleSkip}
+                                    className="text-[10px] font-black text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors"
+                                >
+                                    Skip this step
                                 </button>
                             </div>
                         </div>
-                    )}
-                </div>
-
-                {/* Fixed Footer Buttons */}
-                <div className="px-8 pb-8 flex gap-3">
-                    {step === 2 && (
-                        <button onClick={() => setStep(1)} className="h-10 w-10 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all border border-zinc-200 dark:border-zinc-800">
-                            <ArrowLeft className="h-4 w-4" />
-                        </button>
-                    )}
-                    <button 
-                        onClick={() => handleFinish()}
-                        disabled={loading}
-                        className="flex-1 h-10 bg-primary text-primary-foreground rounded-lg font-bold text-[11px] uppercase tracking-wider hover:bg-primary/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                    >
-                        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (
-                            <>
-                                {step === 1 ? "Next Step" : "Get Started"}
-                                <ArrowRight className="h-4 w-4" />
-                            </>
-                        )}
-                    </button>
+                    </div>
                 </div>
             </div>
         </div>
