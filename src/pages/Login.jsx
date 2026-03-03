@@ -4,11 +4,11 @@ import { Mail, Lock, Loader2, ArrowRight, Chrome } from 'lucide-react';
 import api from '../lib/api';
 import { toast } from 'sonner';
 import ThemeToggle from '../components/ThemeToggle';
-import { useAuth } from '../context/AuthContext';
+import { useAuthStore } from '../store/authStore';
 
 const Login = () => {
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const login = useAuthStore((state) => state.login);
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({ email: '', password: '' });
 
@@ -24,11 +24,10 @@ const Login = () => {
             const response = await api.post('/login', formData);
             const { user, access_token } = response.data;
             
-            // The login function from AuthContext now handles setting state and localStorage
             login(user, access_token);
             
             toast.success('Welcome back!');
-            navigate('/dashboard'); // Navigate to a protected route
+            navigate('/dashboard');
         } catch (err) {
             console.error(err);
             toast.error(err.response?.data?.message || 'Invalid credentials');

@@ -12,7 +12,8 @@ import { toast } from 'sonner';
 import api from '../lib/api';
 import ThemeToggle from '../components/ThemeToggle';
 import { cn } from '../lib/utils';
-import { useAuth } from '../context/AuthContext';
+import { useAuthStore } from '../store/authStore';
+import { useOnboardingStore } from '../store/onboardingStore';
 
 // Import sub-steps
 import Step1 from './Onboarding/Step1';
@@ -21,60 +22,51 @@ import Step3 from './Onboarding/Step3';
 
 const Onboarding = () => {
     const navigate = useNavigate();
-    const { fetchUser } = useAuth();
-    const [step, setStep] = useState(1);
-    const [loading, setLoading] = useState(false);
+    const fetchUser = useAuthStore((state) => state.fetchUser);
+    const { 
+        step, 
+        setStep, 
+        formData, 
+        updateFormData, 
+        stepsStatus, 
+        setStepsStatus, 
+        resetOnboarding 
+    } = useOnboardingStore();
     
-    const [formData, setFormData] = useState({
-        age: '',
-        gender: '',
-        height: '',
-        weight: '',
-        fitness_goal: 'muscle_gain',
-        physical_activity_type: 'strength_training',
-        weekly_split: {},
-        track_expenses: null,
-        expense_categories: []
-    });
-
-    // Track which steps were actually completed
-    const [stepsStatus, setStepsStatus] = useState({
-        'step-1': false,
-        'step-2': false,
-        'step-3': false
-    });
-
-    const updateFormData = (newData) => {
-        setFormData(prev => ({ ...prev, ...newData }));
-    };
+    const [loading, setLoading] = useState(false);
 
     const handleNext = async () => {
-        if (step === 1) {
-            if (!formData.age || !formData.height || !formData.weight) {
-                toast.error("Please fill in all profile fields");
-                return;
-            }
-            setStepsStatus(prev => ({ ...prev, 'step-1': true }));
-            setStep(2);
-            window.scrollTo(0, 0);
-        } else if (step === 2) {
-            setStepsStatus(prev => ({ ...prev, 'step-2': true }));
-            setStep(3);
-            window.scrollTo(0, 0);
-        } else if (step === 3) {
-            setStepsStatus(prev => ({ ...prev, 'step-3': true }));
-            await handleFinalSubmit({ ...stepsStatus, 'step-3': true });
+        switch (step) {
+            case 1:
+                if (!formData.age || !formData.height || !formData.weight) {
+                    toast.error("Please fill in all profile fields");
+                    return;
+                }
+                setStepsStatus({ 'step-1': true });
+                setStep(2);
+                break;
+            case 2:
+                setStepsStatus({ 'step-2': true });
+                setStep(3);
+                break;
+            case 3:
+                setStepsStatus({ 'step-3': true });
+                await handleFinalSubmit({ ...stepsStatus, 'step-3': true });
+                break;
+            default:
+                break;
         }
+        window.scrollTo(0, 0);
     };
 
     const handleSkip = async () => {
         switch (step) {
             case 1:
-                setStepsStatus(prev => ({ ...prev, 'step-1': false }));
+                setStepsStatus({ 'step-1': false });
                 setStep(2);
                 break;
             case 2:
-                setStepsStatus(prev => ({ ...prev, 'step-2': false }));
+                setStepsStatus({ 'step-2': false });
                 setStep(3);
                 break;
             case 3:
@@ -85,6 +77,7 @@ const Onboarding = () => {
             default:
                 break;
         }
+        window.scrollTo(0, 0);
     };
 
     const handleFinalSubmit = async (finalStepsStatus) => {
@@ -102,16 +95,19 @@ const Onboarding = () => {
                 routine: formData.weekly_split,
                 expenses: {
                     track_expenses: formData.track_expenses,
-                    expense_categories: formData.expense_categories
+                    expense_categories: formData.expense_categories,
+                    expense_details: formData.expense_details
                 },
-                steps_completed: finalStepsStatus // Send the dynamic status
+                steps_completed: finalStepsStatus
             };
 
             await api.post('/onboarding/complete', payload);
             
-            await fetchUser(); // Refresh user object in context
+            // Clear the persisted state on success
+            resetOnboarding();
             
-            toast.success('Onboarding complete! Welcome to GymOS.');
+            await fetchUser();
+            toast.success('Onboarding complete!');
             navigate('/dashboard');
         } catch (err) {
             console.error(err);
@@ -122,7 +118,7 @@ const Onboarding = () => {
     };
 
     const handleBack = () => {
-        if (step > 1) setStep(prev => prev - 1);
+        if (step > 1) setStep(step - 1);
     };
 
     const steps = [
@@ -132,9 +128,7 @@ const Onboarding = () => {
     ];
 
     return (
-        <div className="min-h-screen w-full flex bg-background text-foreground transition-colors duration-500 font-sans">
-            
-            {/* Left Panel */}
+        <div className="min-h-screen w-full flex bg-background text-foreground transition-colors duration-500 font-sans text-foreground">
             <div className="hidden lg:flex w-[35%] bg-secondary relative overflow-hidden flex-col justify-between p-12 border-r border-border transition-colors duration-500">
                 <div className="relative z-10">
                     <div className="flex items-center gap-2 mb-20">
@@ -143,7 +137,6 @@ const Onboarding = () => {
                         </div>
                         <span className="text-xl font-black tracking-tighter uppercase italic text-foreground">GymOS</span>
                     </div>
-                    
                     <div className="space-y-6">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-[10px] font-black uppercase tracking-widest text-primary border border-primary/20">
                             <Star className="w-3 h-3 fill-primary" /> Professional Grade
@@ -158,30 +151,23 @@ const Onboarding = () => {
                         </p>
                     </div>
                 </div>
-
                 <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none" 
                     style={{ backgroundImage: 'radial-gradient(var(--foreground) 1px, transparent 0)', backgroundSize: '24px 24px' }} 
                 />
-                
                 <div className="relative z-10 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                     <ShieldCheck className="w-3 h-3 text-emerald-500" />
                     Secure & Private Data
                 </div>
             </div>
 
-            {/* Right Panel */}
             <div className="flex-1 flex flex-col relative overflow-y-auto bg-background">
                 <div className="absolute top-6 right-6 z-50 flex items-center gap-4">
                     <ThemeToggle />
                 </div>
-
-                <div className="flex-1 flex flex-col justify-center px-6 sm:px-12 lg:px-20 py-12 max-w-3xl mx-auto w-full">
-                    
-                    {/* Stepper */}
+                <div className="flex-1 flex flex-col justify-center px-6 sm:px-12 lg:px-20 py-12 max-w-3xl mx-auto w-full text-foreground">
                     <div className="mb-12">
                         <div className="flex items-center justify-between mb-4 relative">
                             <div className="absolute top-4 left-0 w-full h-[1px] bg-border -z-10" />
-                            
                             {steps.map((s, i) => (
                                 <div key={i} className="flex flex-col items-center gap-3 bg-background px-4">
                                     <div className={cn(
@@ -212,14 +198,12 @@ const Onboarding = () => {
                             </p>
                         </div>
 
-                        {/* Step Components */}
                         <div className="min-h-[400px]">
                             {step === 1 && <Step1 data={formData} updateData={updateFormData} />}
                             {step === 2 && <Step2 data={formData} updateData={updateFormData} />}
                             {step === 3 && <Step3 data={formData} updateData={updateFormData} />}
                         </div>
 
-                        {/* Footer Actions */}
                         <div className="flex flex-col gap-6 pt-8 border-t border-border">
                             <div className="flex items-center gap-3">
                                 {step > 1 && (
@@ -245,7 +229,6 @@ const Onboarding = () => {
                                     )}
                                 </button>
                             </div>
-                            
                             <div className="text-center">
                                 <button 
                                     onClick={handleSkip}

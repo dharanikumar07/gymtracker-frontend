@@ -4,11 +4,11 @@ import { User, Mail, Lock, Chrome, ArrowRight, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../lib/api';
 import ThemeToggle from '../components/ThemeToggle';
-import { useAuth } from '../context/AuthContext';
+import { useAuthStore } from '../store/authStore';
 
 const Register = () => {
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const login = useAuthStore((state) => state.login);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -29,7 +29,6 @@ const Register = () => {
             const response = await api.post('/register', formData);
             const { user, access_token } = response.data;
             
-            // Log in via global context
             login(user, access_token);
             
             toast.success('Account created successfully!');
