@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Sun, Moon } from 'lucide-react';
+import { cn } from '../lib/utils';
 
-const ThemeToggle = () => {
+const ThemeToggle = ({ className }) => {
     const [isDark, setIsDark] = useState(false);
 
     useEffect(() => {
@@ -27,10 +28,13 @@ const ThemeToggle = () => {
     return (
         <button
             onClick={toggleTheme}
-            className="fixed top-4 right-4 p-2 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors border border-border"
+            className={cn(
+                "p-2 rounded-xl bg-secondary text-muted-foreground hover:text-foreground transition-all border border-border",
+                className
+            )}
             aria-label="Toggle theme"
         >
-            {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
     );
 };

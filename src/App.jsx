@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Onboarding from './pages/Onboarding';
+import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from 'sonner';
 import { useAuthStore } from './store/authStore';
@@ -29,7 +30,7 @@ function App() {
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/dashboard" element={<div>Dashboard Page (Coming Soon)</div>} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Route>
 
         <Route path="/" element={<Navigate to="/login" replace />} />
