@@ -27,12 +27,10 @@ const Register = () => {
 
         try {
             const response = await api.post('/register', formData);
-            const { user, access_token } = response.data;
             
-            login(user, access_token);
-            
-            toast.success('Account created successfully!');
-            navigate('/onboarding');
+            toast.success(response.data.message || 'Account created successfully!');
+            // After registration, redirect to registration success page
+            navigate('/registration-success');
         } catch (err) {
             toast.error(err.response?.data?.message || 'Something went wrong. Please try again.');
         } finally {
@@ -45,8 +43,11 @@ const Register = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-background p-4 font-sans transition-colors duration-300">
-            <ThemeToggle />
+        <div className="min-h-screen flex items-center justify-center bg-background p-4 font-sans transition-colors duration-300 relative text-foreground">
+            <div className="absolute top-6 right-6">
+                <ThemeToggle />
+            </div>
+
             <div className="w-full max-w-md space-y-6 bg-card p-8 rounded-2xl shadow-xl border border-border">
                 <div className="text-center space-y-2">
                     <h1 className="text-3xl font-bold tracking-tight text-foreground">Join GymOS</h1>
@@ -62,7 +63,7 @@ const Register = () => {
                                 id="name"
                                 type="text"
                                 placeholder="John Doe"
-                                className="w-full pl-10 pr-4 py-2.5 bg-secondary/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground"
+                                className="w-full pl-10 pr-4 py-2.5 bg-secondary/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground font-bold"
                                 value={formData.name}
                                 onChange={handleChange}
                                 required
@@ -78,7 +79,7 @@ const Register = () => {
                                 id="email"
                                 type="email"
                                 placeholder="name@example.com"
-                                className="w-full pl-10 pr-4 py-2.5 bg-secondary/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground"
+                                className="w-full pl-10 pr-4 py-2.5 bg-secondary/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground font-bold"
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
@@ -95,7 +96,7 @@ const Register = () => {
                                     id="password"
                                     type="password"
                                     placeholder="••••••••"
-                                    className="w-full pl-10 pr-4 py-2.5 bg-secondary/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-secondary/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground font-bold"
                                     value={formData.password}
                                     onChange={handleChange}
                                     required
@@ -110,7 +111,7 @@ const Register = () => {
                                     id="password_confirmation"
                                     type="password"
                                     placeholder="••••••••"
-                                    className="w-full pl-10 pr-4 py-2.5 bg-secondary/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-secondary/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground font-bold"
                                     value={formData.password_confirmation}
                                     onChange={handleChange}
                                     required

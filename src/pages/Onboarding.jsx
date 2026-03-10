@@ -42,8 +42,37 @@ const Onboarding = () => {
                     toast.error("Please fill in all profile fields");
                     return;
                 }
-                setStepsStatus({ 'step-1': true });
-                setStep(2);
+                setLoading(true);
+                try {
+                    // Normalize the activity type for the backend
+                    let activityType = formData.physical_activity_type;
+                    if (activityType === 'flexibility') activityType = 'yoga';
+                    
+                    const response = await api.get('/onboarding/physical-activity', {
+                        params: { type: activityType }
+                    });
+                    
+                    // The backend returns the full object with units, metrics_types, and the schedule
+                    const activityData = response.data;
+                    const scheduleKey = activityData.physical_activity_type; // e.g., 'strength_training'
+                    const schedule = activityData[scheduleKey];
+                    
+                    updateFormData({ 
+                        weekly_split: schedule,
+                        onboarding_config: {
+                            units: activityData.units,
+                            metrics_types: activityData.metrics_types
+                        }
+                    });
+                    
+                    setStepsStatus({ 'step-1': true });
+                    setStep(2);
+                } catch (err) {
+                    console.error(err);
+                    toast.error("Failed to load workout routine. Please try again.");
+                } finally {
+                    setLoading(false);
+                }
                 break;
             case 2:
                 setStepsStatus({ 'step-2': true });
@@ -92,6 +121,7 @@ const Onboarding = () => {
                     fitness_goal: formData.fitness_goal,
                     physical_activity_type: formData.physical_activity_type
                 },
+                plan: formData.plan,
                 routine: formData.weekly_split,
                 expenses: {
                     track_expenses: formData.track_expenses,
