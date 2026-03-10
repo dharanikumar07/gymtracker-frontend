@@ -22,12 +22,19 @@ const Login = () => {
 
         try {
             const response = await api.post('/login', formData);
-            const { user, access_token } = response.data;
+            const { user, access_token, refresh_token } = response.data;
             
-            login(user, access_token);
+            // Log in with both tokens
+            await login(user, access_token, refresh_token);
             
             toast.success('Welcome back!');
-            navigate('/dashboard');
+            
+            // Redirection logic based on onboarding status
+            if (user && user.is_onboarding_completed) {
+                navigate('/dashboard');
+            } else {
+                navigate('/onboarding');
+            }
         } catch (err) {
             console.error(err);
             toast.error(err.response?.data?.message || 'Invalid credentials');
@@ -41,8 +48,11 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-background p-4 font-sans transition-colors duration-300">
-            <ThemeToggle />
+        <div className="min-h-screen flex items-center justify-center bg-background p-4 font-sans transition-colors duration-300 relative">
+            <div className="absolute top-6 right-6">
+                <ThemeToggle />
+            </div>
+            
             <div className="w-full max-w-md space-y-6 bg-card p-8 rounded-2xl shadow-xl border border-border">
                 <div className="text-center space-y-2">
                     <h1 className="text-3xl font-bold tracking-tight text-foreground">Welcome Back!</h1>
@@ -58,7 +68,7 @@ const Login = () => {
                                 id="email"
                                 type="email"
                                 placeholder="name@example.com"
-                                className="w-full pl-10 pr-4 py-2.5 bg-secondary/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground"
+                                className="w-full pl-10 pr-4 py-2.5 bg-secondary/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground font-bold"
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
@@ -69,7 +79,7 @@ const Login = () => {
                     <div className="space-y-1">
                         <div className="flex justify-between items-center">
                             <label className="text-sm font-medium text-foreground" htmlFor="password">Password</label>
-                            <Link to="/forgot-password" className="text-xs font-semibold text-primary hover:underline">
+                            <Link to="/forgot-password" size="sm" className="text-xs font-semibold text-primary hover:underline">
                                 Forgot Password?
                             </Link>
                         </div>
@@ -79,7 +89,7 @@ const Login = () => {
                                 id="password"
                                 type="password"
                                 placeholder="••••••••"
-                                className="w-full pl-10 pr-4 py-2.5 bg-secondary/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground"
+                                className="w-full pl-10 pr-4 py-2.5 bg-secondary/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground font-bold"
                                 value={formData.password}
                                 onChange={handleChange}
                                 required

@@ -8,7 +8,6 @@ import {
     LogOut, 
     ChevronDown, 
     User,
-    Menu,
     X,
     Dumbbell,
     ChevronLeft,
@@ -46,14 +45,13 @@ const DashboardLayout = () => {
     };
 
     return (
-        <div className="min-h-screen bg-background flex flex-col lg:flex-row transition-colors duration-500 font-sans text-foreground">
+        <div className="h-screen bg-background flex flex-col lg:flex-row transition-colors duration-500 font-sans text-foreground overflow-hidden">
             
-            {/* Desktop Sidebar - Hidden on Mobile */}
+            {/* Desktop Sidebar */}
             <aside className={cn(
-                "hidden lg:flex flex-col border-r border-border bg-card transition-all duration-300 relative",
+                "hidden lg:flex flex-col border-r border-border bg-card transition-all duration-300 relative shrink-0",
                 isSidebarOpen ? "w-64" : "w-20"
             )}>
-                {/* Floating Toggle Button */}
                 <button 
                     onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                     className={cn(
@@ -70,7 +68,7 @@ const DashboardLayout = () => {
                             <Dumbbell className="w-4 h-4 text-white" />
                         </div>
                         {isSidebarOpen && (
-                            <span className="text-lg font-black tracking-tighter uppercase italic truncate">GymOS</span>
+                            <span className="text-lg font-black tracking-tighter uppercase italic truncate text-foreground">GymOS</span>
                         )}
                     </div>
 
@@ -98,20 +96,6 @@ const DashboardLayout = () => {
                             );
                         })}
                     </nav>
-
-                    <div className="p-4 border-t border-border bg-secondary/30">
-                        <div className="flex items-center gap-3 overflow-hidden text-left">
-                            <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                                <User className="w-5 h-5 text-primary" />
-                            </div>
-                            {isSidebarOpen && (
-                                <div className="min-w-0">
-                                    <p className="text-xs font-black truncate">{user?.name || 'User'}</p>
-                                    <p className="text-[10px] font-medium text-muted-foreground truncate">{user?.email}</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
                 </div>
             </aside>
 
@@ -139,12 +123,9 @@ const DashboardLayout = () => {
                 })}
             </nav>
 
-            {/* Main Content Area */}
-            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-                
-                {/* Header */}
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden h-full">
                 <header className="h-16 bg-card border-b border-border flex items-center justify-between px-6 shrink-0 sticky top-0 z-40">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 text-foreground">
                         <h2 className="text-sm font-black uppercase tracking-[0.2em] text-muted-foreground">
                             {menuItems.find(i => i.id === activeTab)?.label}
                         </h2>
@@ -162,8 +143,7 @@ const DashboardLayout = () => {
                                     </span>
                                 </div>
                                 <div className="text-left hidden md:block">
-                                    <p className="text-xs font-black leading-none mb-0.5">{user?.name}</p>
-                                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-tighter">Premium Athlete</p>
+                                    <p className="text-xs font-black leading-none text-foreground">{user?.name}</p>
                                 </div>
                                 <ChevronDown className={cn("w-3.5 h-3.5 text-muted-foreground transition-transform duration-300", isProfileOpen && "rotate-180")} />
                             </button>
@@ -174,14 +154,11 @@ const DashboardLayout = () => {
                                     <div className="absolute right-0 mt-2 w-52 bg-card border border-border rounded-2xl shadow-2xl z-20 py-2 animate-in fade-in zoom-in-95 duration-200">
                                         <div className="px-4 py-3 border-b border-border mb-1 bg-secondary/20">
                                             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Account</p>
-                                            <p className="text-xs font-bold truncate">{user?.email}</p>
+                                            <p className="text-xs font-bold text-foreground truncate">{user?.email}</p>
                                         </div>
-                                        <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors text-left">
-                                            <User className="w-4 h-4" /> My Profile
-                                        </button>
                                         <button 
                                             onClick={handleLogout}
-                                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-500/5 transition-colors text-left"
+                                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-500/5 transition-colors text-left font-bold"
                                         >
                                             <LogOut className="w-4 h-4" /> Logout
                                         </button>
@@ -194,9 +171,8 @@ const DashboardLayout = () => {
                     </div>
                 </header>
 
-                {/* Page Content */}
-                <main className="flex-1 overflow-y-auto bg-background/50 p-4 lg:p-6 pb-24 lg:pb-6">
-                    <div className="max-w-[1600px] mx-auto">
+                <main className="flex-1 overflow-hidden bg-background/50">
+                    <div className="h-full max-w-[1600px] mx-auto overflow-hidden">
                         {menuItems.find(i => i.id === activeTab)?.component}
                     </div>
                 </main>

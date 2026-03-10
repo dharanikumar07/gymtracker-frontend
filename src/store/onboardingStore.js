@@ -8,6 +8,12 @@ const initialFormData = {
     weight: '',
     fitness_goal: 'muscle_gain',
     physical_activity_type: 'strength_training',
+    plan: {
+        name: 'My Transformation Plan',
+        start_date: new Date().toISOString().split('T')[0],
+        end_date: '',
+        is_active: true
+    },
     weekly_split: {},
     track_expenses: null,
     expense_categories: [],
