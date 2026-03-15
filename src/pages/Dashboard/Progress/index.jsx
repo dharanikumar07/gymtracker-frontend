@@ -6,7 +6,9 @@ import {
     HeartPulse,
     Loader2,
     RefreshCcw,
-    Activity
+    Activity,
+    Utensils,
+    ClipboardList
 } from 'lucide-react';
 import api from '../../../lib/api';
 import { cn } from '../../../lib/utils';
@@ -14,9 +16,11 @@ import { cn } from '../../../lib/utils';
 // Sub-tabs
 import DailyRoutine from './DailyRoutine/index.jsx';
 import TrackRoutine from './TrackRoutine/index.jsx';
+import ManageDiet from './ManageDiet/index.jsx';
+import TrackDiet from './TrackDiet/index.jsx';
 
 const Progress = () => {
-    const [activeSubTab, setActiveTab] = useState('track'); // Default to track
+    const [activeSubTab, setActiveTab] = useState('track_routine');
     const [loading, setLoading] = useState(true);
     const [progressData, setProgressData] = useState(null);
 
@@ -37,39 +41,24 @@ const Progress = () => {
     }, []);
 
     const subTabs = [
-        { id: 'track', label: 'Track Routine', icon: Activity },
+        { id: 'track_routine', label: 'Track Workout', icon: Activity },
         { id: 'daily', label: 'Manage Routine', icon: Calendar },
-        { id: 'vault', label: 'PR Vault', icon: Trophy },
-        { id: 'history', label: 'History', icon: History },
+        { id: 'track_diet', label: 'Track Diet', icon: Utensils },
+        { id: 'manage_diet', label: 'Manage Diet', icon: ClipboardList },
     ];
 
     if (loading && !progressData) {
         return (
             <div className="flex flex-col items-center justify-center h-full min-h-[60vh] gap-4">
                 <Loader2 className="w-10 h-10 animate-spin text-primary" />
-                <p className="text-xs font-black uppercase tracking-widest text-muted-foreground animate-pulse italic">Accessing Routine...</p>
-            </div>
-        );
-    }
-
-    if (!progressData && !loading) {
-        return (
-            <div className="flex flex-col items-center justify-center h-full min-h-[60vh] gap-4">
-                <RefreshCcw className="w-10 h-10 text-muted-foreground/20" />
-                <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">No active routine found</p>
-                <button 
-                    onClick={fetchData}
-                    className="mt-4 px-6 py-2 bg-primary text-white rounded-xl text-[10px] font-black uppercase tracking-widest"
-                >
-                    Retry Sync
-                </button>
+                <p className="text-xs font-black uppercase tracking-widest text-muted-foreground animate-pulse italic">Accessing Atlas...</p>
             </div>
         );
     }
 
     return (
         <div className="w-full h-full flex flex-col bg-background/50 overflow-hidden font-sans">
-            {/* Top Navigation - Always Fixed */}
+            {/* Top Navigation */}
             <div className="w-full bg-background/80 backdrop-blur-md border-b border-border p-2 sm:p-4 shrink-0">
                 <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-4">
                     <div className="bg-secondary/50 p-1.5 rounded-2xl flex flex-1 lg:flex-initial gap-1 overflow-x-auto no-scrollbar shadow-inner border border-border/50">
@@ -96,11 +85,11 @@ const Progress = () => {
                 </div>
             </div>
 
-            {/* Main Content Area - Scrollable */}
+            {/* Main Content Area */}
             <div className="flex-1 overflow-y-auto no-scrollbar">
                 <div className="max-w-[1600px] mx-auto p-4 sm:p-6 lg:p-8 h-full">
                     <div className="h-full animate-in fade-in slide-in-from-bottom-4 duration-700">
-                        {activeSubTab === 'track' && (
+                        {activeSubTab === 'track_routine' && (
                             <TrackRoutine />
                         )}
                         {activeSubTab === 'daily' && (
@@ -109,15 +98,11 @@ const Progress = () => {
                                 onUpdate={fetchData} 
                             />
                         )}
-                        {activeSubTab === 'vault' && (
-                            <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-muted-foreground italic uppercase text-[10px] font-black tracking-widest bg-secondary/10 rounded-[3rem] border-2 border-dashed border-border">
-                                Personal Records Vault coming soon
-                            </div>
+                        {activeSubTab === 'manage_diet' && (
+                            <ManageDiet />
                         )}
-                        {activeSubTab === 'history' && (
-                            <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-muted-foreground italic uppercase text-[10px] font-black tracking-widest bg-secondary/10 rounded-[3rem] border-2 border-dashed border-border">
-                                Training History coming soon
-                            </div>
+                        {activeSubTab === 'track_diet' && (
+                            <TrackDiet />
                         )}
                     </div>
                 </div>
