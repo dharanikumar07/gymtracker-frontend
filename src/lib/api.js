@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://127.0.0.1:8000/api',
+    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1',
     withCredentials: true,
     headers: {
         'Accept': 'application/json',
@@ -34,7 +34,7 @@ api.interceptors.response.use(
                 originalRequest._retry = true;
                 try {
                     // Use a clean axios instance for refresh to avoid interceptor loop
-                    const refreshResponse = await axios.post('http://127.0.0.1:8000/api/refresh', {}, {
+                    const refreshResponse = await axios.post(`${api.defaults.baseURL}/refresh`, {}, {
                         headers: {
                             'Authorization': `Bearer ${refreshToken}`,
                             'Accept': 'application/json'
@@ -53,7 +53,11 @@ api.interceptors.response.use(
                     // Refresh token is also invalid or expired
                     localStorage.removeItem('access_token');
                     localStorage.removeItem('refresh_token');
-                    window.location.href = '/login';
+                    
+                    // Only redirect if we are not already on the login page
+                    if (window.location.pathname !== '/login') {
+                        window.location.href = '/login';
+                    }
                 }
             }
         }

@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import RegistrationSuccess from './pages/RegistrationSuccess';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
-import VerifyEmail from './pages/VerifyEmail';
+import Login from './pages/Authentication/Login';
+import Register from './pages/Authentication/Register';
+import RegistrationSuccess from './pages/Authentication/RegistrationSuccess';
+import ForgotPassword from './pages/Authentication/ForgotPassword';
+import ResetPassword from './pages/Authentication/ResetPassword';
+import VerifyEmail from './pages/Authentication/VerifyEmail';
+import SocialCallback from './pages/Authentication/SocialCallback';
 import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import Routine from './pages/Dashboard/Routine';
@@ -31,6 +32,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/verify-email/:uuid/:hash" element={<VerifyEmail />} />
+        <Route path="/auth/callback/:provider" element={<SocialCallback />} />
 
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
