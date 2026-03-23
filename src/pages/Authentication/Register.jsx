@@ -1,41 +1,29 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, Lock, Chrome, ArrowRight, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { User, Mail, Lock, Chrome, ArrowRight, Loader2, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import ThemeToggle from '../../components/ThemeToggle';
-import { useAuthStore } from '../../store/authStore';
-import { registerApi, getSocialRedirectApi } from './http/authApi';
+import { getSocialRedirectApi } from './http/authApi';
+import { useRegisterMutation } from './http/authQueries';
 
 const Register = () => {
-    const navigate = useNavigate();
-    const login = useAuthStore((state) => state.login);
+    const [socialLoading, setSocialLoading] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         password: '',
         password_confirmation: ''
     });
-    const [loading, setLoading] = useState(false);
-    const [socialLoading, setSocialLoading] = useState(false);
+
+    const registerMutation = useRegisterMutation();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        setLoading(true);
-
-        try {
-            await registerApi(formData);
-            toast.success('Registration successful! Please check your email for verification.');
-            navigate('/registration-success');
-        } catch (err) {
-            console.error(err);
-            toast.error(err.response?.data?.message || 'Registration failed');
-        } finally {
-            setLoading(false);
-        }
+        registerMutation.mutate(formData);
     };
 
     const socialLogin = async (provider) => {
@@ -44,131 +32,107 @@ const Register = () => {
             const response = await getSocialRedirectApi(provider);
             window.location.href = response.data.url;
         } catch (err) {
-            toast.error('Failed to initiate social login');
+            toast.error('Connection failed. Please try again.');
             setSocialLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex flex-col lg:flex-row bg-background text-foreground font-sans selection:bg-primary/30">
-            {/* Left Side - Visual Branding */}
-            <div className="hidden lg:flex lg:w-1/2 bg-zinc-950 relative overflow-hidden items-center justify-center p-12">
-                <div className="relative z-10 space-y-6 max-w-lg">
-                    <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-2xl shadow-primary/20">
-                        <User className="w-8 h-8 text-white" />
-                    </div>
-                    <h1 className="text-6xl font-black tracking-tighter text-white uppercase italic leading-none">
-                        Join the <br /> <span className="text-primary">Vanguard</span>.
-                    </h1>
-                    <p className="text-zinc-400 text-lg font-medium leading-relaxed">
-                        Start your journey with the most advanced fitness OS. Personalize your training, master your nutrition, and track your evolution.
-                    </p>
-                </div>
-                
-                {/* Decorative background elements */}
-                <div className="absolute top-0 left-0 w-96 h-96 bg-primary/10 rounded-full -ml-48 -mt-48 blur-3xl" />
-                <div className="absolute bottom-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mb-32 blur-3xl" />
+        <div className="min-h-screen w-full flex items-center justify-center bg-background font-sans selection:bg-primary/20 p-4 relative overflow-hidden">
+            {/* Background elements */}
+            <div className="absolute inset-0 opacity-5 pointer-events-none -z-10">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-foreground rounded-full animate-[spin_50s_linear_infinite]" />
             </div>
 
-            {/* Right Side - Register Form */}
-            <div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12 relative">
-                <div className="absolute top-8 right-8">
-                    <ThemeToggle />
-                </div>
+            {/* Theme Toggle */}
+            <div className="fixed top-6 right-6 z-20">
+                <ThemeToggle />
+            </div>
 
-                <div className="w-full max-w-md space-y-10">
-                    <div className="space-y-2">
-                        <h2 className="text-4xl font-black tracking-tighter uppercase italic text-foreground">Create Account</h2>
-                        <p className="text-muted-foreground font-medium">Initiate your transformation protocol.</p>
+            <div className="max-w-[480px] w-full animate-in fade-in slide-in-from-bottom-8 duration-700">
+                <div className="bg-card border border-border p-8 rounded-3xl shadow-2xl relative overflow-hidden space-y-6 backdrop-blur-sm">
+                    {/* Header */}
+                    <div className="space-y-1 text-center">
+                        <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center mx-auto mb-3">
+                            <Zap className="w-6 h-6 text-white" />
+                        </div>
+                        <h2 className="text-2xl font-bold tracking-tight text-foreground">Create Account</h2>
+                        <p className="text-muted-foreground text-sm font-medium">Join the GymOS community today</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className="space-y-4">
-                            <div className="space-y-2 group">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 group-focus-within:text-primary transition-colors" htmlFor="name">
-                                    Full Identity
-                                </label>
-                                <div className="relative">
-                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1" htmlFor="name">Full Name</label>
+                            <div className="relative group">
+                                <input
+                                    id="name"
+                                    type="text"
+                                    className="w-full h-11 bg-transparent border-b border-border focus:border-primary outline-none transition-colors px-0 text-foreground text-sm font-medium placeholder:text-muted-foreground/30"
+                                    placeholder="John Doe"
+                                    value={formData.name}
+                                    onChange={handleChange}
+                                    required
+                                />
+                                <User className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none" />
+                            </div>
+                        </div>
+
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1" htmlFor="email">Email Address</label>
+                            <div className="relative group">
+                                <input
+                                    id="email"
+                                    type="email"
+                                    className="w-full h-11 bg-transparent border-b border-border focus:border-primary outline-none transition-colors px-0 text-foreground text-sm font-medium placeholder:text-muted-foreground/30"
+                                    placeholder="name@example.com"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    required
+                                />
+                                <Mail className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none" />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1" htmlFor="password">Password</label>
+                                <div className="relative group">
                                     <input
-                                        id="name"
-                                        type="text"
-                                        placeholder="John "
-                                        className="w-full h-14 pl-12 pr-4 bg-secondary/50 border border-border rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium text-sm"
-                                        value={formData.name}
+                                        id="password"
+                                        type="password"
+                                        className="w-full h-11 bg-transparent border-b border-border focus:border-primary outline-none transition-colors px-0 text-foreground text-sm font-medium placeholder:text-muted-foreground/30"
+                                        placeholder="••••••••"
+                                        value={formData.password}
                                         onChange={handleChange}
                                         required
                                     />
+                                    <Lock className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none" />
                                 </div>
                             </div>
 
-                            <div className="space-y-2 group">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 group-focus-within:text-primary transition-colors" htmlFor="email">
-                                    Email Address
-                                </label>
-                                <div className="relative">
-                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1" htmlFor="password_confirmation">Confirm</label>
+                                <div className="relative group">
                                     <input
-                                        id="email"
-                                        type="email"
-                                        placeholder="name@agency.com"
-                                        className="w-full h-14 pl-12 pr-4 bg-secondary/50 border border-border rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium text-sm"
-                                        value={formData.email}
+                                        id="password_confirmation"
+                                        type="password"
+                                        className="w-full h-11 bg-transparent border-b border-border focus:border-primary outline-none transition-colors px-0 text-foreground text-sm font-medium placeholder:text-muted-foreground/30"
+                                        placeholder="••••••••"
+                                        value={formData.password_confirmation}
                                         onChange={handleChange}
                                         required
                                     />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2 group">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 group-focus-within:text-primary transition-colors" htmlFor="password">
-                                        Access Key
-                                    </label>
-                                    <div className="relative">
-                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                                        <input
-                                            id="password"
-                                            type="password"
-                                            placeholder="••••••••"
-                                            className="w-full h-14 pl-12 pr-4 bg-secondary/50 border border-border rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium text-sm"
-                                            value={formData.password}
-                                            onChange={handleChange}
-                                            required
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2 group">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 group-focus-within:text-primary transition-colors" htmlFor="password_confirmation">
-                                        Confirm Key
-                                    </label>
-                                    <div className="relative">
-                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                                        <input
-                                            id="password_confirmation"
-                                            type="password"
-                                            placeholder="••••••••"
-                                            className="w-full h-14 pl-12 pr-4 bg-secondary/50 border border-border rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium text-sm"
-                                            value={formData.password_confirmation}
-                                            onChange={handleChange}
-                                            required
-                                        />
-                                    </div>
+                                    <Lock className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none" />
                                 </div>
                             </div>
                         </div>
 
                         <button
                             type="submit"
-                            disabled={loading}
-                            className="w-full h-14 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                            disabled={registerMutation.isPending}
+                            className="w-full h-11 bg-foreground text-background rounded-xl font-bold text-xs uppercase tracking-widest hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-4"
                         >
-                            {loading ? (
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                            ) : (
-                                <>Deploy Protocol <ArrowRight className="w-4 h-4" /></>
-                            )}
+                            {registerMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Create Account <ArrowRight className="w-4 h-4" /></>}
                         </button>
                     </form>
 
@@ -176,27 +140,28 @@ const Register = () => {
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t border-border"></div>
                         </div>
-                        <div className="relative flex justify-center text-[10px] font-black uppercase">
-                            <span className="bg-background px-4 text-muted-foreground tracking-widest">Third-Party Auth</span>
+                        <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-tighter">
+                            <span className="bg-card px-3 text-muted-foreground">OR</span>
                         </div>
                     </div>
 
                     <button 
                         onClick={() => socialLogin('google')}
                         disabled={socialLoading}
-                        className="w-full h-14 bg-card border border-border rounded-2xl font-bold text-sm flex items-center justify-center gap-3 hover:bg-secondary transition-all disabled:opacity-50"
+                        className="w-full h-11 bg-secondary/50 border border-border rounded-xl font-bold text-[11px] uppercase tracking-wider flex items-center justify-center gap-3 hover:bg-secondary transition-colors"
                     >
-                        {socialLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Chrome className="w-5 h-5" />} 
-                        Continue with Google
+                        {socialLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Chrome className="w-4 h-4 text-primary" />} 
+                        Sign up with Google
                     </button>
 
-                    <p className="text-center text-sm font-medium text-muted-foreground">
-                        Already Enlisted?{' '}
-                        <Link to="/login" className="text-primary font-black uppercase tracking-widest hover:underline ml-1">
-                            Login Here
-                        </Link>
+                    <p className="text-center text-xs text-muted-foreground font-medium border-t border-border/50 pt-4">
+                        Already have an account? <Link to="/login" className="text-primary font-bold hover:underline">Sign In</Link>
                     </p>
                 </div>
+
+                <p className="text-center text-[10px] text-muted-foreground font-mono uppercase tracking-widest mt-8">
+                    © 2026 GymOS Inc. System Stable.
+                </p>
             </div>
         </div>
     );
