@@ -11,6 +11,7 @@ import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import Routine from './pages/Dashboard/Routine';
 import ProtectedRoute from './components/ProtectedRoute';
+import PublicRoute from './components/PublicRoute';
 import { Toaster } from 'sonner';
 import { useUserQuery } from './pages/Authentication/http/authQueries';
 
@@ -23,13 +24,15 @@ function App() {
       <Toaster richColors position="top-right" closeButton />
       <Routes>
         {/* Public Routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/registration-success" element={<RegistrationSuccess />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/verify-email/:uuid/:hash" element={<VerifyEmail />} />
-        <Route path="/auth/callback/:provider" element={<SocialCallback />} />
+        <Route element={<PublicRoute />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/registration-success" element={<RegistrationSuccess />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-email/:uuid/:hash" element={<VerifyEmail />} />
+          <Route path="/auth/callback/:provider" element={<SocialCallback />} />
+        </Route>
 
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>

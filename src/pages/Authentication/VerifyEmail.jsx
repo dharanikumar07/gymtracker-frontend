@@ -1,44 +1,40 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useParams, useNavigate, Link, Navigate } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader2, UserCheck, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '../../store/authStore';
-import { verifyEmailApi } from './http/authApi';
+import { useVerifyEmailMutation } from './http/authQueries';
+import ThemeToggle from '../../components/ThemeToggle';
 
 const VerifyEmail = () => {
     const { uuid, hash } = useParams();
     const navigate = useNavigate();
     const { login, user, loading: authLoading } = useAuthStore();
     const [status, setStatus] = useState('idle'); // idle, verifying, success, error
+    const [hasStarted, setHasStarted] = useState(false);
 
-    // Redirect if already logged in and verified
-    useEffect(() => {
-        if (!authLoading && user && user.is_email_verified) {
-            if (user.is_onboarding_completed) {
-                navigate('/dashboard');
-            } else {
-                navigate('/onboarding');
-            }
+    const { mutateAsync: verifyEmail } = useVerifyEmailMutation();
+
+    if (!authLoading && user && user.is_email_verified) {
+        if (user.is_onboarding_completed) {
+            return <Navigate to="/dashboard" replace />;
         }
-    }, [user, authLoading, navigate]);
+        return <Navigate to="/onboarding" replace />;
+    }
 
-    useEffect(() => {
-        const verify = async () => {
-            if (status !== 'idle') return;
-            
+    // Kick off verification once per link params.
+    if (uuid && hash && !hasStarted && status === 'idle') {
+        setHasStarted(true);
+        setTimeout(async () => {
             setStatus('verifying');
             try {
-                const response = await verifyEmailApi(uuid, hash);
+                const response = await verifyEmail({ uuid, hash });
                 const { user: userData, access_token, refresh_token } = response.data;
-                
                 if (access_token) {
                     await login(userData, access_token, refresh_token);
                 }
-                
                 setStatus('success');
                 toast.success('Identity verified. Welcome to the protocol.');
-                
-                // Wait 3 seconds then redirect
                 setTimeout(() => {
                     if (userData.is_onboarding_completed) {
                         navigate('/dashboard');
@@ -51,42 +47,41 @@ const VerifyEmail = () => {
                 setStatus('error');
                 toast.error('Identity verification failed.');
             }
-        };
-
-        if (uuid && hash) {
-            verify();
-        }
-    }, [uuid, hash, login, navigate, status]);
+        }, 0);
+    }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-background p-4 text-foreground font-sans">
-            <div className="w-full max-w-md bg-card border border-border p-10 rounded-[3rem] shadow-2xl text-center space-y-8 relative overflow-hidden">
+        <div className="min-h-screen bg-background p-4 text-foreground font-sans flex items-center justify-center">
+            <div className="fixed top-4 right-4 z-50">
+                <ThemeToggle />
+            </div>
+            <div className="w-full max-w-sm bg-card border border-border p-8 rounded-3xl shadow-sm text-center space-y-8 animate-in fade-in duration-500">
                 {status === 'verifying' && (
                     <div className="space-y-6 py-4">
                         <div className="relative inline-block">
-                            <div className="w-20 h-20 rounded-full border-4 border-primary/10 border-t-primary animate-spin" />
-                            <UserCheck className="absolute inset-0 m-auto w-8 h-8 text-primary animate-pulse" />
+                            <div className="w-16 h-16 rounded-full border-4 border-primary/10 border-t-primary animate-spin" />
+                            <UserCheck className="absolute inset-0 m-auto w-7 h-7 text-primary animate-pulse" />
                         </div>
                         <div className="space-y-2">
-                            <h2 className="text-2xl font-black uppercase italic tracking-tighter">Verifying Identity</h2>
-                            <p className="text-muted-foreground text-sm font-medium">Synchronizing access credentials...</p>
+                            <h2 className="text-xl font-black uppercase tracking-tight">Verifying Identity</h2>
+                            <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest">Synchronizing credentials...</p>
                         </div>
                     </div>
                 )}
 
                 {status === 'success' && (
                     <div className="space-y-6 py-4 animate-in zoom-in-95 duration-500">
-                        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-500/10 text-emerald-500">
-                            <CheckCircle className="w-10 h-10" />
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-500/10 text-emerald-500">
+                            <CheckCircle className="w-8 h-8" />
                         </div>
                         <div className="space-y-2">
-                            <h2 className="text-2xl font-black uppercase italic tracking-tighter">Access Granted</h2>
-                            <p className="text-muted-foreground text-sm font-medium">Redirecting to operations base...</p>
+                            <h2 className="text-xl font-black uppercase tracking-tight text-emerald-500">Access Granted</h2>
+                            <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest">Redirecting to operations...</p>
                         </div>
-                        <div className="pt-4">
+                        <div className="pt-2">
                             <button 
                                 onClick={() => navigate('/dashboard')}
-                                className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-primary hover:underline"
+                                className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:underline"
                             >
                                 Manual Override <ArrowRight className="w-3.5 h-3.5" />
                             </button>
@@ -96,26 +91,23 @@ const VerifyEmail = () => {
 
                 {status === 'error' && (
                     <div className="space-y-6 py-4 animate-in zoom-in-95 duration-500">
-                        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-rose-500/10 text-rose-500">
-                            <XCircle className="w-10 h-10" />
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-rose-500/10 text-rose-500">
+                            <XCircle className="w-8 h-8" />
                         </div>
                         <div className="space-y-2">
-                            <h2 className="text-2xl font-black uppercase italic tracking-tighter">Verification Failed</h2>
-                            <p className="text-muted-foreground text-sm font-medium">The link may be expired or invalid.</p>
+                            <h2 className="text-xl font-black uppercase tracking-tight text-rose-500">Verification Failed</h2>
+                            <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest">Link expired or invalid protocol.</p>
                         </div>
-                        <div className="pt-4 flex flex-col gap-4">
+                        <div className="pt-2">
                             <Link 
                                 to="/login"
-                                className="w-full h-12 bg-primary text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center shadow-lg shadow-primary/20"
+                                className="w-full h-11 bg-primary text-white rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center hover:bg-primary/90 shadow-lg shadow-primary/20"
                             >
                                 Back to Login
                             </Link>
                         </div>
                     </div>
                 )}
-                
-                {/* Decorative background element */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-2xl" />
             </div>
         </div>
     );

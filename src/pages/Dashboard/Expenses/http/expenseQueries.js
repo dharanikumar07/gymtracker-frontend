@@ -1,16 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '../../../../lib/api';
-
-export const EXPENSE_KEYS = {
-    all: ['expenses'],
-};
+import { useQuery } from '@tanstack/react-query';
+import { QUERY_KEYS } from '../../../../constants/query.constants';
+import { fetchExpensesApi } from './expenseApi';
 
 export const useExpensesQuery = () => {
     return useQuery({
-        queryKey: EXPENSE_KEYS.all,
-        queryFn: async () => {
-            const response = await api.get('/get-expenses');
-            return response.data;
-        },
+        queryKey: QUERY_KEYS.EXPENSES.ALL,
+        queryFn: fetchExpensesApi,
     });
 };

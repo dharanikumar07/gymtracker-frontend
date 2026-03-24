@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import api from '../lib/api';
+import { fetchRoutineApi } from '../pages/Dashboard/Progress/http/progressApi';
 
 export const useFitnessStore = create((set, get) => ({
     routine: null,
@@ -9,8 +9,8 @@ export const useFitnessStore = create((set, get) => ({
     fetchRoutine: async () => {
         set({ loading: true });
         try {
-            const response = await api.get('/routine');
-            set({ routine: response.data, loading: false });
+            const routine = await fetchRoutineApi();
+            set({ routine, loading: false });
         } catch (err) {
             set({ error: err.message, loading: false });
         }

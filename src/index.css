@@ -87,4 +87,15 @@
     -moz-appearance: textfield;
     appearance: textfield;
   }
+
+  /* Keep autofill consistent with app theme */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--foreground) !important;
+    -webkit-box-shadow: 0 0 0px 1000px var(--card) inset !important;
+    box-shadow: 0 0 0px 1000px var(--card) inset !important;
+    caret-color: var(--foreground);
+    transition: background-color 9999s ease-out 0s;
+  }
 }

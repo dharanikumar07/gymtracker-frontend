@@ -1,25 +1,25 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '../../../../lib/api';
 import { toast } from 'sonner';
-
-export const PROGRESS_KEYS = {
-    routine: ['progress', 'routine'],
-    routine_tracking: (date) => ['progress', 'routine-tracking', date],
-    diet_routine: (planUuid) => ['progress', 'diet-routine', planUuid],
-    diet_tracking: (date) => ['progress', 'diet-tracking', date],
-};
+import { QUERY_KEYS } from '../../../../constants/query.constants';
+import {
+    fetchDietRoutineApi,
+    fetchDietTrackingApi,
+    fetchRoutineApi,
+    fetchRoutineTrackingApi,
+    generateDietPlanApi,
+    logDietApi,
+    logWorkoutApi,
+    updateDietRoutineApi,
+    updateRoutineApi,
+} from './progressApi';
 
 /**
  * Hook for Routine Data (used in Routine management and Progress)
  */
 export const useRoutineQuery = (planUuid = null) => {
     return useQuery({
-        queryKey: planUuid ? [...PROGRESS_KEYS.routine, planUuid] : PROGRESS_KEYS.routine,
-        queryFn: async () => {
-            const params = planUuid ? { plan_uuid: planUuid } : {};
-            const response = await api.get('/routine', { params });
-            return response.data;
-        },
+        queryKey: planUuid ? QUERY_KEYS.PROGRESS.ROUTINE_BY_PLAN(planUuid) : QUERY_KEYS.PROGRESS.ROUTINE,
+        queryFn: () => fetchRoutineApi(planUuid),
     });
 };
 
@@ -28,11 +28,8 @@ export const useRoutineQuery = (planUuid = null) => {
  */
 export const useRoutineTrackingQuery = (date) => {
     return useQuery({
-        queryKey: PROGRESS_KEYS.routine_tracking(date),
-        queryFn: async () => {
-            const response = await api.get('/routine/tracking', { params: { date } });
-            return response.data;
-        },
+        queryKey: QUERY_KEYS.PROGRESS.ROUTINE_TRACKING(date),
+        queryFn: () => fetchRoutineTrackingApi(date),
         enabled: !!date,
     });
 };
@@ -42,12 +39,8 @@ export const useRoutineTrackingQuery = (date) => {
  */
 export const useDietRoutineQuery = (planUuid = null) => {
     return useQuery({
-        queryKey: PROGRESS_KEYS.diet_routine(planUuid),
-        queryFn: async () => {
-            const params = planUuid ? { plan_uuid: planUuid } : {};
-            const response = await api.get('/diet/routine', { params });
-            return response.data;
-        },
+        queryKey: QUERY_KEYS.PROGRESS.DIET_ROUTINE(planUuid),
+        queryFn: () => fetchDietRoutineApi(planUuid),
         retry: (failureCount, error) => {
             // Don't retry if 404 (needs setup)
             if (error.response?.status === 404) return false;
@@ -61,11 +54,8 @@ export const useDietRoutineQuery = (planUuid = null) => {
  */
 export const useDietTrackingQuery = (date) => {
     return useQuery({
-        queryKey: PROGRESS_KEYS.diet_tracking(date),
-        queryFn: async () => {
-            const response = await api.get('/diet/tracking', { params: { date } });
-            return response.data;
-        },
+        queryKey: QUERY_KEYS.PROGRESS.DIET_TRACKING(date),
+        queryFn: () => fetchDietTrackingApi(date),
         enabled: !!date,
     });
 };
@@ -76,10 +66,10 @@ export const useDietTrackingQuery = (date) => {
 export const useUpdateRoutineMutation = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (data) => api.patch('/routine', data),
+        mutationFn: updateRoutineApi,
         onSuccess: () => {
             toast.success("Routine committed to Atlas");
-            queryClient.invalidateQueries({ queryKey: PROGRESS_KEYS.routine });
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROGRESS.ROUTINE });
         },
         onError: () => toast.error("Failed to save routine changes"),
     });
@@ -91,10 +81,10 @@ export const useUpdateRoutineMutation = () => {
 export const useLogWorkoutMutation = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ date, tracking }) => api.post('/routine/tracking', { date, tracking }),
+        mutationFn: logWorkoutApi,
         onSuccess: (_, variables) => {
             toast.success("Logs committed to Atlas");
-            queryClient.invalidateQueries({ queryKey: PROGRESS_KEYS.routine_tracking(variables.date) });
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROGRESS.ROUTINE_TRACKING(variables.date) });
         },
         onError: () => toast.error("Committal failed"),
     });
@@ -106,10 +96,10 @@ export const useLogWorkoutMutation = () => {
 export const useGenerateDietPlanMutation = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (data) => api.post('/diet/routine', data),
+        mutationFn: generateDietPlanApi,
         onSuccess: () => {
             toast.success("Protocol generated successfully");
-            queryClient.invalidateQueries({ queryKey: ['progress', 'diet-routine'] });
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROGRESS.DIET_ROUTINE(null) });
         },
         onError: () => toast.error("Calculation engine error"),
     });
@@ -121,10 +111,10 @@ export const useGenerateDietPlanMutation = () => {
 export const useUpdateDietRoutineMutation = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (data) => api.patch('/diet/routine', data),
+        mutationFn: updateDietRoutineApi,
         onSuccess: () => {
             toast.success("Diet routine saved");
-            queryClient.invalidateQueries({ queryKey: ['progress', 'diet-routine'] });
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROGRESS.DIET_ROUTINE(null) });
         },
         onError: () => toast.error("Failed to save diet routine"),
     });
@@ -136,10 +126,10 @@ export const useUpdateDietRoutineMutation = () => {
 export const useLogDietMutation = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ date, logs }) => api.post('/diet/tracking', { date, logs }),
+        mutationFn: logDietApi,
         onSuccess: (_, variables) => {
             toast.success("Diet logs committed successfully");
-            queryClient.invalidateQueries({ queryKey: PROGRESS_KEYS.diet_tracking(variables.date) });
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROGRESS.DIET_TRACKING(variables.date) });
         },
         onError: () => toast.error("Failed to save progress"),
     });

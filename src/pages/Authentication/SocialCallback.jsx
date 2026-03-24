@@ -3,7 +3,8 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { ShieldCheck, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '../../store/authStore';
-import { socialCallbackApi } from './http/authApi';
+import { useSocialCallbackMutation } from './http/authQueries';
+import ThemeToggle from '../../components/ThemeToggle';
 
 const SocialCallback = () => {
     const { provider } = useParams();
@@ -11,7 +12,7 @@ const SocialCallback = () => {
     const navigate = useNavigate();
     const login = useAuthStore((state) => state.login);
     const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const { mutateAsync: socialCallback, isPending: loading } = useSocialCallbackMutation();
 
     const params = new URLSearchParams(location.search);
     const code = params.get('code');
@@ -23,10 +24,9 @@ const SocialCallback = () => {
         }
 
         if (loading) return;
-        setLoading(true);
 
         try {
-            const response = await socialCallbackApi(provider, code);
+            const response = await socialCallback({ provider, code });
             const { user, access_token, refresh_token } = response.data;
             
             await login(user, access_token, refresh_token);
@@ -42,8 +42,6 @@ const SocialCallback = () => {
             setError(err.response?.data?.message || 'Authentication failed. Please try again.');
             toast.error('Social authentication failed');
             setTimeout(() => navigate('/login'), 3000);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -61,33 +59,34 @@ const SocialCallback = () => {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-background p-4 text-foreground font-sans">
-            <div className="w-full max-w-md bg-card border border-border p-10 rounded-[3rem] shadow-2xl text-center space-y-8 relative overflow-hidden">
+        <div className="min-h-screen bg-background p-4 text-foreground font-sans flex items-center justify-center">
+            <div className="fixed top-4 right-4 z-50">
+                <ThemeToggle />
+            </div>
+            <div className="w-full max-w-sm bg-card border border-border p-8 rounded-3xl shadow-sm text-center space-y-8">
                 {!error ? (
                     <div className="space-y-6 py-4">
                         <div className="relative inline-block">
-                            <div className="w-20 h-20 rounded-full border-4 border-primary/10 border-t-primary animate-spin" />
-                            <ShieldCheck className="absolute inset-0 m-auto w-8 h-8 text-primary animate-pulse" />
+                            <div className="w-16 h-16 rounded-full border-4 border-primary/10 border-t-primary animate-spin" />
+                            <ShieldCheck className="absolute inset-0 m-auto w-7 h-7 text-primary animate-pulse" />
                         </div>
                         <div className="space-y-2">
-                            <h2 className="text-2xl font-black uppercase italic tracking-tighter text-foreground">Authorizing</h2>
-                            <p className="text-muted-foreground text-sm font-medium italic uppercase tracking-widest">Verifying {provider} protocol...</p>
+                            <h2 className="text-xl font-black uppercase tracking-tight text-foreground">Authorizing</h2>
+                            <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest">Verifying {provider} login...</p>
                         </div>
                     </div>
                 ) : (
                     <div className="space-y-6 py-4 animate-in zoom-in-95 duration-500">
-                        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-rose-500/10 text-rose-500">
-                            <AlertCircle className="w-10 h-10" />
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-rose-500/10 text-rose-500">
+                            <AlertCircle className="w-8 h-8" />
                         </div>
                         <div className="space-y-2">
-                            <h2 className="text-2xl font-black uppercase italic tracking-tighter">Handshake Error</h2>
-                            <p className="text-muted-foreground text-sm font-medium">{error}</p>
+                            <h2 className="text-xl font-black uppercase tracking-tight">Authentication Error</h2>
+                            <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest text-rose-500">{error}</p>
                         </div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground animate-pulse">Returning to base...</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground animate-pulse">Redirecting to sign in...</p>
                     </div>
                 )}
-                
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-2xl" />
             </div>
         </div>
     );
