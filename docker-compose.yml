@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: gymtracker_frontend
     ports:
-      - "5174:5173" # Vite dev server port (5174 to avoid conflict with yuko-frontend)
+      - "6500:6500" # Host and container both use 6500
     volumes:
       - ./:/usr/src/app
       - /usr/src/app/node_modules # prevent overwriting container node_modules

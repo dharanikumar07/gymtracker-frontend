@@ -18,11 +18,9 @@ import {
     Scale,
     X
 } from 'lucide-react';
-import api from '../../../../lib/api';
 import { cn } from '../../../../lib/utils';
-import { toast } from 'sonner';
-import { useFitnessStore } from '../../../../store/fitnessStore';
 import Calendar from '../../../../components/Calendar';
+import { useRoutineTrackingQuery, useLogWorkoutMutation, useRoutineQuery } from '../http/progressQueries';
 
 const SetRow = ({ slotUuid, setIndex, set, metricsType, units, onUpdate, onRemove }) => {
     const hasWeight = 'weight' in set && set.weight !== undefined;
@@ -96,14 +94,25 @@ const SetRow = ({ slotUuid, setIndex, set, metricsType, units, onUpdate, onRemov
 
 const TrackRoutine = () => {
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
+    const { data: routineData, isLoading: loading } = useRoutineTrackingQuery(selectedDate);
+    // useRoutineQuery can replace fitnessStore.fetchRoutine if needed, 
+    // but here we just need to ensure the data is synced.
+    useRoutineQuery(); 
+    
+    const logMutation = useLogWorkoutMutation();
+    
     const [exercises, setExercises] = useState([]);
     const [units, setUnits] = useState(null);
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const calendarRef = useRef(null);
-    
-    const { fetchRoutine } = useFitnessStore();
+
+    // Sync local state with query data
+    useEffect(() => {
+        if (routineData) {
+            setExercises(routineData.exercises || []);
+            setUnits(routineData.units);
+        }
+    }, [routineData]);
 
     // Close calendar when clicking outside
     useEffect(() => {
@@ -138,27 +147,6 @@ const TrackRoutine = () => {
                 };
             });
         } catch (e) { return []; }
-    }, [selectedDate]);
-
-    const fetchData = async (date) => {
-        if (!date) return;
-        try {
-            setLoading(true);
-            const response = await api.get('/routine/tracking', { params: { date } });
-            setExercises(response.data.exercises || []);
-            setUnits(response.data.units);
-        } catch (err) {
-            toast.error("Protocol sync failed");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        if (selectedDate) {
-            fetchRoutine();
-            fetchData(selectedDate);
-        }
     }, [selectedDate]);
 
     const handleUpdateSet = (slotUuid, setIndex, updates) => {
@@ -207,20 +195,12 @@ const TrackRoutine = () => {
         }));
     };
 
-    const handleSave = async () => {
-        try {
-            setSaving(true);
-            const tracking = exercises.map(ex => ({
-                slot_uuid: ex.slot_uuid,
-                performed_metrics: ex.performed_metrics
-            }));
-            await api.post('/routine/tracking', { date: selectedDate, tracking });
-            toast.success("Logs committed to Atlas");
-        } catch (err) {
-            toast.error("Committal failed");
-        } finally {
-            setSaving(false);
-        }
+    const handleSave = () => {
+        const tracking = exercises.map(ex => ({
+            slot_uuid: ex.slot_uuid,
+            performed_metrics: ex.performed_metrics
+        }));
+        logMutation.mutate({ date: selectedDate, tracking });
     };
 
     return (
@@ -261,10 +241,10 @@ const TrackRoutine = () => {
                     </div>
 
                     <button 
-                        onClick={handleSave} disabled={saving || exercises.length === 0}
+                        onClick={handleSave} disabled={logMutation.isPending || exercises.length === 0}
                         className="h-10 px-6 bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
                     >
-                        {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                        {logMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                         Commit
                     </button>
                 </div>

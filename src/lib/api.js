@@ -23,14 +23,21 @@ api.interceptors.response.use(
     response => response,
     async error => {
         const originalRequest = error.config;
+        const requestUrl = originalRequest?.url || '';
+        const isAuthEndpoint =
+            requestUrl.includes('/login') ||
+            requestUrl.includes('/register') ||
+            requestUrl.includes('/forgot-password') ||
+            requestUrl.includes('/reset-password') ||
+            requestUrl.includes('/verify-email') ||
+            requestUrl.includes('/auth/');
 
         // If the error is 401 and we haven't tried to refresh yet
         if (error.response?.status === 401 && !originalRequest._retry) {
             const refreshToken = localStorage.getItem('refresh_token');
-            const publicPages = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'];
-            
-            // Don't try to refresh on public pages or if no refresh token
-            if (!publicPages.some(page => window.location.pathname.startsWith(page)) && refreshToken) {
+
+            // Don't try to refresh for auth endpoints themselves or if no refresh token.
+            if (!isAuthEndpoint && refreshToken) {
                 originalRequest._retry = true;
                 try {
                     // Use a clean axios instance for refresh to avoid interceptor loop
@@ -53,11 +60,6 @@ api.interceptors.response.use(
                     // Refresh token is also invalid or expired
                     localStorage.removeItem('access_token');
                     localStorage.removeItem('refresh_token');
-                    
-                    // Only redirect if we are not already on the login page
-                    if (window.location.pathname !== '/login') {
-                        window.location.href = '/login';
-                    }
                 }
             }
         }

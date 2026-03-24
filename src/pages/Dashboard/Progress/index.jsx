@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     Calendar,
     Trophy,
@@ -10,8 +10,8 @@ import {
     Utensils,
     ClipboardList
 } from 'lucide-react';
-import api from '../../../lib/api';
 import { cn } from '../../../lib/utils';
+import { useRoutineQuery } from './http/progressQueries';
 
 // Sub-tabs
 import DailyRoutine from './DailyRoutine/index.jsx';
@@ -21,24 +21,7 @@ import TrackDiet from './TrackDiet/index.jsx';
 
 const Progress = () => {
     const [activeSubTab, setActiveTab] = useState('track_routine');
-    const [loading, setLoading] = useState(true);
-    const [progressData, setProgressData] = useState(null);
-
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const response = await api.get('/routine');
-            setProgressData(response.data);
-        } catch (err) {
-            console.error("Failed to fetch progress data", err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchData();
-    }, []);
+    const { data: progressData, isLoading: loading, refetch } = useRoutineQuery();
 
     const subTabs = [
         { id: 'track_routine', label: 'Track Workout', icon: Activity },
@@ -95,7 +78,7 @@ const Progress = () => {
                         {activeSubTab === 'daily' && (
                             <DailyRoutine 
                                 data={progressData} 
-                                onUpdate={fetchData} 
+                                onUpdate={refetch} 
                             />
                         )}
                         {activeSubTab === 'manage_diet' && (
@@ -110,5 +93,6 @@ const Progress = () => {
         </div>
     );
 };
+
 
 export default Progress;

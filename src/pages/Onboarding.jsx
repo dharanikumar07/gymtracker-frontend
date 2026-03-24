@@ -9,11 +9,14 @@ import {
     ShieldCheck
 } from 'lucide-react';
 import { toast } from 'sonner';
-import api from '../lib/api';
 import ThemeToggle from '../components/ThemeToggle';
 import { cn } from '../lib/utils';
 import { useAuthStore } from '../store/authStore';
 import { useOnboardingStore } from '../store/onboardingStore';
+import { useQueryClient } from '@tanstack/react-query';
+import { useCompleteOnboardingMutation } from './http/onboardingQueries';
+import { fetchPhysicalActivityApi } from './http/onboardingApi';
+import { QUERY_KEYS } from '../constants/query.constants';
 
 // Import sub-steps
 import Step1 from './Onboarding/Step1';
@@ -34,6 +37,8 @@ const Onboarding = () => {
     } = useOnboardingStore();
     
     const [loading, setLoading] = useState(false);
+    const queryClient = useQueryClient();
+    const completeOnboardingMutation = useCompleteOnboardingMutation();
 
     const handleNext = async () => {
         switch (step) {
@@ -44,27 +49,22 @@ const Onboarding = () => {
                 }
                 setLoading(true);
                 try {
-                    // Normalize the activity type for the backend
                     let activityType = formData.physical_activity_type;
                     if (activityType === 'flexibility') activityType = 'yoga';
-                    
-                    const response = await api.get('/onboarding/physical-activity', {
-                        params: { type: activityType }
+                    const activityData = await queryClient.fetchQuery({
+                        queryKey: QUERY_KEYS.ONBOARDING.PHYSICAL_ACTIVITY(activityType),
+                        queryFn: () => fetchPhysicalActivityApi(activityType),
                     });
-                    
-                    // The backend returns the full object with units, metrics_types, and the schedule
-                    const activityData = response.data;
-                    const scheduleKey = activityData.physical_activity_type; // e.g., 'strength_training'
+
+                    const scheduleKey = activityData.physical_activity_type;
                     const schedule = activityData[scheduleKey];
-                    
-                    updateFormData({ 
+                    updateFormData({
                         weekly_split: schedule,
                         onboarding_config: {
                             units: activityData.units,
-                            metrics_types: activityData.metrics_types
-                        }
+                            metrics_types: activityData.metrics_types,
+                        },
                     });
-                    
                     setStepsStatus({ 'step-1': true });
                     setStep(2);
                 } catch (err) {
@@ -131,11 +131,8 @@ const Onboarding = () => {
                 steps_completed: finalStepsStatus
             };
 
-            await api.post('/onboarding/complete', payload);
-            
-            // Clear the persisted state on success
+            await completeOnboardingMutation.mutateAsync(payload);
             resetOnboarding();
-            
             await fetchUser();
             toast.success('Onboarding complete!');
             navigate('/dashboard');

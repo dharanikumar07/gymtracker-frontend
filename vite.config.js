@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: true, // Listen on 0.0.0.0 for Docker port forwarding
-    port: 5173,
+    port: 6500,
     watch: {
       usePolling: true, // Needed for file changes with Docker volume mounts
     },

@@ -1,9 +1,9 @@
 import { create } from 'zustand';
-import api from '../lib/api';
+import { fetchMeApi, logoutApi } from '../pages/Authentication/http/authApi';
 
 export const useAuthStore = create((set, get) => ({
     user: null,
-    loading: true,
+    loading: !!localStorage.getItem('access_token'),
 
     fetchUser: async () => {
         const token = localStorage.getItem('access_token');
@@ -13,7 +13,7 @@ export const useAuthStore = create((set, get) => ({
         }
 
         try {
-            const response = await api.get('/me');
+            const response = await fetchMeApi();
             const userData = response.data.data || response.data.user || response.data;
             set({ user: userData, loading: false });
             return userData;
@@ -39,7 +39,7 @@ export const useAuthStore = create((set, get) => ({
 
     logout: async () => {
         try {
-            await api.post('/logout');
+            await logoutApi();
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
@@ -50,5 +50,6 @@ export const useAuthStore = create((set, get) => ({
         }
     },
 
-    setUser: (user) => set({ user }),
+    setUser: (user) => set({ user, loading: false }),
+    setLoading: (loading) => set({ loading }),
 }));

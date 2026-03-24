@@ -4,19 +4,28 @@ import {
     ChevronLeft, ChevronRight, PieChart, Zap, 
     Flame, Target, Scale, CheckCircle2, History
 } from 'lucide-react';
-import api from '../../../../lib/api';
 import { cn } from '../../../../lib/utils';
-import { toast } from 'sonner';
 import Calendar from '../../../../components/Calendar';
+import { useDietTrackingQuery, useLogDietMutation } from '../http/progressQueries';
 
 const MEALS = ['breakfast', 'lunch', 'dinner', 'snack'];
 
 const TrackDiet = () => {
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
+    const { data: dietData, isLoading: loading } = useDietTrackingQuery(selectedDate);
+    const logMutation = useLogDietMutation();
+    
     const [meals, setMeals] = useState({});
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+
+    // Sync local state with query data
+    useEffect(() => {
+        if (dietData?.meals) {
+            setMeals(dietData.meals);
+        } else {
+            setMeals({});
+        }
+    }, [dietData]);
 
     // Week navigation logic
     const weekDays = useMemo(() => {
@@ -35,23 +44,6 @@ const TrackDiet = () => {
                 isToday: iso === new Date().toISOString().split('T')[0]
             };
         });
-    }, [selectedDate]);
-
-    const fetchData = async (date) => {
-        try {
-            setLoading(true);
-            const response = await api.get('/diet/tracking', { params: { date } });
-            setMeals(response.data.meals || {});
-        } catch (err) {
-            console.error(err);
-            toast.error("Dietary sync failed");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchData(selectedDate);
     }, [selectedDate]);
 
     const handleUpdateLog = (mealType, idx, updates) => {
@@ -77,38 +69,29 @@ const TrackDiet = () => {
         });
     };
 
-    const handleSave = async () => {
-        try {
-            setSaving(true);
-            const logs = [];
-            Object.values(meals).forEach(mealItems => {
-                mealItems.forEach(item => {
-                    if (item.logged) {
-                        logs.push({
-                            diet_plan_item_uuid: item.diet_plan_item_uuid,
-                            actual_quantity: item.logged.quantity,
-                            unit: item.logged.unit,
-                            calories: item.logged.calories,
-                            protein: item.logged.macros.p,
-                            carbs: item.logged.macros.c,
-                            fats: item.logged.macros.f,
-                            notes: item.logged.notes
-                        });
-                    }
-                });
+    const handleSave = () => {
+        const logs = [];
+        Object.values(meals).forEach(mealItems => {
+            mealItems.forEach(item => {
+                if (item.logged) {
+                    logs.push({
+                        diet_plan_item_uuid: item.diet_plan_item_uuid,
+                        actual_quantity: item.logged.quantity,
+                        unit: item.logged.unit,
+                        calories: item.logged.calories,
+                        protein: item.logged.macros.p,
+                        carbs: item.logged.macros.c,
+                        fats: item.logged.macros.f,
+                        notes: item.logged.notes
+                    });
+                }
             });
+        });
 
-            await api.post('/diet/tracking', {
-                date: selectedDate,
-                logs: logs
-            });
-            toast.success("Diet logs committed successfully");
-        } catch (err) {
-            console.error(err);
-            toast.error("Failed to save progress");
-        } finally {
-            setSaving(false);
-        }
+        logMutation.mutate({
+            date: selectedDate,
+            logs: logs
+        });
     };
 
     // Calculate totals
@@ -170,10 +153,10 @@ const TrackDiet = () => {
 
                     <button 
                         onClick={handleSave}
-                        disabled={saving}
+                        disabled={logMutation.isPending}
                         className="h-10 px-6 bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 shrink-0"
                     >
-                        {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                        {logMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                         Save Logs
                     </button>
                 </div>

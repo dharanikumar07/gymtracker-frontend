@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Authentication/Login';
 import Register from './pages/Authentication/Register';
@@ -11,28 +11,28 @@ import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import Routine from './pages/Dashboard/Routine';
 import ProtectedRoute from './components/ProtectedRoute';
+import PublicRoute from './components/PublicRoute';
 import { Toaster } from 'sonner';
-import { useAuthStore } from './store/authStore';
+import { useUserQuery } from './pages/Authentication/http/authQueries';
 
 function App() {
-  const fetchUser = useAuthStore((state) => state.fetchUser);
-
-  useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
+  // TanStack Query handles fetching user profile on mount automatically
+  useUserQuery();
 
   return (
     <Router>
       <Toaster richColors position="top-right" closeButton />
       <Routes>
         {/* Public Routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/registration-success" element={<RegistrationSuccess />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/verify-email/:uuid/:hash" element={<VerifyEmail />} />
-        <Route path="/auth/callback/:provider" element={<SocialCallback />} />
+        <Route element={<PublicRoute />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/registration-success" element={<RegistrationSuccess />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-email/:uuid/:hash" element={<VerifyEmail />} />
+          <Route path="/auth/callback/:provider" element={<SocialCallback />} />
+        </Route>
 
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
