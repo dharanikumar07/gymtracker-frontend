@@ -3,7 +3,7 @@ import api from '../lib/api';
 
 export const useAuthStore = create((set, get) => ({
     user: null,
-    loading: true,
+    loading: !!localStorage.getItem('access_token'),
 
     fetchUser: async () => {
         const token = localStorage.getItem('access_token');
@@ -50,5 +50,6 @@ export const useAuthStore = create((set, get) => ({
         }
     },
 
-    setUser: (user) => set({ user }),
+    setUser: (user) => set({ user, loading: false }),
+    setLoading: (loading) => set({ loading }),
 }));

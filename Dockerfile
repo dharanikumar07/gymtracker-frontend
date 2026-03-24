@@ -12,7 +12,7 @@ RUN npm install
 # Copy source
 COPY . .
 
-EXPOSE 5173
+EXPOSE 6500
 
 # Start with bash so the container stays alive
 CMD ["/bin/bash"]

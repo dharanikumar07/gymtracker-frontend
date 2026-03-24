@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { 
     Wallet, 
     TrendingDown, 
@@ -13,26 +13,11 @@ import {
     ChevronRight,
     ArrowRight
 } from 'lucide-react';
-import api from '../../../lib/api';
 import { cn } from '../../../lib/utils';
+import { useExpensesQuery } from './http/expenseQueries';
 
 const Expenses = () => {
-    const [loading, setLoading] = useState(true);
-    const [expenseData, setExpenseData] = useState(null);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await api.get('/get-expenses');
-                setExpenseData(response.data);
-            } catch (err) {
-                console.error("Failed to fetch expenses", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, []);
+    const { data: expenseData, isLoading: loading } = useExpensesQuery();
 
     if (loading) {
         return (
@@ -117,7 +102,7 @@ const Expenses = () => {
                         </div>
                     </div>
                     <button className="mt-6 flex items-center gap-2 text-[10px] font-black uppercase text-primary hover:underline">
-                        Detailed Analysis <ArrowRight className="w-3 h-3" />
+                        Detailed Analysis <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                 </div>
             </div>

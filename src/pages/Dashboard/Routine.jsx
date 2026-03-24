@@ -15,19 +15,19 @@ import {
     ChevronDown,
     Layers
 } from 'lucide-react';
-import api from '../../lib/api';
 import { cn } from '../../lib/utils';
 import { toast } from 'sonner';
 import WorkoutMetricEditor from '../../components/WorkoutMetricEditor';
+import { useRoutineQuery, useUpdateRoutineMutation } from './Progress/http/progressQueries';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const Routine = () => {
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
-    const [plan, setPlan] = useState(null);
+    const [planUuid, setPlanUuid] = useState(null);
+    const { data: routineData, isLoading: loading } = useRoutineQuery(planUuid);
+    const updateMutation = useUpdateRoutineMutation();
+
     const [routine, setRoutine] = useState({});
-    const [availablePlans, setAvailablePlans] = useState([]);
     const [activeDay, setActiveDay] = useState('Mon');
     const [showVideoInput, setShowVideoInput] = useState(null);
     const [units, setUnits] = useState({
@@ -35,41 +35,19 @@ const Routine = () => {
         duration_units: ['seconds', 'minutes', 'hours']
     });
 
+    // Sync local state with query data
     useEffect(() => {
-        fetchRoutine();
-    }, []);
-
-    const fetchRoutine = async (planUuid = null) => {
-        try {
-            setLoading(true);
-            const params = planUuid ? { plan_uuid: planUuid } : {};
-            const response = await api.get('/routine', { params });
-            setPlan(response.data.plan);
-            setRoutine(response.data.routine);
-            setAvailablePlans(response.data.available_plans);
-            if (response.data.units) setUnits(response.data.units);
-        } catch (err) {
-            console.error(err);
-            toast.error("Failed to load routine");
-        } finally {
-            setLoading(false);
+        if (routineData) {
+            setRoutine(routineData.routine || {});
+            if (routineData.units) setUnits(routineData.units);
         }
-    };
+    }, [routineData]);
 
-    const handleSave = async () => {
-        try {
-            setSaving(true);
-            await api.patch('/routine', {
-                plan_uuid: plan.uuid,
-                routine: routine
-            });
-            toast.success("Routine committed to Atlas");
-        } catch (err) {
-            console.error(err);
-            toast.error("Failed to save changes");
-        } finally {
-            setSaving(false);
-        }
+    const handleSave = () => {
+        updateMutation.mutate({
+            plan_uuid: routineData.plan.uuid,
+            routine: routine
+        });
     };
 
     const updateDay = (updates) => {
@@ -100,6 +78,8 @@ const Routine = () => {
         );
     }
 
+    const plan = routineData?.plan;
+    const availablePlans = routineData?.available_plans || [];
     const dayData = routine[activeDay] || { workouts: [] };
 
     return (
@@ -121,7 +101,7 @@ const Routine = () => {
                                 <select 
                                     className="appearance-none h-9 pl-4 pr-10 bg-secondary/50 border border-border rounded-xl text-[10px] font-black uppercase tracking-widest text-primary outline-none focus:ring-1 focus:ring-primary/30 cursor-pointer hover:bg-secondary transition-all"
                                     value={plan?.uuid}
-                                    onChange={(e) => fetchRoutine(e.target.value)}
+                                    onChange={(e) => setPlanUuid(e.target.value)}
                                 >
                                     {availablePlans.map(p => (
                                         <option key={p.plan_uuid} value={p.plan_uuid}>{p.name}</option>
@@ -139,10 +119,10 @@ const Routine = () => {
 
                     <button 
                         onClick={handleSave}
-                        disabled={saving}
+                        disabled={updateMutation.isPending}
                         className="h-12 px-8 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
                     >
-                        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                        {updateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                         Commit Changes
                     </button>
                 </div>
@@ -160,7 +140,7 @@ const Routine = () => {
                                 onClick={() => setActiveDay(day)}
                                 className={cn(
                                     "flex-1 min-w-[70px] py-3.5 rounded-2xl text-[10px] font-black transition-all flex items-center justify-center gap-2 relative group",
-                                    isActive ? "bg-primary text-white shadow-lg shadow-primary/30" : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                                    isActive ? "bg-primary text-white shadow-lg shadow-primary/20" : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
                                 )}
                             >
                                 {day}

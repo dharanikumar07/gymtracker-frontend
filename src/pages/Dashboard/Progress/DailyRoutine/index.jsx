@@ -18,8 +18,7 @@ import {
     ExternalLink
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
-import api from '../../../../lib/api';
-import { toast } from 'sonner';
+import { useUpdateRoutineMutation } from '../http/progressQueries';
 import WorkoutMetricEditor from '../../../../components/WorkoutMetricEditor';
 
 // DND Kit Imports
@@ -152,12 +151,13 @@ const DailyRoutine = ({ data, onUpdate }) => {
     });
 
     const [editSplit, setEditSplit] = useState({});
-    const [saving, setSaving] = useState(false);
     const [showVideoInput, setShowVideoInput] = useState(null);
     const [units, setUnits] = useState({ 
         weight_units: ['kg', 'lb'],
         duration_units: ['seconds', 'minutes', 'hours']
     });
+
+    const updateMutation = useUpdateRoutineMutation();
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -238,21 +238,11 @@ const DailyRoutine = ({ data, onUpdate }) => {
         }
     };
 
-    const handleSave = async () => {
-        setSaving(true);
-        try {
-            await api.patch('/routine', { 
-                plan_uuid: data.plan.uuid,
-                routine: editSplit 
-            });
-            toast.success("Routine updated!");
-            if (onUpdate) onUpdate();
-        } catch (err) {
-            console.error(err);
-            toast.error("Failed to save changes.");
-        } finally {
-            setSaving(false);
-        }
+    const handleSave = () => {
+        updateMutation.mutate({ 
+            plan_uuid: data.plan.uuid,
+            routine: editSplit 
+        });
     };
 
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -313,10 +303,10 @@ const DailyRoutine = ({ data, onUpdate }) => {
                         </button>
                         <button 
                             onClick={handleSave}
-                            disabled={saving}
+                            disabled={updateMutation.isPending}
                             className="flex-1 sm:flex-initial h-12 px-8 bg-primary text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
                         >
-                            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                            {updateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                             Commit Changes
                         </button>
                     </div>

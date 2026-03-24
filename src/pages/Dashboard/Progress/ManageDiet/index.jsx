@@ -7,9 +7,14 @@ import {
     TrendingUp, Dumbbell, Leaf, LayoutGrid,
     Calendar, ArrowUpRight, Activity
 } from 'lucide-react';
-import api from '../../../../lib/api';
 import { cn } from '../../../../lib/utils';
 import { toast } from 'sonner';
+import { 
+    useDietRoutineQuery, 
+    useGenerateDietPlanMutation, 
+    useUpdateDietRoutineMutation,
+    useRoutineQuery
+} from '../http/progressQueries';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const MEALS = ['breakfast', 'lunch', 'dinner', 'snack'];
@@ -22,44 +27,34 @@ const mealIcons = {
 };
 
 const ManageDiet = () => {
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
-    const [plan, setPlan] = useState(null);
+    const [planUuid, setPlanUuid] = useState(null);
+    const { data: dietData, isLoading: loading, error } = useDietRoutineQuery(planUuid);
+    const { data: generalRoutineData } = useRoutineQuery();
+    
     const [routine, setRoutine] = useState({});
-    const [availablePlans, setAvailablePlans] = useState([]);
     const [activeDay, setActiveDay] = useState('Mon');
     
     // Setup States
     const [showSetup, setShowSetup] = useState(false);
     const [setupGoal, setSetupGoal] = useState('muscle_gain');
     const [setupType, setSetupType] = useState('veg');
-    const [generating, setGenerating] = useState(false);
 
+    const generateMutation = useGenerateDietPlanMutation();
+    const updateMutation = useUpdateDietRoutineMutation();
+
+    // Sync local state with query data
     useEffect(() => {
-        fetchRoutine();
-    }, []);
-
-    const fetchRoutine = async (planUuid = null) => {
-        try {
-            setLoading(true);
-            const params = planUuid ? { plan_uuid: planUuid } : {};
-            const response = await api.get('/diet/routine', { params });
-            setPlan(response.data.plan);
-            setRoutine(response.data.routine);
-            setAvailablePlans(response.data.available_plans || []);
+        if (dietData?.routine) {
+            setRoutine(dietData.routine);
             setShowSetup(false);
-        } catch (err) {
-            if (err.response?.status === 404) {
-                setPlan(null);
-                setAvailablePlans(err.response?.data?.available_plans || []);
-                setShowSetup(true);
-            } else {
-                toast.error("Network synchronization failed");
-            }
-        } finally {
-            setLoading(false);
         }
-    };
+        if (error?.response?.status === 404) {
+            setShowSetup(true);
+        }
+    }, [dietData, error]);
+
+    const availablePlans = dietData?.available_plans || generalRoutineData?.available_plans || [];
+    const plan = dietData?.plan;
 
     // --- Real-time Calculations ---
     const dayTotals = useMemo(() => {
@@ -76,8 +71,6 @@ const ManageDiet = () => {
         return t;
     }, [routine, activeDay]);
 
-    // Note: In a real app, these targets would come from the 'plan' metadata or a separate profile API.
-    // For now, we'll display them based on the current 'Actual' vs 'Target' logic.
     const targets = {
         cal: plan?.target_calories || 2400,
         p: plan?.target_protein || 120,
@@ -85,47 +78,26 @@ const ManageDiet = () => {
         f: plan?.target_fats || 65
     };
 
-    const handleGeneratePlan = async () => {
-        try {
-            setGenerating(true);
-            const response = await api.post('/diet/routine', {
-                goal: setupGoal,
-                diet_preference: setupType
-            });
-            toast.success("Protocol generated successfully");
-            await fetchRoutine(response.data.plan_uuid);
-        } catch (err) {
-            toast.error("Calculation engine error");
-        } finally {
-            setGenerating(false);
-        }
+    const handleGeneratePlan = () => {
+        generateMutation.mutate({
+            goal: setupGoal,
+            diet_preference: setupType
+        }, {
+            onSuccess: (response) => {
+                setPlanUuid(response.data.plan_uuid);
+            }
+        });
     };
 
-    const handleSwitchPlan = async (uuid) => {
-        try {
-            setLoading(true);
-            await api.post('/diet/routine/active', { plan_uuid: uuid });
-            await fetchRoutine(uuid);
-        } catch (err) {
-            toast.error("Failed to switch plan");
-        } finally {
-            setLoading(false);
-        }
+    const handleSwitchPlan = (uuid) => {
+        setPlanUuid(uuid);
     };
 
-    const handleSave = async () => {
-        try {
-            setSaving(true);
-            await api.patch('/diet/routine', {
-                plan_uuid: plan.uuid,
-                routine: routine
-            });
-            toast.success("Diet routine saved");
-        } catch (err) {
-            toast.error("Failed to save changes");
-        } finally {
-            setSaving(false);
-        }
+    const handleSave = () => {
+        updateMutation.mutate({
+            plan_uuid: plan.uuid,
+            routine: routine
+        });
     };
 
     const updateItem = (mealType, idx, updates) => {
@@ -246,10 +218,10 @@ const ManageDiet = () => {
 
                         <button
                             onClick={handleGeneratePlan}
-                            disabled={generating}
+                            disabled={generateMutation.isPending}
                             className="h-20 px-12 bg-primary text-white rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] shadow-2xl shadow-primary/20 hover:scale-[1.05] active:scale-[0.95] transition-all flex items-center gap-4 disabled:opacity-50"
                         >
-                            {generating ? <Loader2 className="w-6 h-6 animate-spin" /> : <Sparkles className="w-6 h-6 fill-current" />}
+                            {generateMutation.isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : <Sparkles className="w-6 h-6 fill-current" />}
                             Initialize Protocol <ArrowRight className="w-5 h-5" />
                         </button>
                     </div>
@@ -289,10 +261,10 @@ const ManageDiet = () => {
                             <span className="text-[10px] font-black uppercase text-zinc-400">Target: {targets.cal}</span>
                         </div>
                         <button 
-                            onClick={handleSave} disabled={saving}
+                            onClick={handleSave} disabled={updateMutation.isPending}
                             className="h-10 px-6 bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
                         >
-                            {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} Sync
+                            {updateMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} Sync
                         </button>
                     </div>
                     <div className="absolute bottom-0 right-0 w-48 h-48 bg-primary/10 rounded-full -mb-24 -mr-24 blur-3xl group-hover:bg-primary/20 transition-all duration-700" />
