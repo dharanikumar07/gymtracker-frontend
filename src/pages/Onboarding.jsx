@@ -123,11 +123,7 @@ const Onboarding = () => {
                 },
                 plan: formData.plan,
                 routine: formData.weekly_split,
-                expenses: {
-                    track_expenses: formData.track_expenses,
-                    expense_categories: formData.expense_categories,
-                    expense_details: formData.expense_details
-                },
+                expenses: formData.fixed_expenses || [],
                 steps_completed: finalStepsStatus
             };
 

@@ -5,6 +5,8 @@ export const QUERY_KEYS = {
   },
   EXPENSES: {
     ALL: ['expenses'],
+    BUDGET_PLANS: ['expenses', 'budget-plans'],
+    BUDGET_STATUS: ['expenses', 'budget-status'],
   },
   PROGRESS: {
     ROUTINE: ['progress', 'routine'],

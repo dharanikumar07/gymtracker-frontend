@@ -15,6 +15,7 @@ const initialFormData = {
         is_active: true
     },
     weekly_split: {},
+    fixed_expenses: [],
     track_expenses: null,
     expense_categories: [],
     expense_details: {}

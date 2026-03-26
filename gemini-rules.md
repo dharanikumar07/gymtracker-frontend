@@ -32,7 +32,22 @@
 
 ---
 
-## 5. Explanation Rule
+## 5. Ternary Over If Statements
+- Use ternary operators (`condition ? true : false`) instead of if statements
+- Avoid if statements for conditional rendering and simple conditionals
+- Only use if statements when absolutely necessary (e.g., complex business logic)
+- Example:
+  ```jsx
+  // Good
+  {isActive ? <ActiveComponent /> : <InactiveComponent />}
+  
+  // Avoid
+  {if (isActive) return <ActiveComponent />}
+  ```
+
+---
+
+## 6. Explanation Rule
 - If any rule is broken, you MUST:
   - Clearly explain why
   - Justify the decision
