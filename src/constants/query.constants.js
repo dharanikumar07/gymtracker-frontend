@@ -3,8 +3,13 @@ export const QUERY_KEYS = {
     USER: ['auth', 'user'],
     VERIFY_EMAIL: (uuid, hash) => ['auth', 'verify-email', uuid, hash],
   },
+  DASHBOARD: {
+    ALL: ['dashboard'],
+  },
   EXPENSES: {
     ALL: ['expenses'],
+    BUDGET_PLANS: ['expenses', 'budget-plans'],
+    BUDGET_STATUS: ['expenses', 'budget-status'],
   },
   PROGRESS: {
     ROUTINE: ['progress', 'routine'],
