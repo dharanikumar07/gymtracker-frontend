@@ -8,43 +8,45 @@ import ResetPassword from './pages/Authentication/ResetPassword';
 import VerifyEmail from './pages/Authentication/VerifyEmail';
 import SocialCallback from './pages/Authentication/SocialCallback';
 import Onboarding from './pages/Onboarding';
-import Dashboard from './pages/Dashboard';
-import Routine from './pages/Dashboard/Routine';
+import DashboardLayout from './components/DashboardLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 import { Toaster } from 'sonner';
 import { useUserQuery } from './pages/Authentication/http/authQueries';
 
 function App() {
-  // TanStack Query handles fetching user profile on mount automatically
-  useUserQuery();
+    useUserQuery();
 
-  return (
-    <Router>
-      <Toaster richColors position="top-right" closeButton />
-      <Routes>
-        {/* Public Routes */}
-        <Route element={<PublicRoute />}>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/registration-success" element={<RegistrationSuccess />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/verify-email/:uuid/:hash" element={<VerifyEmail />} />
-          <Route path="/auth/callback/:provider" element={<SocialCallback />} />
-        </Route>
+    return (
+        <Router>
+            <Toaster richColors position="top-right" closeButton />
+            <Routes>
+                {/* Public Routes */}
+                <Route element={<PublicRoute />}>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/registration-success" element={<RegistrationSuccess />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/verify-email/:uuid/:hash" element={<VerifyEmail />} />
+                    <Route path="/auth/callback/:provider" element={<SocialCallback />} />
+                </Route>
 
-        {/* Protected Routes */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard/routine" element={<Routine />} />
-        </Route>
+                {/* Protected Routes */}
+                <Route element={<ProtectedRoute />}>
+                    <Route path="/onboarding" element={<Onboarding />} />
+                    <Route path="/dashboard" element={<DashboardLayout />} />
+                    <Route path="/analytics" element={<DashboardLayout />} />
+                    <Route path="/track-progress" element={<DashboardLayout />} />
+                    <Route path="/track-expense" element={<DashboardLayout />} />
+                    <Route path="/settings" element={<DashboardLayout />} />
+                    <Route path="/billing" element={<DashboardLayout />} />
+                </Route>
 
-        <Route path="/" element={<Navigate to="/login" replace />} />
-      </Routes>
-    </Router>
-  );
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+        </Router>
+    );
 }
 
 export default App;
