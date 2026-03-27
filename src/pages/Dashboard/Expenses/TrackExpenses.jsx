@@ -3,7 +3,6 @@ import {
     Wallet,
     Plus,
     ShoppingCart,
-    Calendar as CalendarIcon,
     Loader2,
     Save,
     CheckCircle2,
@@ -14,7 +13,11 @@ import {
     Clock,
     TrendingUp,
     TrendingDown,
-    AlertTriangle
+    AlertTriangle,
+    Calendar,
+    Flame,
+    PiggyBank,
+    Timer
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { 
@@ -79,80 +82,153 @@ const TrackExpenses = ({ expenseData, selectedDate, formatDate }) => {
     };
 
     const statusColor = budgetStatusData?.data?.status?.color;
-    const statusBgClass = statusColor === 'blue' ? 'bg-blue-500/10 border-blue-500/30' 
-        : statusColor === 'green' ? 'bg-green-500/10 border-green-500/30'
-        : statusColor === 'yellow' ? 'bg-yellow-500/10 border-yellow-500/30'
-        : statusColor === 'red' ? 'bg-red-500/10 border-red-500/30'
-        : 'bg-secondary border-border';
-
-    const statusIcon = statusColor === 'blue' ? <Clock className="w-4 h-4 text-blue-500" />
-        : statusColor === 'green' ? <TrendingUp className="w-4 h-4 text-green-500" />
-        : statusColor === 'yellow' ? <AlertTriangle className="w-4 h-4 text-yellow-500" />
-        : statusColor === 'red' ? <TrendingDown className="w-4 h-4 text-red-500" />
-        : null;
-
     const stats = budgetStatusData?.data?.stats;
+    const plan = budgetStatusData?.data?.plan;
+
+    const progressPercent = stats ? Math.min((stats.days_passed / stats.total_days) * 100, 100) : 0;
+    const spentPercent = stats && stats.budget_amount > 0 ? Math.min((stats.total_spent / stats.budget_amount) * 100, 100) : 0;
+
+    const statusConfig = {
+        blue: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-500', icon: Clock, label: 'Upcoming' },
+        green: { bg: 'bg-green-500/10', border: 'border-green-500/30', text: 'text-green-500', icon: TrendingUp, label: 'On Track' },
+        yellow: { bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-500', icon: AlertTriangle, label: 'Warning' },
+        red: { bg: 'bg-red-500/10', border: 'border-red-500/30', text: 'text-red-500', icon: TrendingDown, label: 'Over Budget' },
+    };
+
+    const currentStatus = statusConfig[statusColor] || statusConfig.blue;
+    const StatusIcon = currentStatus.icon;
 
     return (
         <div className="space-y-4">
-            {/* Budget Tracking Card */}
+            {/* Budget Tracking Card - Redesigned */}
             {activeBudget ? (
-                <div className={cn("border rounded-3xl p-4", statusBgClass)}>
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                            <Target className="w-4 h-4 text-primary" />
-                            <h3 className="text-[10px] font-black uppercase tracking-widest">Budget</h3>
+                <div className={cn("border rounded-3xl overflow-hidden", currentStatus.bg, currentStatus.border)}>
+                    {/* Header */}
+                    <div className="p-4 bg-background/50">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                                <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center", currentStatus.bg)}>
+                                    <Target className={cn("w-5 h-5", currentStatus.text)} />
+                                </div>
+                                <div>
+                                    <h3 className="text-[12px] font-black text-foreground uppercase italic">{plan?.name}</h3>
+                                    <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">
+                                        {plan ? new Date(plan.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''} - {plan ? new Date(plan.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-full", currentStatus.bg)}>
+                                <StatusIcon className={cn("w-3.5 h-3.5", currentStatus.text)} />
+                                <span className={cn("text-[9px] font-black uppercase tracking-wider", currentStatus.text)}>
+                                    {budgetStatusData?.data?.status?.text}
+                                </span>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            {statusIcon}
-                            <span className={cn(
-                                "text-[9px] font-black uppercase px-2 py-1 rounded-full",
-                                statusColor === 'blue' ? "bg-blue-500/20 text-blue-500" 
-                                : statusColor === 'green' ? "bg-green-500/20 text-green-500"
-                                : statusColor === 'yellow' ? "bg-yellow-500/20 text-yellow-500"
-                                : statusColor === 'red' ? "bg-red-500/20 text-red-500"
-                                : "bg-secondary text-muted-foreground"
-                            )}>
-                                {budgetStatusData?.data?.status?.text || 'Loading...'}
-                            </span>
+
+                        {/* Progress Bar - Days */}
+                        <div className="space-y-1.5">
+                            <div className="flex justify-between text-[8px] font-black uppercase tracking-widest">
+                                <span className="text-muted-foreground">Days Progress</span>
+                                <span className={currentStatus.text}>{stats?.days_passed || 0}/{stats?.total_days || 0} Days</span>
+                            </div>
+                            <div className="h-2 bg-secondary/50 rounded-full overflow-hidden">
+                                <div 
+                                    className={cn("h-full rounded-full transition-all duration-500", 
+                                        statusColor === 'blue' ? 'bg-blue-500' 
+                                        : statusColor === 'green' ? 'bg-green-500' 
+                                        : statusColor === 'yellow' ? 'bg-yellow-500' 
+                                        : 'bg-red-500'
+                                    )}
+                                    style={{ width: `${progressPercent}%` }}
+                                />
+                            </div>
                         </div>
                     </div>
 
+                    {/* Stats Grid */}
                     {budgetLoading ? (
-                        <div className="flex items-center justify-center py-6">
-                            <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                        <div className="flex items-center justify-center py-8">
+                            <Loader2 className="w-6 h-6 animate-spin text-primary" />
                         </div>
                     ) : (
-                        <div className="grid grid-cols-3 gap-3">
-                            <div className="bg-background/50 rounded-2xl p-3 text-center">
-                                <p className="text-[7px] font-black uppercase tracking-widest text-muted-foreground mb-1">Budget</p>
-                                <p className="text-sm font-black italic text-foreground">₹{stats?.budget_amount?.toLocaleString() || 0}</p>
+                        <div className="p-4 space-y-4">
+                            {/* Main Stats Row */}
+                            <div className="grid grid-cols-4 gap-2">
+                                <div className="bg-background/70 rounded-2xl p-3 text-center">
+                                    <PiggyBank className="w-4 h-4 text-primary mx-auto mb-1" />
+                                    <p className="text-[7px] font-black uppercase tracking-widest text-muted-foreground mb-0.5">Budget</p>
+                                    <p className="text-[13px] font-black italic text-foreground">₹{stats?.budget_amount?.toLocaleString() || 0}</p>
+                                </div>
+                                <div className="bg-background/70 rounded-2xl p-3 text-center">
+                                    <Flame className="w-4 h-4 text-orange-500 mx-auto mb-1" />
+                                    <p className="text-[7px] font-black uppercase tracking-widest text-muted-foreground mb-0.5">Spent</p>
+                                    <p className={cn("text-[13px] font-black italic", spentPercent > 100 ? 'text-red-500' : 'text-foreground')}>₹{stats?.total_spent?.toLocaleString() || 0}</p>
+                                </div>
+                                <div className="bg-background/70 rounded-2xl p-3 text-center">
+                                    <Timer className="w-4 h-4 text-blue-500 mx-auto mb-1" />
+                                    <p className="text-[7px] font-black uppercase tracking-widest text-muted-foreground mb-0.5">Remaining</p>
+                                    <p className={cn("text-[13px] font-black italic", (stats?.remaining_amount || 0) < 0 ? 'text-red-500' : 'text-green-500')}>₹{Math.abs(stats?.remaining_amount || 0).toLocaleString()}</p>
+                                </div>
+                                <div className="bg-background/70 rounded-2xl p-3 text-center">
+                                    <Calendar className="w-4 h-4 text-purple-500 mx-auto mb-1" />
+                                    <p className="text-[7px] font-black uppercase tracking-widest text-muted-foreground mb-0.5">Days Left</p>
+                                    <p className="text-[13px] font-black italic text-foreground">{stats?.remaining_days || 0}</p>
+                                </div>
                             </div>
-                            <div className="bg-background/50 rounded-2xl p-3 text-center">
-                                <p className="text-[7px] font-black uppercase tracking-widest text-muted-foreground mb-1">Days</p>
-                                <p className="text-sm font-black italic text-foreground">
-                                    {stats?.remaining_days || 0}/{stats?.total_days || 0}
-                                </p>
+
+                            {/* Secondary Stats */}
+                            <div className="grid grid-cols-3 gap-2">
+                                <div className="bg-secondary/30 rounded-xl p-2.5 text-center">
+                                    <p className="text-[6px] font-black uppercase tracking-widest text-muted-foreground mb-0.5">Expected</p>
+                                    <p className="text-[11px] font-bold italic text-foreground">₹{Math.round(stats?.expected_spent || 0).toLocaleString()}</p>
+                                </div>
+                                <div className="bg-secondary/30 rounded-xl p-2.5 text-center">
+                                    <p className="text-[6px] font-black uppercase tracking-widest text-muted-foreground mb-0.5">Daily Allowance</p>
+                                    <p className="text-[11px] font-bold italic text-primary">₹{Math.round(stats?.daily_allowance || 0).toLocaleString()}</p>
+                                </div>
+                                <div className="bg-secondary/30 rounded-xl p-2.5 text-center">
+                                    <p className="text-[6px] font-black uppercase tracking-widest text-muted-foreground mb-0.5">% Used</p>
+                                    <p className={cn("text-[11px] font-bold italic", spentPercent > 100 ? 'text-red-500' : spentPercent > 80 ? 'text-yellow-500' : 'text-green-500')}>{Math.round(spentPercent)}%</p>
+                                </div>
                             </div>
-                            <div className="bg-background/50 rounded-2xl p-3 text-center">
-                                <p className="text-[7px] font-black uppercase tracking-widest text-muted-foreground mb-1">Remaining</p>
-                                <p className={cn(
-                                    "text-sm font-black italic",
-                                    (stats?.remaining_amount || 0) >= 0 ? "text-green-500" : "text-red-500"
-                                )}>
-                                    ₹{stats?.remaining_amount?.toLocaleString() || 0}
-                                </p>
+
+                            {/* Spent Progress Bar */}
+                            <div className="space-y-1">
+                                <div className="flex justify-between text-[8px] font-black uppercase tracking-widest">
+                                    <span className="text-muted-foreground">Spending Progress</span>
+                                    <span className={spentPercent > 100 ? 'text-red-500' : 'text-green-500'}>
+                                        {spentPercent > 100 ? `${Math.round(spentPercent - 100)}% Over` : `${Math.round(100 - spentPercent)}% Left`}
+                                    </span>
+                                </div>
+                                <div className="h-3 bg-secondary/50 rounded-full overflow-hidden">
+                                    <div 
+                                        className={cn("h-full rounded-full transition-all duration-500 relative", 
+                                            spentPercent > 100 ? 'bg-red-500' 
+                                            : spentPercent > 80 ? 'bg-yellow-500' 
+                                            : 'bg-green-500'
+                                        )}
+                                        style={{ width: `${Math.min(spentPercent, 100)}%` }}
+                                    />
+                                    {spentPercent > 100 && (
+                                        <div 
+                                            className="absolute right-0 top-0 h-full bg-red-600/50 rounded-r-full animate-pulse"
+                                            style={{ width: `${Math.min(spentPercent - 100, 100)}%` }}
+                                        />
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}
                 </div>
             ) : (
-                <div className="bg-card border border-border rounded-3xl p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                        <Target className="w-4 h-4 text-primary" />
-                        <h3 className="text-[10px] font-black uppercase tracking-widest">Budget</h3>
+                <div className="bg-card border border-border rounded-3xl p-6">
+                    <div className="flex flex-col items-center text-center">
+                        <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-3">
+                            <Target className="w-7 h-7 text-primary" />
+                        </div>
+                        <h3 className="text-[11px] font-black uppercase italic text-foreground mb-1">No Active Budget</h3>
+                        <p className="text-[9px] font-bold text-muted-foreground italic">Create a budget plan in Manage to track spending</p>
                     </div>
-                    <p className="text-[9px] font-bold text-muted-foreground italic text-center py-2">No active budget plan</p>
                 </div>
             )}
 
