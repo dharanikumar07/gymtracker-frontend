@@ -118,4 +118,32 @@
     caret-color: var(--foreground);
     transition: background-color 9999s ease-out 0s;
   }
+
+  /* Custom Scrollbar - Light Mode */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(240 5.9% 70%);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(240 5.9% 55%);
+  }
+
+  /* Custom Scrollbar - Dark Mode */
+  .dark ::-webkit-scrollbar-thumb {
+    background: hsl(240 3.7% 35%);
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: hsl(240 3.7% 50%);
+  }
 }
