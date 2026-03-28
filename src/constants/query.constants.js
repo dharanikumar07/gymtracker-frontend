@@ -19,6 +19,7 @@ export const QUERY_KEYS = {
     DIET_TRACKING: (date) => ['progress', 'diet-tracking', date],
   },
   ONBOARDING: {
+    PROFILE: ['onboarding', 'profile'],
     PHYSICAL_ACTIVITY: (activityType) => ['onboarding', 'physical-activity', activityType],
   },
 };
