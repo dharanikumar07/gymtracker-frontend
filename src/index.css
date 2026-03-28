@@ -44,6 +44,16 @@
     --border: hsl(240 5.9% 90%);
     --input: hsl(240 5.9% 90%);
     --ring: hsl(142.1 76.2% 36.3%);
+    --banner-bg: hsl(0 0% 98%);
+    --logo-text: black;
+    --logo-subtext: #4b5563;
+    --hero-text: black;
+    --hero-subtext: #374151;
+    --hero-desc: #4b5563;
+    --card-bg: white;
+    --card-title: black;
+    --card-desc: #4b5563;
+    --footer-text: #4b5563;
   }
 
   .dark {
@@ -66,6 +76,16 @@
     --border: hsl(240 3.7% 15.9%);
     --input: hsl(240 3.7% 15.9%);
     --ring: hsl(142.1 70.6% 45.3%);
+    --banner-bg: hsl(240 6% 10%);
+    --logo-text: hsl(0 0% 98%);
+    --logo-subtext: hsl(240 5% 64.9%);
+    --hero-text: hsl(0 0% 98%);
+    --hero-subtext: hsl(240 5% 64.9%);
+    --hero-desc: hsl(240 4.8% 64.9%);
+    --card-bg: hsl(240 6% 10%);
+    --card-title: hsl(0 0% 98%);
+    --card-desc: hsl(240 5% 64.9%);
+    --footer-text: hsl(240 5% 64.9%);
   }
 }
 
