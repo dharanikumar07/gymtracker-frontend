@@ -61,17 +61,69 @@ const Step1 = ({ data, updateData }) => {
 
     const inputClasses = (field) => cn(
         "w-full h-12 bg-background border rounded-xl px-4 text-sm font-medium outline-none transition-all",
-        "border-border dark:border-zinc-700",
+        "border-zinc-400 dark:border-zinc-700",
         "focus:border-primary dark:focus:border-primary focus:ring-2 focus:ring-primary/20",
-        "hover:border-zinc-400 dark:hover:border-zinc-600",
+        "hover:border-zinc-500 dark:hover:border-zinc-600",
         "placeholder:text-muted-foreground",
         hasError(field) ? "border-red-500 bg-red-500/5" : ""
     );
 
     return isLoadingProfile ? (
-        <div className="flex flex-col items-center justify-center py-24 gap-5">
-            <Loader2 className="w-10 h-10 animate-spin text-primary" />
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground italic">Loading...</p>
+        <div className="space-y-8 animate-pulse">
+            {/* Profile Information Skeleton */}
+            <section>
+                <SectionHeader title="Biometric Data" />
+                <div className="space-y-3">
+                    {/* Row 1: Age & Gender */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                            <div className="h-3 w-12 bg-secondary rounded" />
+                            <div className="h-12 bg-secondary rounded-xl" />
+                        </div>
+                        <div className="space-y-1.5">
+                            <div className="h-3 w-16 bg-secondary rounded" />
+                            <div className="h-12 bg-secondary rounded-xl" />
+                        </div>
+                    </div>
+                    {/* Row 2: Height & Weight */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                            <div className="h-3 w-20 bg-secondary rounded" />
+                            <div className="h-12 bg-secondary rounded-xl" />
+                        </div>
+                        <div className="space-y-1.5">
+                            <div className="h-3 w-18 bg-secondary rounded" />
+                            <div className="h-12 bg-secondary rounded-xl" />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Training Focus Skeleton */}
+            <section>
+                <SectionHeader title="Training Focus" />
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="flex items-center gap-2.5 p-2.5 rounded-2xl border border-border bg-background">
+                            <div className="w-10 h-10 rounded-xl bg-secondary" />
+                            <div className="h-3 w-14 bg-secondary rounded" />
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* Primary Objective Skeleton */}
+            <section>
+                <SectionHeader title="Primary Objective" />
+                <div className="grid grid-cols-3 gap-3">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex flex-col items-center gap-2 p-3 rounded-2xl border-2 border-border bg-background aspect-square justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-secondary" />
+                            <div className="h-3 w-16 bg-secondary rounded" />
+                        </div>
+                    ))}
+                </div>
+            </section>
         </div>
     ) : (
         <div className="space-y-8">
@@ -100,14 +152,14 @@ const Step1 = ({ data, updateData }) => {
                                 <select
                                     value={data.gender || ''}
                                     onChange={(e) => handleChange('gender', e.target.value)}
-                                    className={inputClasses('gender')}
+                                    className={cn(inputClasses('gender'), "pr-10 appearance-none cursor-pointer")}
                                 >
                                     <option value="">Select</option>
                                     <option value="male">Male</option>
                                     <option value="female">Female</option>
                                     <option value="other">Other</option>
                                 </select>
-                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                             </div>
                         </div>
                     </div>

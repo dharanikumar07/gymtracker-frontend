@@ -214,39 +214,41 @@ const Onboarding = () => {
                         </div>
 
                         {/* Navigation - Same Line */}
-                        <div className="flex items-center justify-between gap-4">
-                            <button 
-                                onClick={handleNext}
-                                disabled={loading}
-                                className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/30"
-                            >
-                                {loading ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                ) : (
-                                    <>
-                                        {step === 3 ? 'Launch App' : 'Continue'}
-                                        <ArrowRight className="w-4 h-4" />
-                                    </>
-                                )}
-                            </button>
-                            
-                            {step > 1 && (
-                                <button 
-                                    onClick={handleBack}
-                                    disabled={loading}
-                                    className="h-12 px-6 bg-secondary hover:bg-secondary/80 rounded-xl font-semibold text-xs uppercase tracking-wider flex items-center gap-2 transition-all"
-                                >
-                                    <ArrowLeft className="w-4 h-4" /> Back
-                                </button>
-                            )}
-                            
+                        <div className="flex items-center gap-4">
                             <button 
                                 onClick={handleSkip}
                                 disabled={loading}
-                                className="h-12 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+                                className="h-12 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors shrink-0"
                             >
                                 {step === 3 ? 'Skip' : 'Skip'}
                             </button>
+                            
+                            <div className="flex-1 flex items-center gap-3">
+                                {step > 1 && (
+                                    <button 
+                                        onClick={handleBack}
+                                        disabled={loading}
+                                        className="h-12 px-6 bg-secondary hover:bg-secondary/80 rounded-xl font-semibold text-xs uppercase tracking-wider flex items-center gap-2 transition-all shrink-0"
+                                    >
+                                        <ArrowLeft className="w-4 h-4" /> Back
+                                    </button>
+                                )}
+                                
+                                <button 
+                                    onClick={handleNext}
+                                    disabled={loading}
+                                    className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/30"
+                                >
+                                    {loading ? (
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                        <>
+                                            {step === 3 ? 'Launch App' : 'Continue'}
+                                            <ArrowRight className="w-4 h-4" />
+                                        </>
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
