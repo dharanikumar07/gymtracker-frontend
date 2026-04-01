@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { User, Target, Dumbbell, Zap, Wind, ShieldCheck, Check, Loader2, Activity, ChevronDown } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { useFormValidation } from '../../../validation/ValidationWrapper';
 import { validationRules } from '../../../validation';
 import { useProfileInformationQuery } from '../http/onboardingQueries';
-import { useOnboardingStore } from '../../../store/onboardingStore';
 
 const GOALS = [
     { id: 'muscle_gain', label: 'Muscle Gain', icon: Target, desc: 'Increase mass' },
@@ -20,12 +19,12 @@ const ACTIVITIES = [
 ];
 
 const VALIDATION_SCHEMA = {
-    age: { ...validationRules.required('Required'), ...validationRules.min(10), ...validationRules.max(120) },
-    gender: { ...validationRules.required('Select gender'), ...validationRules.oneOf(['male', 'female', 'other']) },
-    height: { ...validationRules.required('Required'), ...validationRules.min(50), ...validationRules.max(300) },
-    weight: { ...validationRules.required('Required'), ...validationRules.min(20), ...validationRules.max(500) },
-    fitness_goal: { ...validationRules.required('Select goal') },
-    physical_activity_type: { ...validationRules.required('Select training') },
+    age: { ...validationRules.required('Age is required'), ...validationRules.min(10), ...validationRules.max(120) },
+    gender: { ...validationRules.required('Gender is required'), ...validationRules.oneOf(['male', 'female', 'other']) },
+    height: { ...validationRules.required('Height is required'), ...validationRules.min(50), ...validationRules.max(300) },
+    weight: { ...validationRules.required('Weight is required'), ...validationRules.min(20), ...validationRules.max(500) },
+    fitness_goal: { ...validationRules.required('Fitness goal is required') },
+    physical_activity_type: { ...validationRules.required('Training type is required') },
 };
 
 const SectionHeader = ({ title }) => (
@@ -35,15 +34,34 @@ const SectionHeader = ({ title }) => (
     </div>
 );
 
-const Step1 = ({ data, updateData }) => {
-    const { profileLoaded, setProfileData } = useOnboardingStore();
+const Step1 = ({ data, updateData, errors = {} }) => {
     const { data: profileData, isLoading: isLoadingProfile } = useProfileInformationQuery();
-    const { validateField, hasError } = useFormValidation(VALIDATION_SCHEMA);
+    const { validateField, hasError, getError } = useFormValidation(VALIDATION_SCHEMA);
     const [spinningGoal, setSpinningGoal] = useState(null);
+    const synced = useRef(false);
 
     useEffect(() => {
-        profileData?.data && !profileLoaded && setProfileData(profileData.data);
-    }, [profileData, profileLoaded, setProfileData]);
+        if (profileData?.data && !synced.current) {
+            synced.current = true;
+            updateData({
+                age: profileData.data.age || '',
+                gender: profileData.data.gender || '',
+                height: profileData.data.height || '',
+                weight: profileData.data.weight || '',
+                fitness_goal: profileData.data.fitness_goal || 'muscle_gain',
+                physical_activity_type: profileData.data.physical_activity_type || 'strength_training',
+            });
+        }
+    }, [profileData, updateData]);
+
+    const localData = useMemo(() => ({
+        age: data.age || '',
+        gender: data.gender || '',
+        height: data.height || '',
+        weight: data.weight || '',
+        fitness_goal: data.fitness_goal || 'muscle_gain',
+        physical_activity_type: data.physical_activity_type || 'strength_training',
+    }), [data.age, data.gender, data.height, data.weight, data.fitness_goal, data.physical_activity_type]);
 
     const handleChange = (field, value) => {
         updateData({ [field]: value });
@@ -65,16 +83,16 @@ const Step1 = ({ data, updateData }) => {
         "focus:border-primary dark:focus:border-primary focus:ring-2 focus:ring-primary/20",
         "hover:border-zinc-500 dark:hover:border-zinc-600",
         "placeholder:text-muted-foreground",
-        hasError(field) ? "border-red-500 bg-red-500/5" : ""
+        (hasError(field) || errors[field]) ? "border-red-500 bg-red-500/5" : ""
     );
+
+    const getFieldError = (field) => errors[field] || getError(field);
 
     return isLoadingProfile ? (
         <div className="space-y-8 animate-pulse">
-            {/* Profile Information Skeleton */}
             <section>
                 <SectionHeader title="Biometric Data" />
                 <div className="space-y-3">
-                    {/* Row 1: Age & Gender */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                             <div className="h-3 w-12 bg-secondary rounded" />
@@ -85,7 +103,6 @@ const Step1 = ({ data, updateData }) => {
                             <div className="h-12 bg-secondary rounded-xl" />
                         </div>
                     </div>
-                    {/* Row 2: Height & Weight */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                             <div className="h-3 w-20 bg-secondary rounded" />
@@ -99,7 +116,6 @@ const Step1 = ({ data, updateData }) => {
                 </div>
             </section>
 
-            {/* Training Focus Skeleton */}
             <section>
                 <SectionHeader title="Training Focus" />
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -112,7 +128,6 @@ const Step1 = ({ data, updateData }) => {
                 </div>
             </section>
 
-            {/* Primary Objective Skeleton */}
             <section>
                 <SectionHeader title="Primary Objective" />
                 <div className="grid grid-cols-3 gap-3">
@@ -127,30 +142,31 @@ const Step1 = ({ data, updateData }) => {
         </div>
     ) : (
         <div className="space-y-8">
-            
-            {/* Profile Information */}
             <section>
                 <SectionHeader title="Biometric Data" />
                 <div className="space-y-3">
-                    {/* Row 1: Age & Gender */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Age</label>
                             <div className="relative mt-1">
                                 <input
-                                    type="number"
-                                    value={data.age || ''}
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={localData.age}
                                     onChange={(e) => handleChange('age', e.target.value)}
                                     placeholder="25"
                                     className={inputClasses('age')}
                                 />
                             </div>
+                            {getFieldError('age') && (
+                                <p className="text-[10px] text-red-500 font-medium px-1">{getFieldError('age')}</p>
+                            )}
                         </div>
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Gender</label>
                             <div className="relative mt-1">
                                 <select
-                                    value={data.gender || ''}
+                                    value={localData.gender}
                                     onChange={(e) => handleChange('gender', e.target.value)}
                                     className={cn(inputClasses('gender'), "pr-10 appearance-none cursor-pointer")}
                                 >
@@ -161,45 +177,54 @@ const Step1 = ({ data, updateData }) => {
                                 </select>
                                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                             </div>
+                            {getFieldError('gender') && (
+                                <p className="text-[10px] text-red-500 font-medium px-1">{getFieldError('gender')}</p>
+                            )}
                         </div>
                     </div>
-                    {/* Row 2: Height & Weight */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Height (cm)</label>
                             <div className="relative mt-1">
                                 <input
-                                    type="number"
-                                    value={data.height || ''}
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={localData.height}
                                     onChange={(e) => handleChange('height', e.target.value)}
                                     placeholder="175"
                                     className={inputClasses('height')}
                                 />
                             </div>
+                            {getFieldError('height') && (
+                                <p className="text-[10px] text-red-500 font-medium px-1">{getFieldError('height')}</p>
+                            )}
                         </div>
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Weight (kg)</label>
                             <div className="relative mt-1">
                                 <input
-                                    type="number"
-                                    value={data.weight || ''}
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={localData.weight}
                                     onChange={(e) => handleChange('weight', e.target.value)}
                                     placeholder="70"
                                     className={inputClasses('weight')}
                                 />
                             </div>
+                            {getFieldError('weight') && (
+                                <p className="text-[10px] text-red-500 font-medium px-1">{getFieldError('weight')}</p>
+                            )}
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Training Type */}
             <section>
                 <SectionHeader title="Training Focus" />
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {ACTIVITIES.map((act) => {
                         const Icon = act.icon;
-                        const isActive = data.physical_activity_type === act.id;
+                        const isActive = localData.physical_activity_type === act.id;
                         const isSpinning = spinningGoal === 'activity' && isActive;
                         return (
                             <button
@@ -229,15 +254,17 @@ const Step1 = ({ data, updateData }) => {
                         );
                     })}
                 </div>
+                {getFieldError('physical_activity_type') && (
+                    <p className="text-[10px] text-red-500 font-medium px-1">{getFieldError('physical_activity_type')}</p>
+                )}
             </section>
 
-            {/* Fitness Goal */}
             <section>
                 <SectionHeader title="Primary Objective" />
                 <div className="grid grid-cols-3 sm:grid-cols-3 gap-3">
                     {GOALS.map((goal) => {
                         const Icon = goal.icon;
-                        const isActive = data.fitness_goal === goal.id;
+                        const isActive = localData.fitness_goal === goal.id;
                         const isSpinning = spinningGoal === 'goal' && isActive;
                         return (
                             <button
@@ -280,6 +307,9 @@ const Step1 = ({ data, updateData }) => {
                         );
                     })}
                 </div>
+                {getFieldError('fitness_goal') && (
+                    <p className="text-[10px] text-red-500 font-medium px-1">{getFieldError('fitness_goal')}</p>
+                )}
             </section>
         </div>
     );

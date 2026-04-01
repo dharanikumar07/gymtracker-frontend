@@ -1,20 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
     Dumbbell, 
     Trash2, 
     Plus, 
-    ChevronDown, 
-    ChevronUp,
+    ChevronDown,
     Video,
     ExternalLink,
-    Play,
-    X,
     Calendar,
-    GripVertical,
-    MoreVertical,
-    Check
+    Check,
+    Loader2
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
+import { usePhysicalActivityQuery } from '../http/onboardingQueries';
 import WorkoutMetricEditor from '../../../components/WorkoutMetricEditor';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -27,10 +24,68 @@ const activityIcons = {
     calisthenics: Dumbbell
 };
 
+const transformApiResponse = (apiData) => {
+    if (!apiData?.data) return null;
+
+    const { plan, slots, physical_activity_type } = apiData.data;
+
+    const groupedSlots = {};
+    DAYS.forEach(day => {
+        groupedSlots[day] = { target_muscles: [], workouts: [] };
+    });
+
+    slots?.forEach(slot => {
+        const dayKey = slot.day.charAt(0).toUpperCase() + slot.day.slice(1).toLowerCase();
+        if (groupedSlots[dayKey]) {
+            groupedSlots[dayKey].workouts.push({
+                name: slot.exercise_name,
+                exercise_order: slot.exercise_order,
+                sample_video_link: slot.meta_data?.sample_video_link || '',
+                metrics: {
+                    type: slot.metrics_type,
+                    data: slot.metrics_data || {}
+                }
+            });
+        }
+    });
+
+    const formattedPlan = {
+        uuid: plan?.uuid || null,
+        name: plan?.name || 'My Transformation Plan',
+        physical_activity_type: plan?.meta_data?.physical_activity_type || physical_activity_type || 'strength_training',
+        start_date: plan?.start_date ? plan.start_date.split('T')[0] : '',
+        end_date: plan?.end_date ? plan.end_date.split('T')[0] : '',
+        is_active: plan?.is_active ?? true
+    };
+
+    const config = {
+        units: plan?.meta_data?.units || { weight_units: ['kg'], duration_units: ['min'] },
+        metrics_types: plan?.meta_data?.metrics_types || ['strength', 'timed_sets', 'endurance']
+    };
+
+    return { plan: formattedPlan, weekly_split: groupedSlots, onboarding_config: config };
+};
+
 const Step2 = ({ data, updateData }) => {
     const [activeDay, setActiveDay] = useState('Mon');
     const [expandedExercise, setExpandedExercise] = useState(null);
-    
+    const synced = useRef(false);
+
+    const activityType = data.physical_activity_type || 'strength_training';
+    const { data: apiData, isLoading } = usePhysicalActivityQuery(activityType);
+
+    useEffect(() => {
+        const transformed = transformApiResponse(apiData);
+        if (transformed && !synced.current) {
+            synced.current = true;
+            updateData({
+                plan: transformed.plan,
+                weekly_split: transformed.weekly_split,
+                onboarding_config: transformed.onboarding_config
+            });
+        }
+    }, [apiData, updateData]);
+
     const selectedFocus = data.physical_activity_type || 'strength_training';
     const weeklySplit = data.weekly_split || {};
     const config = data.onboarding_config || { units: { weight_units: ['kg'], duration_units: ['min'] }, metrics_types: [] };
@@ -75,9 +130,17 @@ const Step2 = ({ data, updateData }) => {
     const IconComponent = activityIcons[selectedFocus] || Dumbbell;
     const totalExercises = Object.values(weeklySplit).reduce((acc, day) => acc + (day.workouts?.length || 0), 0);
 
+    if (isLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center py-24 gap-5">
+                <Loader2 className="w-10 h-10 animate-spin text-primary" />
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground italic">Loading...</p>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Summary Card */}
             <div className="bg-gradient-to-br from-primary/10 to-primary/5 border-2 border-primary/20 rounded-3xl p-5">
                 <div className="flex items-center gap-4">
                     <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
@@ -100,7 +163,6 @@ const Step2 = ({ data, updateData }) => {
                 </div>
             </div>
 
-            {/* Quick Settings */}
             <div className="bg-card border-2 border-border rounded-3xl p-5 space-y-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -160,7 +222,6 @@ const Step2 = ({ data, updateData }) => {
                 </div>
             </div>
 
-            {/* Day Selector */}
             <div className="bg-card border-2 border-border rounded-3xl p-5">
                 <div className="flex items-center gap-3 mb-4">
                     <Dumbbell className="w-4 h-4 text-primary" />
@@ -197,7 +258,6 @@ const Step2 = ({ data, updateData }) => {
                 </div>
             </div>
 
-            {/* Exercises for Selected Day */}
             <div className="bg-card border-2 border-border rounded-3xl p-5">
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
@@ -216,11 +276,23 @@ const Step2 = ({ data, updateData }) => {
                     </button>
                 </div>
 
-                {/* Exercise List */}
                 <div className="space-y-3">
                     {dayData.workouts?.map((ex, exIdx) => {
                         const isExpanded = expandedExercise === exIdx;
                         const hasVideo = !!ex.sample_video_link;
+                        
+                        const metricsText = () => {
+                            if (ex.metrics?.type === 'strength') {
+                                return `${ex.metrics.data?.sets || 0} sets × ${ex.metrics.data?.reps || 0} reps`;
+                            }
+                            if (ex.metrics?.type === 'timed_sets') {
+                                return `${ex.metrics.data?.sets || 0} sets × ${ex.metrics.data?.duration || 0}s`;
+                            }
+                            if (ex.metrics?.type === 'endurance') {
+                                return `${ex.metrics.data?.duration || 0}s hold`;
+                            }
+                            return ex.metrics?.type || 'rest';
+                        };
                         
                         return (
                             <div 
@@ -230,7 +302,6 @@ const Step2 = ({ data, updateData }) => {
                                     isExpanded ? "border-primary/30 bg-primary/5" : "border-border bg-secondary/20"
                                 )}
                             >
-                                {/* Exercise Header */}
                                 <button
                                     onClick={() => setExpandedExercise(isExpanded ? null : exIdx)}
                                     className="w-full p-4 flex items-center gap-3"
@@ -246,7 +317,7 @@ const Step2 = ({ data, updateData }) => {
                                             {ex.name || 'New Exercise'}
                                         </p>
                                         <p className="text-[9px] text-muted-foreground">
-                                            {ex.metrics?.type || 'strength'} • {ex.metrics?.data?.sets || 0} sets × {ex.metrics?.data?.reps || 0} reps
+                                            {metricsText()}
                                         </p>
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -264,10 +335,8 @@ const Step2 = ({ data, updateData }) => {
                                     </div>
                                 </button>
 
-                                {/* Expanded Content */}
                                 {isExpanded && (
                                     <div className="px-4 pb-4 space-y-4 border-t border-border/50 pt-4">
-                                        {/* Exercise Name Input */}
                                         <div className="space-y-1.5">
                                             <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Exercise Name</label>
                                             <input 
@@ -278,7 +347,6 @@ const Step2 = ({ data, updateData }) => {
                                             />
                                         </div>
 
-                                        {/* Video Link */}
                                         <div className="space-y-1.5">
                                             <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Tutorial Video (Optional)</label>
                                             <div className="flex gap-2">
@@ -301,7 +369,6 @@ const Step2 = ({ data, updateData }) => {
                                             </div>
                                         </div>
 
-                                        {/* Metrics Editor */}
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Sets & Reps</label>
                                             <WorkoutMetricEditor 
@@ -311,7 +378,6 @@ const Step2 = ({ data, updateData }) => {
                                             />
                                         </div>
 
-                                        {/* Delete Button */}
                                         <button
                                             onClick={() => handleRemoveWorkout(exIdx)}
                                             className="w-full flex items-center justify-center gap-2 py-2 text-[10px] font-bold text-primary hover:bg-primary/10 rounded-xl transition-colors"
@@ -324,7 +390,6 @@ const Step2 = ({ data, updateData }) => {
                         );
                     })}
 
-                    {/* Empty State */}
                     {(!dayData.workouts || dayData.workouts.length === 0) && (
                         <div className="py-12 text-center bg-secondary/20 rounded-3xl border-2 border-dashed border-border">
                             <Dumbbell className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />

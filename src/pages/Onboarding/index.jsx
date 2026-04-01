@@ -4,7 +4,6 @@ import {
     ArrowRight, 
     ArrowLeft, 
     Loader2, 
-    Dumbbell, 
     Star,
     CreditCard,
     Check,
@@ -16,7 +15,7 @@ import { cn } from '../../lib/utils';
 import { useAuthStore } from '../../store/authStore';
 import { useOnboardingStore } from '../../store/onboardingStore';
 import { useQueryClient } from '@tanstack/react-query';
-import { useCompleteOnboardingMutation } from './http/onboardingQueries';
+import { useCompleteOnboardingMutation, useSaveProfileInformationMutation } from './http/onboardingQueries';
 import { fetchPhysicalActivityApi } from './http/onboardingApi';
 import { QUERY_KEYS } from '../../constants/query.constants';
 import ThemeToggle from '../../components/ThemeToggle';
@@ -52,18 +51,53 @@ const Onboarding = () => {
     } = useOnboardingStore();
     
     const [loading, setLoading] = useState(false);
+    const [stepErrors, setStepErrors] = useState({});
     const queryClient = useQueryClient();
     const completeOnboardingMutation = useCompleteOnboardingMutation();
+    const saveProfileMutation = useSaveProfileInformationMutation();
+
+    const validateStep1 = () => {
+        const errors = {};
+        const { age, gender, height, weight, fitness_goal, physical_activity_type } = formData;
+
+        if (!age || age.trim() === '') errors.age = 'Age is required';
+        else if (parseFloat(age) < 10 || parseFloat(age) > 120) errors.age = 'Age must be between 10 and 120';
+
+        if (!gender || gender.trim() === '') errors.gender = 'Gender is required';
+        else if (!['male', 'female', 'other'].includes(gender)) errors.gender = 'Select a valid gender';
+
+        if (!height || height.trim() === '') errors.height = 'Height is required';
+        else if (parseFloat(height) < 50 || parseFloat(height) > 300) errors.height = 'Height must be between 50 and 300 cm';
+
+        if (!weight || weight.trim() === '') errors.weight = 'Weight is required';
+        else if (parseFloat(weight) < 20 || parseFloat(weight) > 500) errors.weight = 'Weight must be between 20 and 500 kg';
+
+        if (!fitness_goal || fitness_goal.trim() === '') errors.fitness_goal = 'Fitness goal is required';
+
+        if (!physical_activity_type || physical_activity_type.trim() === '') errors.physical_activity_type = 'Training type is required';
+
+        return errors;
+    };
 
     const handleNext = async () => {
+        setStepErrors({});
+
         if (step === 1) {
+            const errors = validateStep1();
+            if (Object.keys(errors).length > 0) {
+                setStepErrors(errors);
+                return;
+            }
+
             setLoading(true);
             const activityType = formData.physical_activity_type === 'flexibility' ? 'yoga' : formData.physical_activity_type;
             
-            queryClient.fetchQuery({
-                queryKey: QUERY_KEYS.ONBOARDING.PHYSICAL_ACTIVITY(activityType),
-                queryFn: () => fetchPhysicalActivityApi(activityType),
-            }).then((activityData) => {
+            try {
+                const activityData = await queryClient.fetchQuery({
+                    queryKey: QUERY_KEYS.ONBOARDING.PHYSICAL_ACTIVITY(activityType),
+                    queryFn: () => fetchPhysicalActivityApi(activityType),
+                });
+                
                 const scheduleKey = activityData.physical_activity_type;
                 updateFormData({
                     weekly_split: activityData[scheduleKey],
@@ -74,8 +108,11 @@ const Onboarding = () => {
                 });
                 setStepsStatus({ 'step-1': true });
                 setStep(2);
-            }).catch(() => toast.error("Failed to load workout routine"))
-              .finally(() => setLoading(false));
+            } catch (error) {
+                toast.error("Failed to load workout routine");
+            } finally {
+                setLoading(false);
+            }
         } else if (step === 2) {
             setStepsStatus({ 'step-2': true });
             setStep(3);
@@ -116,17 +153,15 @@ const Onboarding = () => {
     };
 
     const handleBack = () => {
+        setStepErrors({});
         step > 1 && setStep(step - 1);
     };
 
     return (
         <div className="h-screen bg-background text-foreground flex overflow-hidden">
-            {/* Left Banner */}
             <LeftBanner />
 
-            {/* Right Side - Static Header/Progress, Scrollable Content */}
             <div className="flex-1 flex flex-col h-full">
-                {/* Header - Static */}
                 <header className="border-b border-border shrink-0">
                     <div className="flex items-center justify-between px-6 sm:px-10 h-16 max-w-3xl mx-auto w-full">
                         <div className="flex items-center gap-3 lg:hidden">
@@ -145,7 +180,6 @@ const Onboarding = () => {
                     </div>
                 </header>
 
-                {/* Progress Steps - Static */}
                 <div className="border-b border-border px-6 sm:px-10 py-4 max-w-3xl mx-auto w-full shrink-0">
                     <div className="flex items-center justify-between gap-4">
                         {STEPS.map((s, i) => {
@@ -193,10 +227,8 @@ const Onboarding = () => {
                     </div>
                 </div>
 
-                {/* Main Content - Scrollable */}
                 <div className="flex-1 overflow-y-auto h-0 min-h-0">
                     <div className="px-6 sm:px-10 py-8 max-w-xl mx-auto w-full">
-                        {/* Title */}
                         <div className="mb-8">
                             <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-foreground mb-2">
                                 {STEP_TITLES[step].title}
@@ -206,21 +238,19 @@ const Onboarding = () => {
                             </p>
                         </div>
 
-                        {/* Step Content */}
                         <div className="mb-8">
-                            {step === 1 && <Step1 data={formData} updateData={updateFormData} />}
+                            {step === 1 && <Step1 data={formData} updateData={updateFormData} errors={stepErrors} />}
                             {step === 2 && <Step2 data={formData} updateData={updateFormData} />}
                             {step === 3 && <Step3 data={formData} updateData={updateFormData} />}
                         </div>
 
-                        {/* Navigation - Same Line */}
                         <div className="flex items-center gap-4">
                             <button 
                                 onClick={handleSkip}
                                 disabled={loading}
                                 className="h-12 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors shrink-0"
                             >
-                                {step === 3 ? 'Skip' : 'Skip'}
+                                Skip
                             </button>
                             
                             <div className="flex-1 flex items-center gap-3">
