@@ -23,7 +23,7 @@ const initialFormData = {
 
 export const useOnboardingStore = create(
     persist(
-        (set) => ({
+        (set, get) => ({
             step: 1,
             formData: initialFormData,
             stepsStatus: {
@@ -31,11 +31,25 @@ export const useOnboardingStore = create(
                 'step-2': false,
                 'step-3': false
             },
+            profileLoaded: false,
 
             setStep: (step) => set({ step }),
             
             updateFormData: (newData) => set((state) => ({
                 formData: { ...state.formData, ...newData }
+            })),
+
+            setProfileData: (profileData) => set((state) => ({
+                formData: { 
+                    ...state.formData,
+                    age: profileData.age || '',
+                    gender: profileData.gender || '',
+                    height: profileData.height || '',
+                    weight: profileData.weight || '',
+                    fitness_goal: profileData.fitness_goal || 'muscle_gain',
+                    physical_activity_type: profileData.physical_activity_type || 'strength_training',
+                },
+                profileLoaded: true
             })),
 
             setStepsStatus: (status) => set((state) => ({
@@ -50,13 +64,14 @@ export const useOnboardingStore = create(
                         'step-1': false,
                         'step-2': false,
                         'step-3': false
-                    }
+                    },
+                    profileLoaded: false
                 });
                 localStorage.removeItem('onboarding-storage');
             },
         }),
         {
-            name: 'onboarding-storage', // key in localStorage
+            name: 'onboarding-storage',
             storage: createJSONStorage(() => localStorage),
         }
     )
