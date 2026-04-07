@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 
 const initialFormData = {
     age: '',
@@ -21,43 +20,49 @@ const initialFormData = {
     expense_details: {}
 };
 
-export const useOnboardingStore = create(
-    persist(
-        (set) => ({
-            step: 1,
+export const useOnboardingStore = create((set) => ({
+    step: 1,
+    formData: initialFormData,
+    stepsStatus: {
+        'step-1': false,
+        'step-2': false,
+        'step-3': false
+    },
+    profileLoaded: false,
+
+    setStep: (step) => set({ step }),
+    
+    updateFormData: (newData) => set((state) => ({
+        formData: { ...state.formData, ...newData }
+    })),
+
+    setProfileData: (profileData) => set((state) => ({
+        formData: { 
+            ...state.formData,
+            age: profileData.age || '',
+            gender: profileData.gender || '',
+            height: profileData.height || '',
+            weight: profileData.weight || '',
+            fitness_goal: profileData.fitness_goal || 'muscle_gain',
+            physical_activity_type: profileData.physical_activity_type || 'strength_training',
+        },
+        profileLoaded: true
+    })),
+
+    setStepsStatus: (status) => set((state) => ({
+        stepsStatus: { ...state.stepsStatus, ...status }
+    })),
+
+    resetOnboarding: () => {
+        set({ 
+            step: 1, 
             formData: initialFormData,
             stepsStatus: {
                 'step-1': false,
                 'step-2': false,
                 'step-3': false
             },
-
-            setStep: (step) => set({ step }),
-            
-            updateFormData: (newData) => set((state) => ({
-                formData: { ...state.formData, ...newData }
-            })),
-
-            setStepsStatus: (status) => set((state) => ({
-                stepsStatus: { ...state.stepsStatus, ...status }
-            })),
-
-            resetOnboarding: () => {
-                set({ 
-                    step: 1, 
-                    formData: initialFormData,
-                    stepsStatus: {
-                        'step-1': false,
-                        'step-2': false,
-                        'step-3': false
-                    }
-                });
-                localStorage.removeItem('onboarding-storage');
-            },
-        }),
-        {
-            name: 'onboarding-storage', // key in localStorage
-            storage: createJSONStorage(() => localStorage),
-        }
-    )
-);
+            profileLoaded: false
+        });
+    },
+}));
