@@ -31,3 +31,8 @@ export const completeOnboardingApi = async (payload) => {
   const response = await api.post('/onboarding/complete', payload);
   return response.data;
 };
+
+export const fetchExpensesApi = async () => {
+  const response = await api.get('/expenses');
+  return response.data;
+};

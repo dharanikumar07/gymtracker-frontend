@@ -17,8 +17,8 @@ import { cn } from '../../lib/utils';
 import { useAuthStore } from '../../store/authStore';
 import { useOnboardingStore } from '../../store/onboardingStore';
 import { useQueryClient } from '@tanstack/react-query';
-import { useCompleteOnboardingMutation, useSaveProfileInformationMutation, useSavePhysicalActivityMutation } from './http/onboardingQueries';
-import { fetchPhysicalActivityApi } from './http/onboardingApi';
+import { useCompleteOnboardingMutation, useSaveProfileInformationMutation, useSavePhysicalActivityMutation, useExpenseQuery } from './http/onboardingQueries';
+import { fetchPhysicalActivityApi, fetchExpensesApi } from './http/onboardingApi';
 import { QUERY_KEYS } from '../../constants/query.constants';
 import ThemeToggle from '../../components/ThemeToggle';
 import LeftBanner from './components/LeftBanner';
@@ -175,6 +175,21 @@ const Onboarding = () => {
             try {
                 const routinePayload = transformRoutineForApi(formData);
                 await savePhysicalActivityMutation.mutateAsync(routinePayload);
+                
+                const expenseData = await queryClient.fetchQuery({
+                    queryKey: ['expenses'],
+                    queryFn: fetchExpensesApi,
+                });
+                
+                if (expenseData?.expenses?.length > 0) {
+                    const mappedExpenses = expenseData.expenses.map(e => ({
+                        type: e.category_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                        period: e.expense_period,
+                        amount: e.default_amount || ''
+                    }));
+                    updateFormData({ expenses: mappedExpenses });
+                }
+                
                 setStepsStatus({ 'step-2': true });
                 setStep(3);
             } catch (error) {
@@ -187,7 +202,13 @@ const Onboarding = () => {
         }
     };
 
-    const handleNext = () => goToStep(step + 1);
+    const handleNext = () => {
+        if (step === 3) {
+            handleFinalSubmit({ ...stepsStatus, 'step-3': true });
+        } else {
+            goToStep(step + 1);
+        }
+    };
     const handleBack = () => goToStep(step - 1);
 
     const handleSkip = () => {
@@ -203,28 +224,29 @@ const Onboarding = () => {
         }
     };
 
-    const handleFinalSubmit = async (finalStepsStatus) => {
+    const handleFinalSubmit = async () => {
         setLoading(true);
-        completeOnboardingMutation.mutateAsync({
-            profile: {
-                age: formData.age,
-                gender: formData.gender,
-                height: formData.height,
-                weight: formData.weight,
-                fitness_goal: formData.fitness_goal,
-                physical_activity_type: formData.physical_activity_type
-            },
-            plan: formData.plan,
-            routine: formData.weekly_split,
-            expenses: formData.fixed_expenses || [],
-            steps_completed: finalStepsStatus
-        }).then(() => {
+        
+        const transformedExpenses = (formData.expenses || []).map(exp => ({
+            category_type: exp.type.toLowerCase().replace(/\s+/g, '_'),
+            expense_period: exp.period || 'fixed',
+            default_amount: parseFloat(exp.amount) || 0
+        }));
+
+        try {
+            await completeOnboardingMutation.mutateAsync({
+                expenses: transformedExpenses
+            });
+            
+            await fetchUser();
             resetOnboarding();
-            fetchUser();
             toast.success('Welcome to GymOS!');
             navigate('/dashboard');
-        }).catch(() => toast.error('Failed to complete onboarding'))
-          .finally(() => setLoading(false));
+        } catch (error) {
+            toast.error('Failed to complete onboarding');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const animationClass = direction === 'forward' 
@@ -341,10 +363,10 @@ const Onboarding = () => {
                     <div className="px-4 sm:px-6 lg:px-10 py-6 sm:py-8 max-w-xl mx-auto w-full">
                         <div className="mb-6 sm:mb-8">
                             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black uppercase tracking-tight text-foreground mb-1 sm:mb-2">
-                                {STEP_TITLES[step].title}
+                                {STEP_TITLES[step]?.title || 'Loading...'}
                             </h2>
                             <p className="text-xs sm:text-sm text-muted-foreground">
-                                {STEP_TITLES[step].desc}
+                                {STEP_TITLES[step]?.desc || ''}
                             </p>
                         </div>
 
@@ -377,7 +399,7 @@ const Onboarding = () => {
                                 <button 
                                     onClick={handleNext}
                                     disabled={loading}
-                                    className="flex-1 h-10 sm:h-12 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold text-[11px] sm:text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 sm:gap-2 shadow-lg shadow-primary/30"
+                                    className="flex-1 h-10 sm:h-12 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold text-[11px] sm:text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 sm:gap-2 shadow-lg shadow-primary/30 disabled:opacity-70"
                                 >
                                     {loading ? (
                                         <Loader2 className="w-4 sm:w-4 h-4 sm:h-4 animate-spin" />

@@ -5,7 +5,8 @@ import {
   fetchPhysicalActivityApi, 
   savePhysicalActivityApi,
   deleteWorkoutSlotApi,
-  completeOnboardingApi 
+  completeOnboardingApi,
+  fetchExpensesApi 
 } from './onboardingApi';
 import { QUERY_KEYS } from '../../../constants/query.constants';
 import { toast } from 'sonner';
@@ -90,5 +91,12 @@ export const useCompleteOnboardingMutation = () => {
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to complete onboarding');
     },
+  });
+};
+
+export const useExpenseQuery = () => {
+  return useQuery({
+    queryKey: ['expenses'],
+    queryFn: fetchExpensesApi,
   });
 };
