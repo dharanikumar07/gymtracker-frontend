@@ -136,7 +136,7 @@ const RestSlot = ({ ex, exIdx, handleRemoveWorkout, updateWorkout }) => (
             
             <button
                 onClick={() => handleRemoveWorkout(exIdx, ex.uuid)}
-                className="absolute top-3 right-3 p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                className="absolute top-3 right-3 p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors cursor-pointer"
             >
                 <Trash2 className="w-4 h-4 text-red-500" />
             </button>
@@ -223,7 +223,7 @@ const SortableExercise = ({ ex, exIdx, isExpanded, setExpandedExercise, updateWo
                 </button>
                 <button
                     onClick={handleDelete}
-                    className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                    className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors cursor-pointer"
                 >
                     <Trash2 className="w-4 h-4 text-red-500" />
                 </button>

@@ -21,5 +21,6 @@ export const QUERY_KEYS = {
   ONBOARDING: {
     PROFILE: ['onboarding', 'profile'],
     PHYSICAL_ACTIVITY: (activityType) => ['onboarding', 'physical-activity', activityType],
+    EXPENSES: ['onboarding', 'expenses'],
   },
 };
