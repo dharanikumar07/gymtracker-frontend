@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Dumbbell, UtensilsCrossed, Activity, ClipboardList, Loader2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { useRoutineQuery } from './http/queries';
 
-import Routine from './components/Routine';
+import Routine from './Routine';
 import TrackWorkout from './components/TrackWorkout';
 import TrackDiet from './components/TrackDiet';
 import ManageDiet from './components/ManageDiet';
@@ -17,16 +16,6 @@ const tabs = [
 
 const TrackProgress = () => {
     const [activeTab, setActiveTab] = useState('routine');
-    const { data: progressData, isLoading } = useRoutineQuery();
-
-    if (isLoading && !progressData) {
-        return (
-            <div className="flex flex-col items-center justify-center h-full min-h-[60vh] gap-4">
-                <Loader2 className="w-10 h-10 animate-spin text-primary" />
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground animate-pulse italic">Loading...</p>
-            </div>
-        );
-    }
 
     return (
         <div className="h-full flex flex-col p-2 sm:p-4 lg:p-6 font-sans">

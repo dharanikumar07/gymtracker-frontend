@@ -71,6 +71,10 @@ export const useFormValidation = (validationSchema) => {
     const validateAll = (data) => {
         const result = validateForm(data, validationSchema);
         setErrors(result.errors);
+        // Mark all validated fields as touched so errors are visible
+        const allTouched = {};
+        Object.keys(validationSchema).forEach(field => { allTouched[field] = true; });
+        setTouched(prev => ({ ...prev, ...allTouched }));
         return result.isValid;
     };
 
