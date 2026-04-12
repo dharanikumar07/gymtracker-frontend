@@ -18,9 +18,10 @@ import { useFormValidation } from '../../../../validation/ValidationWrapper';
 
 const TRAINING_TYPES = [
     { id: 'strength_training', label: 'Strength' },
-    { id: 'cardio', label: 'Cardio' },
-    { id: 'flexibility', label: 'Yoga' },
-    { id: 'calisthenics', label: 'Core' },
+    { id: 'cardio_training', label: 'Cardio' },
+    { id: 'flexibility_yoga', label: 'Yoga' },
+    { id: 'balance_core', label: 'Balanced & Core' },
+    { id: 'calisthenics', label: 'Calisthenics' },
 ];
 
 const PLAN_VALIDATION_SCHEMA = {

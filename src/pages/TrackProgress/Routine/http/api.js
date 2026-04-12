@@ -16,7 +16,7 @@ export const fetchSlotsApi = async (planUuid) => {
 };
 
 export const saveSlotsApi = async (payload) => {
-    const response = await api.post('/workouts/slots/save', payload);
+    const response = await api.post('/workouts/slots', payload);
     return response.data;
 };
 

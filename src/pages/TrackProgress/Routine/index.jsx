@@ -69,7 +69,7 @@ const Routine = () => {
     );
 
     return (isLoadingPlans || (currentPlanUuid && isLoadingSlots)) ? null : plans.length === 0 ? renderEmptyState() : (
-        <div className="space-y-6 pb-24 w-full lg:w-[90%] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="space-y-6 pb-24 w-full mx-auto px-4 sm:px-6 lg:px-8">
             <PlanCard
                 key={`plan-${currentPlanUuid}`}
                 plans={plans}
@@ -86,7 +86,9 @@ const Routine = () => {
             {currentPlanUuid ? (
                 <SlotsCard 
                     key={`slots-${currentPlanUuid}`}
-                    slots={slotsData?.data || []}
+                    slots={slotsData?.data?.slots || []}
+                    units={slotsData?.data?.units}
+                    metricsTypes={slotsData?.data?.metrics_types}
                     planUuid={currentPlanUuid}
                     onSave={handleSaveSlots}
                     isSaving={saveSlotsMutation.isPending}
