@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { User, Target, Dumbbell, Zap, Wind, ShieldCheck, Check, Loader2, Activity, ChevronDown } from 'lucide-react';
+import { User, Target, Dumbbell, Zap, Wind, ShieldCheck, Check, Loader2, Activity, ChevronDown, ChartNoAxesCombined } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { useFormValidation } from '../../../validation/ValidationWrapper';
 import { validationRules } from '../../../validation';
@@ -13,9 +13,10 @@ const GOALS = [
 
 const ACTIVITIES = [
     { id: 'strength_training', label: 'Strength', icon: Dumbbell },
-    { id: 'cardio', label: 'Cardio', icon: Zap },
-    { id: 'flexibility', label: 'Yoga', icon: Wind },
-    { id: 'calisthenics', label: 'Core', icon: ShieldCheck },
+    { id: 'cardio_training', label: 'Cardio', icon: Zap },
+    { id: 'flexibility_yoga', label: 'Yoga', icon: Wind },
+    { id: 'balance_core', label: 'Balance & Core', icon: ChartNoAxesCombined },
+    { id: 'calisthenics', label: 'Calisthenics', icon: ShieldCheck },
 ];
 
 const VALIDATION_SCHEMA = {
@@ -88,6 +89,38 @@ const Step1 = ({ data, updateData, errors = {} }) => {
 
     const getFieldError = (field) => errors[field] || getError(field);
 
+    const renderActivityButton = (act) => {
+        const Icon = act.icon;
+        const isActive = localData.physical_activity_type === act.id;
+        const isSpinning = spinningGoal === 'activity' && isActive;
+        return (
+            <button
+                key={act.id}
+                onClick={() => handleChange('physical_activity_type', act.id)}
+                className={cn(
+                    "relative flex items-center gap-2.5 p-2.5 rounded-2xl border transition-all duration-300",
+                    isActive 
+                        ? "border-primary bg-primary/10 shadow-lg" 
+                        : "border-border bg-background hover:border-primary/50"
+                )}
+            >
+                <div className={cn(
+                    "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all",
+                    isActive ? "bg-primary text-white" : "bg-secondary text-muted-foreground",
+                    isSpinning && "animate-[spin_200ms_linear_2]"
+                )}>
+                    <Icon className={act.id === 'strength_training' ? 'w-5 h-5' : 'w-4 h-4'} />
+                </div>
+                <span className={cn(
+                    "text-[10px] sm:text-[11px] font-black uppercase tracking-tight",
+                    isActive ? "text-primary" : "text-foreground"
+                )}>
+                    {act.label}
+                </span>
+            </button>
+        );
+    };
+
     return isLoadingProfile ? (
         <div className="space-y-8 animate-pulse">
             <section>
@@ -118,13 +151,23 @@ const Step1 = ({ data, updateData, errors = {} }) => {
 
             <section>
                 <SectionHeader title="Training Focus" />
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="flex items-center gap-2.5 p-2.5 rounded-2xl border border-border bg-background">
-                            <div className="w-10 h-10 rounded-xl bg-secondary" />
-                            <div className="h-3 w-14 bg-secondary rounded" />
-                        </div>
-                    ))}
+                <div className="space-y-3">
+                    <div className="grid grid-cols-3 gap-3">
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="flex items-center gap-2.5 p-2.5 rounded-2xl border border-border bg-background">
+                                <div className="w-10 h-10 rounded-xl bg-secondary" />
+                                <div className="h-3 w-14 bg-secondary rounded" />
+                            </div>
+                        ))}
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        {[1, 2].map((i) => (
+                            <div key={i} className="flex items-center gap-2.5 p-2.5 rounded-2xl border border-border bg-background">
+                                <div className="w-10 h-10 rounded-xl bg-secondary" />
+                                <div className="h-3 w-14 bg-secondary rounded" />
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </section>
 
@@ -221,38 +264,13 @@ const Step1 = ({ data, updateData, errors = {} }) => {
 
             <section>
                 <SectionHeader title="Training Focus" />
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {ACTIVITIES.map((act) => {
-                        const Icon = act.icon;
-                        const isActive = localData.physical_activity_type === act.id;
-                        const isSpinning = spinningGoal === 'activity' && isActive;
-                        return (
-                            <button
-                                key={act.id}
-                                onClick={() => handleChange('physical_activity_type', act.id)}
-                                className={cn(
-                                    "relative flex items-center gap-2.5 p-2.5 rounded-2xl border transition-all duration-300",
-                                    isActive 
-                                        ? "border-primary bg-primary/10 shadow-lg" 
-                                        : "border-border bg-background hover:border-primary/50"
-                                )}
-                            >
-                                <div className={cn(
-                                    "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
-                                    isActive ? "bg-primary text-white" : "bg-secondary text-muted-foreground",
-                                    isSpinning && "animate-[spin_200ms_linear_2]"
-                                )}>
-                                    <Icon className={act.id === 'strength_training' ? 'w-5 h-5' : 'w-4 h-4'} />
-                                </div>
-                                <span className={cn(
-                                    "text-[11px] font-medium tracking-tight",
-                                    isActive ? "text-primary" : "text-foreground"
-                                )}>
-                                    {act.label}
-                                </span>
-                            </button>
-                        );
-                    })}
+                <div className="space-y-3">
+                    <div className="grid grid-cols-3 gap-3">
+                        {ACTIVITIES.slice(0, 3).map(renderActivityButton)}
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        {ACTIVITIES.slice(3).map(renderActivityButton)}
+                    </div>
                 </div>
                 {getFieldError('physical_activity_type') && (
                     <p className="text-[10px] text-red-500 font-medium px-1">{getFieldError('physical_activity_type')}</p>
@@ -287,7 +305,7 @@ const Step1 = ({ data, updateData, errors = {} }) => {
                                 </div>
                                 <div className="text-center space-y-0.5">
                                     <p className={cn(
-                                        "text-[10px] sm:text-xs font-medium tracking-wide",
+                                        "text-[10px] sm:text-xs font-black uppercase tracking-wide",
                                         isActive ? "text-primary" : "text-foreground"
                                     )}>
                                         {goal.label}

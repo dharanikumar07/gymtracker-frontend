@@ -35,9 +35,9 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const activityIcons = {
     strength_training: Dumbbell,
-    cardio: Dumbbell,
-    flexibility: Dumbbell,
-    balance: Dumbbell,
+    cardio_training: Dumbbell,
+    flexibility_yoga: Dumbbell,
+    balance_core: Dumbbell,
     calisthenics: Dumbbell
 };
 
