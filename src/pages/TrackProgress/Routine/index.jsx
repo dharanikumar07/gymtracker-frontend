@@ -6,10 +6,12 @@ import {
 } from 'lucide-react';
 import {
     usePlansQuery,
-    useSlotsQuery,
     useSavePlanMutation,
     useDeletePlanMutation,
-    useSaveSlotsMutation
+} from '../http/queries';
+import {
+    useSlotsQuery,
+    useSaveSlotsMutation,
 } from './http/queries';
 import PlanCard from './components/PlanCard';
 import SlotsCard from './components/SlotsCard';

@@ -1,8 +1,58 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchRoutineApi, fetchRoutineTrackingApi, fetchDietRoutineApi, fetchDietTrackingApi, updateRoutineApi, logWorkoutApi, generateDietPlanApi, updateDietRoutineApi, logDietApi } from './api';
+import {
+    fetchPlansApi,
+    savePlanApi,
+    deletePlanApi,
+    fetchRoutineApi,
+    fetchRoutineTrackingApi,
+    fetchDietRoutineApi,
+    fetchDietTrackingApi,
+    updateRoutineApi,
+    logWorkoutApi,
+    generateDietPlanApi,
+    updateDietRoutineApi,
+    logDietApi,
+} from './api';
 import { QUERY_KEYS } from '../../../constants/query.constants';
 import { toast } from 'sonner';
 
+// ─── Common Plan Queries ───
+export const usePlansQuery = (type = 'physical_activity', is_active = null) => {
+    return useQuery({
+        queryKey: [QUERY_KEYS.PROGRESS.ROUTINE, 'plans', type, is_active],
+        queryFn: () => fetchPlansApi(type, is_active),
+    });
+};
+
+export const useSavePlanMutation = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: savePlanApi,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROGRESS.ROUTINE, 'plans'] });
+            toast.success('Plan saved successfully');
+        },
+        onError: (error) => {
+            toast.error(error.response?.data?.message || 'Failed to save plan');
+        },
+    });
+};
+
+export const useDeletePlanMutation = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: deletePlanApi,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROGRESS.ROUTINE, 'plans'] });
+            toast.success('Plan deleted successfully');
+        },
+        onError: (error) => {
+            toast.error(error.response?.data?.message || 'Failed to delete plan');
+        },
+    });
+};
+
+// ─── Routine Queries ───
 export const useRoutineQuery = () => {
     return useQuery({
         queryKey: QUERY_KEYS.PROGRESS.ROUTINE,
@@ -14,21 +64,6 @@ export const useRoutineTrackingQuery = (date) => {
     return useQuery({
         queryKey: QUERY_KEYS.PROGRESS.ROUTINE_TRACKING(date),
         queryFn: () => fetchRoutineTrackingApi(date),
-        enabled: !!date,
-    });
-};
-
-export const useDietRoutineQuery = () => {
-    return useQuery({
-        queryKey: QUERY_KEYS.PROGRESS.DIET_ROUTINE(),
-        queryFn: () => fetchDietRoutineApi(),
-    });
-};
-
-export const useDietTrackingQuery = (date) => {
-    return useQuery({
-        queryKey: QUERY_KEYS.PROGRESS.DIET_TRACKING(date),
-        queryFn: () => fetchDietTrackingApi(date),
         enabled: !!date,
     });
 };
@@ -54,6 +89,22 @@ export const useLogWorkoutMutation = () => {
             toast.success('Workout logged successfully');
         },
         onError: (error) => toast.error(error.response?.data?.errors || 'Failed to log workout'),
+    });
+};
+
+// ─── Diet Queries ───
+export const useDietRoutineQuery = () => {
+    return useQuery({
+        queryKey: QUERY_KEYS.PROGRESS.DIET_ROUTINE(),
+        queryFn: () => fetchDietRoutineApi(),
+    });
+};
+
+export const useDietTrackingQuery = (date) => {
+    return useQuery({
+        queryKey: QUERY_KEYS.PROGRESS.DIET_TRACKING(date),
+        queryFn: () => fetchDietTrackingApi(date),
+        enabled: !!date,
     });
 };
 

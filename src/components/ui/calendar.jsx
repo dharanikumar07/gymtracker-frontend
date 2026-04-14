@@ -85,9 +85,10 @@ function Calendar({
     setShowYearDropdown(false)
   }
 
-  const handleDateSelect = (dateStr) => {
+  const handleDateSelect = (d) => {
     if (onSelect) {
-      onSelect(new Date(dateStr))
+      // Use local date constructor to avoid timezone displacement
+      onSelect(new Date(d.year, d.month, d.day))
     }
   }
 
@@ -119,9 +120,10 @@ function Calendar({
     days.push({ day: d, month: m, year: y, outside: true })
   }
 
-  const todayStr = new Date().toISOString().split('T')[0]
+  const today = new Date()
+  const todayStr = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`
   const selectedStr = selected
-    ? `${selected.getFullYear()}-${String(selected.getMonth() + 1).padStart(2, '0')}-${String(selected.getDate()).padStart(2, '0')}`
+    ? `${selected.getFullYear()}-${selected.getMonth()}-${selected.getDate()}`
     : null
 
   return (
@@ -166,7 +168,7 @@ function Calendar({
           <div className="grid grid-cols-3 gap-1">
             {MONTHS.map((month, index) => (
               <button
-                key={month}
+                key={index}
                 onClick={() => handleMonthSelect(index)}
                 className={cn(
                   "px-2 py-2 text-xs font-medium rounded-md transition-colors text-center",
@@ -186,9 +188,9 @@ function Calendar({
       {showYearDropdown && (
         <div ref={yearListRef} className="mb-4 bg-secondary/30 border border-border rounded-lg p-2 max-h-48 overflow-y-auto">
           <div className="grid grid-cols-3 gap-1">
-            {YEARS.map((year) => (
+            {YEARS.map((year, index) => (
               <button
-                key={year}
+                key={index}
                 data-active={viewYear === year}
                 onClick={() => handleYearSelect(year)}
                 className={cn(
@@ -207,8 +209,8 @@ function Calendar({
 
       {/* ─── Weekday Labels ─── */}
       <div className="grid grid-cols-7 mb-2">
-        {WEEKDAYS.map((d) => (
-          <div key={d} className="h-9 flex items-center justify-center text-sm font-normal text-muted-foreground">
+        {WEEKDAYS.map((d, index) => (
+          <div key={index} className="h-9 flex items-center justify-center text-sm font-normal text-muted-foreground">
             {d}
           </div>
         ))}
@@ -217,7 +219,7 @@ function Calendar({
       {/* ─── Date Grid ─── */}
       <div className="grid grid-cols-7">
         {days.map((d, i) => {
-          const dateStr = `${d.year}-${String(d.month + 1).padStart(2, '0')}-${String(d.day).padStart(2, '0')}`
+          const dateStr = `${d.year}-${d.month}-${d.day}`
           const isSelected = selectedStr === dateStr
           const isToday = todayStr === dateStr
           const isOutside = d.outside
@@ -229,7 +231,7 @@ function Calendar({
           return (
             <button
               key={i}
-              onClick={() => handleDateSelect(dateStr)}
+              onClick={() => handleDateSelect(d)}
               className={cn(
                 "h-10 flex items-center justify-center text-sm rounded-lg transition-colors",
                 isOutside && "text-muted-foreground/40",
