@@ -10,5 +10,12 @@ export default defineConfig({
     watch: {
       usePolling: true, // Needed for file changes with Docker volume mounts
     },
+    hmr: {
+      overlay: true, // Show errors in browser
+    },
+  },
+  optimizeDeps: {
+    include: ['@radix-ui/react-slot'],
+    // Explicitly exclude these if they cause issues, but usually include is enough
   },
 })

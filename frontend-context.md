@@ -1,0 +1,3 @@
+prompt: now analsye this folder api structure we dive into api logics and create one file frontend-context.md file in that each prompt i typing in the gemini you put one entry in that promp: and answers: for your reference when i switch to another window or new gemenin chaat i tell the ai to refer that file can you understand now analsye and create the frontend-context.md
+answer: Analyzed the `WorkoutLog` module. It uses a Context Provider pattern with TanStack Query for API interactions. Key endpoints include `GET/POST /workouts/log` and `DELETE /workouts/workout-slot/`. The system handles exercise sets dynamically based on `metrics_type` (strength, timed, endurance). Created `frontend-context.md` to persist session context for future chats.
+---

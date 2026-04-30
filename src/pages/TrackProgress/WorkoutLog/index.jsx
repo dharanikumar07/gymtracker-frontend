@@ -1,15 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { 
-    Dumbbell, 
-    Calendar as CalendarIcon, 
-    Info, 
-    Activity, 
     Plus, 
+    Calendar as CalendarIcon, 
+    Activity, 
     Loader2,
-    AlertCircle,
     CheckCircle2,
-    Zap,
-    Target
+    AlertCircle
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { WorkoutLogProvider, useWorkoutLog } from './context/WorkoutLogContext';
@@ -17,7 +13,6 @@ import DaySelector from './components/DaySelector';
 import WorkoutSlot from './components/WorkoutSlot';
 import AddWorkoutCard from './components/AddWorkoutCard';
 import { Calendar } from '../../../components/ui/calendar';
-
 import { format } from 'date-fns';
 
 const WorkoutLogContent = () => {
@@ -25,11 +20,9 @@ const WorkoutLogContent = () => {
         activePlan, 
         logs, 
         pending,
-        summary,
         selectedDate,
         setSelectedDate,
         selectedDay, 
-        weekDates,
         isLoading 
     } = useWorkoutLog();
 
@@ -37,7 +30,10 @@ const WorkoutLogContent = () => {
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const calendarRef = useRef(null);
 
-    // Close calendar on outside click
+    const inProgressLogs = useMemo(() => logs.filter(l => l.status === 'in_progress'), [logs]);
+    const completedLogs = useMemo(() => logs.filter(l => l.status === 'completed'), [logs]);
+    const skippedLogs = useMemo(() => logs.filter(l => l.status === 'skipped'), [logs]);
+
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (calendarRef.current && !calendarRef.current.contains(event.target)) {
@@ -51,64 +47,60 @@ const WorkoutLogContent = () => {
     if (isLoading && !activePlan) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[300px]">
-                <Loader2 className="w-8 h-8 animate-spin text-primary/40" />
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
         );
     }
 
     if (!activePlan && !isLoading) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[300px] p-6 text-center bg-secondary/10 rounded-2xl border border-dashed border-border">
-                <AlertCircle className="w-6 h-6 text-muted-foreground/30 mb-2" />
-                <h3 className="text-[12px] font-black uppercase text-foreground">No Active Plan</h3>
-                <p className="text-[10px] text-muted-foreground mt-1 max-w-[180px]">Activate a plan in Routine tab.</p>
+            <div className="w-full flex flex-col items-center justify-center min-h-[300px] p-8 text-center bg-secondary/5 border-2 border-dashed border-border rounded-3xl">
+                <AlertCircle className="w-10 h-10 text-foreground/10 mb-4" />
+                <h3 className="text-[14px] font-black uppercase text-foreground/40">No Active Workout Plan</h3>
+                <p className="text-[11px] text-foreground/20 mt-2 max-w-[200px]">Activate a plan in the Routine tab to start logging.</p>
             </div>
         );
     }
 
+    const hasNoActivities = inProgressLogs.length === 0 && pending.length === 0 && completedLogs.length === 0 && skippedLogs.length === 0 && !isAddingWorkout;
+
     return (
-        <div className="space-y-5 pb-20 w-full mx-auto px-4 sm:px-6">
-            {/* Redesigned Plan Card */}
-            <div className="bg-card border border-border p-4 sm:p-5 rounded-2xl shadow-sm space-y-5">
-                <div className="flex items-center justify-between gap-3">
+        <div className="space-y-6 pb-24 w-full mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Ultra-Compact Plan Header */}
+            <div className="bg-card border border-border rounded-3xl p-3 sm:p-4 shadow-sm">
+                <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-primary flex items-center justify-center shrink-0 shadow-md shadow-primary/20">
-                            <Activity className="w-4.5 h-4.5 sm:w-5.5 sm:h-5.5 text-white" />
+                        <div className="w-10 h-10 rounded-2xl bg-emerald-600 flex items-center justify-center shrink-0 shadow-lg shadow-emerald-600/20">
+                            <Activity className="w-5 h-5 text-white" />
                         </div>
                         <div className="min-w-0">
-                            <div className="flex items-center gap-2 mb-0.5 sm:mb-1 whitespace-nowrap overflow-hidden">
-                                <span className="text-[7px] sm:text-[8px] font-black uppercase text-primary tracking-widest bg-primary/10 px-1.5 sm:px-2 py-0.5 rounded-md shrink-0">
-                                    Active Plan
-                                </span>
-                                <span className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">
-                                    {activePlan?.meta_data?.physical_activity_type?.replace('_', ' ')}
-                                </span>
-                            </div>
-                            <h2 className="text-[14px] sm:text-[18px] font-black uppercase tracking-tight text-foreground truncate leading-tight">
+                            <h2 className="text-[14px] font-black uppercase tracking-tight text-foreground truncate leading-none mb-1">
                                 {activePlan?.name}
                             </h2>
+                            <span className="text-[8px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-600/10 px-1.5 py-0.5 rounded">
+                                {activePlan?.meta_data?.physical_activity_type?.replace('_', ' ')}
+                            </span>
                         </div>
                     </div>
 
-                    {/* Selected Date Indicator & Popover Calendar */}
                     <div className="relative shrink-0" ref={calendarRef}>
                         <button 
                             onClick={() => setIsCalendarOpen(!isCalendarOpen)}
                             className={cn(
-                                "flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl border transition-all outline-none",
+                                "flex items-center gap-2 px-3 py-2 rounded-xl border transition-all",
                                 isCalendarOpen 
-                                    ? "bg-primary text-white border-primary shadow-md shadow-primary/20" 
-                                    : "bg-secondary/40 border-border/50 text-foreground hover:bg-secondary/60"
+                                    ? "bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-600/20" 
+                                    : "bg-secondary/40 border-transparent text-foreground hover:bg-secondary/60"
                             )}
                         >
-                            <CalendarIcon className={cn("w-3.5 h-3.5 sm:w-4 sm:h-4", isCalendarOpen ? "text-white" : "text-primary")} />
-                            <span className="text-[10px] sm:text-[12px] font-black uppercase whitespace-nowrap">
+                            <CalendarIcon className="w-3.5 h-3.5" />
+                            <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
                                 {format(selectedDate, 'dd MMM')}
                             </span>
                         </button>
 
                         {isCalendarOpen && (
-                            <div className="absolute right-0 top-full mt-2 z-[100] bg-card border border-border rounded-2xl shadow-xl shadow-black/10 animate-in fade-in zoom-in-95 duration-200 min-w-[280px] sm:min-w-[300px]">
+                            <div className="absolute right-0 top-full mt-2 z-[100] bg-card border-2 border-border rounded-3xl shadow-2xl animate-in fade-in zoom-in-95 duration-200 min-w-[280px]">
                                 <Calendar 
                                     mode="single"
                                     selected={selectedDate}
@@ -123,98 +115,99 @@ const WorkoutLogContent = () => {
                         )}
                     </div>
                 </div>
-
-                {/* Plan Metadata Section */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 sm:pt-5 border-t border-border/40">
-                    <div className="space-y-1.5 px-1">
-                        <span className="text-[7px] sm:text-[8px] font-black uppercase text-muted-foreground tracking-[0.2em] block">
-                            Plan Duration
-                        </span>
-                        <div className="flex items-center gap-2 sm:gap-3 text-[11px] sm:text-[13px] font-black text-foreground">
-                            <span className="font-bold">
-                                {activePlan?.start_date ? format(new Date(activePlan.start_date), 'dd MMM yyyy') : 'Not set'}
-                            </span>
-                            <span className="text-muted-foreground/30">—</span>
-                            <span className="font-bold">
-                                {activePlan?.end_date ? format(new Date(activePlan.end_date), 'dd MMM yyyy') : 'Not set'}
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Ultra-Compact Green Information Card */}
-                    <div className="bg-emerald-500/5 rounded-xl py-1.5 px-3 border border-emerald-500/10 flex items-center gap-2.5 group hover:bg-emerald-500/10 transition-colors self-center md:justify-self-end h-fit w-fit max-w-full">
-                        <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
-                            <Info className="w-3.5 h-3.5 text-emerald-500" />
-                        </div>
-                        <p className="text-[9px] sm:text-[10px] font-bold text-foreground/60 whitespace-nowrap overflow-hidden text-ellipsis">
-                            Pick a date to view your logs for that week.
-                        </p>
-                    </div>
-                </div>
             </div>
 
-            {/* Restored Day Selector without header */}
             <DaySelector />
 
-            {/* Exercises List Header */}
-            <div className="space-y-4">
-                <div className="flex items-center justify-between px-1">
-                    <div className="flex items-center gap-2">
-                        <div className="w-1 h-3.5 bg-primary rounded-full" />
-                        <h3 className="text-[11px] font-black uppercase tracking-[0.15em] text-foreground">
-                            {selectedDay}'s Routine
-                        </h3>
-                    </div>
+            {/* Compact Manual Add Action - Right Corner - Solid Green */}
+            <div className="pt-2 flex justify-end">
+                {!isAddingWorkout ? (
                     <button 
                         onClick={() => setIsAddingWorkout(true)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white text-[9px] font-black uppercase tracking-widest rounded-lg transition-all shadow-md shadow-primary/20 hover:shadow-primary/30"
+                        className="flex items-center justify-center gap-2 h-9 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-lg shadow-emerald-600/10 active:scale-95 group"
                     >
-                        <Plus className="w-3 h-3" />
-                        <span>Add Exercise</span>
+                        <Plus className="w-3.5 h-3.5 text-white group-hover:scale-110 transition-transform" />
+                        <span className="text-[9px] font-black uppercase tracking-widest">Add Manual Exercise</span>
                     </button>
-                </div>
-
-                {isAddingWorkout && (
-                    <div className="animate-in slide-in-from-top-2 duration-300">
+                ) : (
+                    <div className="w-full animate-in slide-in-from-top-2 duration-300">
                         <AddWorkoutCard onClose={() => setIsAddingWorkout(false)} />
                     </div>
                 )}
+            </div>
 
-                {isLoading ? (
-                    <div className="flex flex-col items-center justify-center min-h-[200px] bg-secondary/5 rounded-2xl border border-dashed border-border">
-                        <Loader2 className="w-6 h-6 animate-spin text-primary/40 mb-2" />
-                        <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">Loading Logs...</p>
+
+            <div className="space-y-8 mt-6">
+                {/* 1. In Progress Section */}
+                {inProgressLogs.length > 0 && (
+                    <div className="space-y-4">
+                        <SectionLabel label="In Progress" count={inProgressLogs.length} active />
+                        <div className="flex flex-col gap-4">
+                            {inProgressLogs.map((log) => (
+                                <WorkoutSlot key={`ip-${log.uuid || log.slot_uuid}-${selectedDate}`} slot={log} isInProgress />
+                            ))}
+                        </div>
                     </div>
-                ) : (logs.length === 0 && pending.length === 0) ? (
-                    <div className="bg-secondary/5 border border-border rounded-2xl p-10 flex flex-col items-center text-center">
-                        <CheckCircle2 className="w-6 h-6 text-muted-foreground/20 mb-2" />
-                        <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">No activities scheduled</p>
+                )}
+
+                {/* 2. Pending Routine Section */}
+                {pending.length > 0 && (
+                    <div className="space-y-4">
+                        <SectionLabel label={`${selectedDay}'s Routine`} count={pending.length} />
+                        <div className="flex flex-col gap-4">
+                            {pending.map((item) => (
+                                <WorkoutSlot key={`pend-${item.slot_uuid}-${selectedDate}`} slot={item} isPending />
+                            ))}
+                        </div>
                     </div>
-                ) : (
-                    <div className="flex flex-col gap-4">
-                        {/* Render completed logs */}
-                        {logs.map((log) => (
-                            <WorkoutSlot 
-                                key={`log-${log.uuid}-${selectedDate}`} 
-                                slot={log} 
-                                isCompleted 
-                            />
-                        ))}
-                        
-                        {/* Render pending templates */}
-                        {pending.map((item) => (
-                            <WorkoutSlot 
-                                key={`pending-${item.slot_uuid}-${selectedDate}`} 
-                                slot={item} 
-                                isPending 
-                            />
-                        ))}
+                )}
+
+                {/* 3. Completed Activities */}
+                {completedLogs.length > 0 && (
+                    <div className="space-y-4">
+                        <SectionLabel label="Completed Activities" count={completedLogs.length} color="bg-emerald-600" />
+                        <div className="flex flex-col gap-4">
+                            {completedLogs.map((log) => (
+                                <WorkoutSlot key={`done-${log.uuid || log.slot_uuid}-${selectedDate}`} slot={log} isCompleted />
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* 4. Skipped Activities */}
+                {skippedLogs.length > 0 && (
+                    <div className="space-y-4 opacity-50 grayscale-[0.5]">
+                        <SectionLabel label="Skipped / Missed" count={skippedLogs.length} color="bg-orange-500" />
+                        <div className="flex flex-col gap-4">
+                            {skippedLogs.map((log) => (
+                                <WorkoutSlot key={`skip-${log.uuid || log.slot_uuid}-${selectedDate}`} slot={log} />
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {hasNoActivities && (
+                    <div className="py-20 flex flex-col items-center text-center">
+                        <CheckCircle2 className="w-10 h-10 text-foreground/5 mb-4" />
+                        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-foreground/30">No Activities Scheduled</p>
                     </div>
                 )}
             </div>
         </div>
     );
 };
+
+const SectionLabel = ({ label, count, color = "bg-emerald-600", active }) => (
+    <div className="flex items-center gap-3 px-2">
+        <div className={cn("w-2 h-2 rounded-full", color, active && "animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]")} />
+        <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-foreground/50">
+            {label}
+        </h3>
+        <span className="text-[9px] font-black text-foreground/30 ml-auto">
+            {count} Total
+        </span>
+    </div>
+);
 
 const WorkoutLog = () => {
     return (

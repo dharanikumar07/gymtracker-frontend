@@ -8,11 +8,14 @@ services:
       - "6500:6500" # Host and container both use 6500
     volumes:
       - ./:/usr/src/app
-      - /usr/src/app/node_modules # prevent overwriting container node_modules
+      - node_modules:/usr/src/app/node_modules
     stdin_open: true
     tty: true
     networks:
       - gym-network
+
+volumes:
+  node_modules:
 
 networks:
   gym-network:
