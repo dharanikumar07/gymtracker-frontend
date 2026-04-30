@@ -47,11 +47,15 @@ const WorkoutSetRow = ({
     const weightUnit = set.weight_unit || 'kg';
     const currentDurationUnit = set.duration_unit || durationUnit || 'min';
 
+    const [isAnimating, setIsAnimating] = useState(false);
+
     const handleToggleComplete = () => {
-        if (!isCompleted) {
+        setIsAnimating(true);
+        setTimeout(() => {
             onUpdate(set.id, 'completed', true);
             setIsEditing(false);
-        }
+            setIsAnimating(false);
+        }, 600); // Duration for the animation to play
     };
 
     const handleEdit = () => {
@@ -77,6 +81,18 @@ const WorkoutSetRow = ({
                 isCompleted && !isEditing ? "border-emerald-600/30 shadow-[0_0_15px_rgba(16,185,129,0.05)]" : "shadow-sm"
             )}
         >
+            {/* Animation Keyframes */}
+            <style dangerouslySetInnerHTML={{ __html: `
+                @keyframes drawCircle {
+                    from { stroke-dashoffset: 63; }
+                    to { stroke-dashoffset: 0; }
+                }
+                @keyframes drawTick {
+                    from { stroke-dashoffset: 15; }
+                    to { stroke-dashoffset: 0; }
+                }
+            `}} />
+
             {/* First Section: Identity & Actions */}
             <div className={cn(
                 "flex items-center justify-between p-2.5 border-b border-border/50",
@@ -99,7 +115,7 @@ const WorkoutSetRow = ({
                     {(isTimed || isEndurance) && (
                         <button 
                             onClick={handleToggleWeight}
-                            disabled={isSaving || (isCompleted && !isEditing)}
+                            disabled={isSaving || isAnimating || (isCompleted && !isEditing)}
                             className={cn(
                                 "w-8 h-8 flex items-center justify-center rounded-lg border transition-all",
                                 showWeightInput 
@@ -114,25 +130,45 @@ const WorkoutSetRow = ({
                     {/* Delete Icon */}
                     <button 
                         onClick={() => onRemove(set.id)} 
-                        disabled={isSaving} 
+                        disabled={isSaving || isAnimating} 
                         className="w-8 h-8 flex items-center justify-center text-red-500 hover:text-red-700 transition-all"
                     >
                         <Trash2 className="w-3.5 h-3.5" />
                     </button>
 
-                    {/* Done/Edit Icon */}
+                    {/* Done/Edit Icon with Animation */}
                     {(!isCompleted || isEditing) ? (
                         <button 
                             onClick={handleToggleComplete} 
-                            disabled={isSaving} 
-                            className="w-8 h-8 flex items-center justify-center bg-emerald-600 text-white rounded-lg shadow-lg shadow-emerald-600/20 active:scale-90 transition-all"
+                            disabled={isSaving || isAnimating} 
+                            className={cn(
+                                "h-8 px-3 flex items-center justify-center rounded-lg transition-all relative overflow-hidden min-w-[50px]",
+                                isAnimating ? "bg-emerald-600 text-white" : "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 active:scale-95"
+                            )}
                         >
-                            <Check className="w-3.5 h-3.5 stroke-[3]" />
+                            {isAnimating ? (
+                                <svg className="w-4 h-4" viewBox="0 0 24 24">
+                                    <circle 
+                                        cx="12" cy="12" r="10" 
+                                        stroke="white" strokeWidth="3" fill="none"
+                                        strokeDasharray="63" strokeDashoffset="63"
+                                        style={{ animation: 'drawCircle 0.4s ease-out forwards' }}
+                                    />
+                                    <path 
+                                        d="M8 12l3 3 5-5" 
+                                        stroke="white" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"
+                                        strokeDasharray="15" strokeDashoffset="15"
+                                        style={{ animation: 'drawTick 0.3s ease-out 0.3s forwards' }}
+                                    />
+                                </svg>
+                            ) : (
+                                <span className="text-[9px] font-black uppercase tracking-wider">Done</span>
+                            )}
                         </button>
                     ) : (
                         <button 
                             onClick={handleEdit} 
-                            disabled={isSaving} 
+                            disabled={isSaving || isAnimating} 
                             className="w-8 h-8 flex items-center justify-center text-emerald-600 hover:bg-emerald-600/10 rounded-lg transition-all"
                         >
                             <PencilLine className="w-3.5 h-3.5" />
@@ -147,7 +183,7 @@ const WorkoutSetRow = ({
                 {(isStrength || showWeightInput) && (
                     <div className="space-y-1">
                         <label className="text-[8px] font-black uppercase tracking-widest text-foreground/30 ml-1">Weight</label>
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border focus-within:border-emerald-600 focus-within:ring-1 focus-within:ring-emerald-600/20 transition-all">
+                        <div className="flex items-center gap-3 px-3 py-1.5 rounded-lg border border-border focus-within:border-emerald-600 focus-within:ring-1 focus-within:ring-emerald-600/20 transition-all">
                             <Dumbbell className="w-3.5 h-3.5 text-foreground/20" />
                             <input 
                                 type="number" placeholder="0.00" 
@@ -165,7 +201,7 @@ const WorkoutSetRow = ({
                 {(isStrength || isTimed) && (
                     <div className="space-y-1">
                         <label className="text-[8px] font-black uppercase tracking-widest text-foreground/30 ml-1">Reps</label>
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border focus-within:border-emerald-600 focus-within:ring-1 focus-within:ring-emerald-600/20 transition-all">
+                        <div className="flex items-center gap-3 px-3 py-1.5 rounded-lg border border-border focus-within:border-emerald-600 focus-within:ring-1 focus-within:ring-emerald-600/20 transition-all">
                             <PlusCircle className="w-3.5 h-3.5 text-foreground/20" />
                             <input 
                                 type="number" placeholder="0" 
@@ -183,7 +219,7 @@ const WorkoutSetRow = ({
                 {(isTimed || isEndurance) && (
                     <div className="space-y-1">
                         <label className="text-[8px] font-black uppercase tracking-widest text-foreground/30 ml-1">Duration</label>
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border focus-within:border-emerald-600 focus-within:ring-1 focus-within:ring-emerald-600/20 transition-all">
+                        <div className="flex items-center gap-3 px-3 py-1.5 rounded-lg border border-border focus-within:border-emerald-600 focus-within:ring-1 focus-within:ring-emerald-600/20 transition-all">
                             <X className="w-3.5 h-3.5 text-foreground/20" />
                             <input 
                                 type="number" placeholder="0" 
