@@ -21,6 +21,8 @@ import { toast } from 'sonner';
 import { Button } from '../../../../components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../../components/ui/popover';
 
+import { validateManualExercise } from '../validation/validation';
+
 const METRIC_CONFIG = {
     strength: { label: 'Strength', icon: Dumbbell },
     timed_sets: { label: 'Timed Sets', icon: Timer },
@@ -66,18 +68,28 @@ const AddWorkoutCard = ({ onClose }) => {
     };
 
     const handleSave = () => {
-        if (!exerciseName.trim()) { toast.error('Exercise name is required'); return; }
+        if (!validateManualExercise(exerciseName, sets, metricsType)) return;
         setIsSaving(true);
         
         const metricsData = {
-            sets: sets.map(s => ({
-                weight: Number(s.weight) || 0,
-                weight_unit: s.weight_unit || 'kg',
-                reps: Number(s.reps) || 0,
-                duration: Number(s.duration) || 0,
-                duration_unit: s.duration_unit || 'seconds',
-                completed: true
-            }))
+            sets: sets.map(s => {
+                const setObj = {
+                    weight: Number(s.weight) || 0,
+                    weight_unit: s.weight_unit || 'kg',
+                    completed: true
+                };
+
+                if (metricsType === 'strength') {
+                    setObj.reps = Number(s.reps) || 0;
+                }
+
+                if (metricsType === 'timed_sets' || metricsType === 'endurance') {
+                    setObj.duration = Number(s.duration) || 0;
+                    setObj.duration_unit = s.duration_unit || (metricsType === 'endurance' ? 'minutes' : 'seconds');
+                }
+
+                return setObj;
+            })
         };
 
         saveLog([{ 
@@ -221,7 +233,7 @@ const AddWorkoutCard = ({ onClose }) => {
                                             )}
                                             <button 
                                                 onClick={() => removeSet(set.id)}
-                                                className="w-7 h-7 flex items-center justify-center text-red-500/40 hover:text-red-500 transition-colors"
+                                                className="w-8 h-8 flex items-center justify-center text-red-500 hover:text-red-700 transition-all"
                                             >
                                                 <Trash2 className="w-3.5 h-3.5" />
                                             </button>

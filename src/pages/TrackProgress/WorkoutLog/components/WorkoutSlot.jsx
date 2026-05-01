@@ -30,6 +30,8 @@ import {
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 
+import { validateSkip } from '../validation/validation';
+
 const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
     const { saveLog, isSaving, deleteSlot } = useWorkoutLog();
     
@@ -56,6 +58,7 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
 
     const [showSkipModal, setShowSkipModal] = useState(false);
     const [skipReason, setSkipReason] = useState('');
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -66,17 +69,33 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
 
     const triggerSync = (currentSets, forcedStatus = null, extraData = {}) => {
         const determinedStatus = forcedStatus || (currentSets.every(s => s.completed) ? 'completed' : 'in_progress');
+        const metricsType = slot.metrics_type || 'strength';
         
         saveLog([{
             slot_uuid: slot.slot_uuid || slot.uuid,
             exercise_name: slot.exercise_name,
-            metrics_type: slot.metrics_type || 'strength',
+            metrics_type: metricsType,
             metrics_data: {
                 ...(slot.metrics_data || {}),
-                sets: currentSets.map(({ id, ...rest }, index) => ({
-                    ...rest,
-                    order: index + 1
-                }))
+                sets: currentSets.map(({ id, ...rest }, index) => {
+                    const setObj = {
+                        ...rest,
+                        order: index + 1
+                    };
+
+                    // Only include reps for strength
+                    if (metricsType !== 'strength') {
+                        delete setObj.reps;
+                    }
+
+                    // Only include duration for timed_sets or endurance
+                    if (metricsType !== 'timed_sets' && metricsType !== 'endurance') {
+                        delete setObj.duration;
+                        delete setObj.duration_unit;
+                    }
+
+                    return setObj;
+                })
             },
             status: determinedStatus,
             type: slot.type || (isPending ? 'routine' : 'additional'),
@@ -108,11 +127,22 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
 
     const updateSet = (id, field, value) => {
         const numericFields = ['weight', 'reps', 'duration', 'order'];
-        const updated = localSets.map(s => 
-            s.id === id 
-                ? { ...s, [field]: numericFields.includes(field) ? (parseFloat(value) || 0) : value } 
-                : s
-        );
+        const updated = localSets.map(s => {
+            if (s.id === id) {
+                let finalValue = value;
+                if (numericFields.includes(field)) {
+                    if (value === '') {
+                        finalValue = '';
+                    } else {
+                        const parsed = parseFloat(value);
+                        finalValue = isNaN(parsed) ? 0 : parsed;
+                    }
+                }
+                return { ...s, [field]: finalValue };
+            }
+            return s;
+        });
+        
         setLocalSets(updated);
         if (field === 'completed') {
             triggerSync(updated);
@@ -133,13 +163,69 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
     };
 
     const confirmSkip = () => {
+        if (!validateSkip(skipReason)) return;
         triggerSync(localSets, 'skipped', { reason: skipReason });
         setShowSkipModal(false);
+    };
+
+    const confirmDelete = () => {
+        deleteSlot(slot.slot_uuid || slot.uuid);
+        setShowDeleteConfirm(false);
     };
 
     const metricsType = slot.metrics_type || 'strength';
     const durationUnit = slot.metrics_data?.duration_unit || 'min';
     const allDone = localSets.every(s => s.completed);
+    const isSkipped = slot.status === 'skipped';
+
+    if (isSkipped) {
+        return (
+            <div className="w-full bg-card/50 rounded-3xl border border-border/50 overflow-hidden shadow-sm hover:border-orange-500/20 transition-all duration-300">
+                <div className="flex items-start justify-between p-4 sm:p-5">
+                    <div className="flex flex-col gap-2 min-w-0">
+                        <div className="flex flex-col gap-1">
+                            <h4 className="text-[14px] font-black uppercase tracking-tight text-foreground/40 truncate leading-none line-through">
+                                {slot.exercise_name || "Routine Activity"}
+                            </h4>
+                            <div className="flex items-center gap-2">
+                                <span className="text-[8px] font-black text-orange-500 uppercase tracking-widest">
+                                    {metricsType}
+                                </span>
+                                <div className="w-1 h-1 rounded-full bg-foreground/10" />
+                                <span className="text-[8px] font-bold text-foreground/20 uppercase tracking-widest">
+                                    {localSets.length} Sets
+                                </span>
+                            </div>
+                        </div>
+                        
+                        {slot.reason && (
+                            <div className="mt-1 flex gap-2 items-start bg-orange-500/5 border border-orange-500/10 rounded-xl p-2.5">
+                                <SkipForward className="w-3 h-3 text-orange-500 shrink-0 mt-0.5" />
+                                <p className="text-[10px] font-bold text-orange-600/80 italic leading-tight">
+                                    "{slot.reason}"
+                                </p>
+                            </div>
+                        )}
+                    </div>
+
+                    <button 
+                        onClick={() => setShowDeleteConfirm(true)}
+                        disabled={isSaving}
+                        className="w-8 h-8 flex items-center justify-center text-red-500 hover:text-red-700 transition-all shrink-0"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                    </button>
+                </div>
+                {showDeleteConfirm && (
+                    <DeleteConfirmModal 
+                        exerciseName={slot.exercise_name || "Routine Activity"} 
+                        onCancel={() => setShowDeleteConfirm(false)} 
+                        onConfirm={confirmDelete} 
+                    />
+                )}
+            </div>
+        );
+    }
 
     return (
         <div className={cn(
@@ -153,7 +239,7 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
                         "text-[15px] font-black uppercase tracking-tight truncate leading-none",
                         allDone ? "text-emerald-600" : "text-foreground"
                     )}>
-                        {slot.exercise_name}
+                        {slot.exercise_name || "Routine Activity"}
                     </h4>
                     <div className="flex items-center gap-2">
                         <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">
@@ -178,15 +264,16 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
                     </button>
 
 
-                    {/* Visible Delete Button with red shadow hover - background hover removed */}
-                    <button 
-                        onClick={() => deleteSlot(slot.slot_uuid || slot.uuid)}
-                        disabled={isSaving}
-                        className="w-8 h-8 flex items-center justify-center text-red-500 hover:text-red-700 rounded-lg transition-all group relative"
-                    >
-                        <Trash2 className="w-4 h-4" />
-                        <div className="absolute inset-0 rounded-lg group-hover:shadow-[0_0_12px_rgba(239,68,68,0.3)] transition-all pointer-events-none" />
-                    </button>
+                    {/* Delete Button - Hidden for Pending Routine Items */}
+                    {!isPending && (
+                        <button 
+                            onClick={() => setShowDeleteConfirm(true)}
+                            disabled={isSaving}
+                            className="w-8 h-8 flex items-center justify-center text-red-500 hover:text-red-700 transition-all shrink-0"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+                    )}
 
                     {isPending && (
                         <button 
@@ -221,34 +308,95 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
                 </DndContext>
             </div>
 
-            {/* Skip Dialog */}
+            {/* Skip Dialog - Refactored to Compact Shadcn-style */}
             {showSkipModal && (
-                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-background/90 backdrop-blur-md animate-in fade-in duration-300">
-                    <div className="bg-card border-2 border-border rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-                        <div className="p-8">
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center">
-                                    <SkipForward className="w-6 h-6 text-orange-600" />
-                                </div>
-                                <h3 className="text-[16px] font-black uppercase tracking-tight text-foreground">Skip Exercise</h3>
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                    <div 
+                        className="absolute inset-0 bg-background/80 backdrop-blur-sm animate-in fade-in duration-300" 
+                        onClick={() => setShowSkipModal(false)}
+                    />
+                    <div className="relative bg-card border border-border rounded-2xl shadow-2xl w-full max-w-[340px] overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="p-5 space-y-4">
+                            <div className="flex flex-col gap-1.5">
+                                <h3 className="text-[14px] font-black uppercase tracking-tight text-foreground">Skip Exercise</h3>
+                                <p className="text-[11px] text-muted-foreground font-medium leading-relaxed">
+                                    Provide a brief reason for skipping <span className="text-foreground font-bold">"{slot.exercise_name || "Activity"}"</span>.
+                                </p>
                             </div>
+                            
                             <textarea 
                                 autoFocus
-                                placeholder="Why are you skipping this?"
-                                className="w-full h-32 bg-secondary/30 border-2 border-border rounded-2xl p-4 text-[13px] font-bold outline-none focus:border-orange-500/50 transition-all resize-none"
+                                placeholder="e.g. Injury, lack of equipment..."
+                                className="w-full h-24 bg-secondary/20 border border-border rounded-xl p-3 text-[12px] font-bold outline-none focus:border-orange-500/50 transition-all resize-none placeholder:text-foreground/20"
                                 value={skipReason}
                                 onChange={(e) => setSkipReason(e.target.value)}
                             />
                         </div>
-                        <div className="flex p-4 gap-4 bg-secondary/5 border-t border-border">
-                            <button onClick={() => setShowSkipModal(false)} className="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-foreground/40">Cancel</button>
-                            <button onClick={confirmSkip} className="flex-1 py-4 bg-orange-500 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest">Skip</button>
+                        
+                        <div className="flex border-t border-border divide-x divide-border">
+                            <button 
+                                onClick={() => setShowSkipModal(false)} 
+                                className="flex-1 py-3 text-[10px] font-black uppercase tracking-widest text-foreground/40 hover:bg-secondary/50 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={confirmSkip} 
+                                className="flex-1 py-3 bg-orange-500/10 text-orange-600 hover:bg-orange-500 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all"
+                            >
+                                Skip Activity
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteConfirm && (
+                <DeleteConfirmModal 
+                    exerciseName={slot.exercise_name || "Routine Activity"} 
+                    onCancel={() => setShowDeleteConfirm(false)} 
+                    onConfirm={confirmDelete} 
+                />
+            )}
         </div>
     );
 };
+
+const DeleteConfirmModal = ({ exerciseName, onCancel, onConfirm }) => (
+    <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm animate-in fade-in duration-300" onClick={onCancel} />
+        <div className="relative bg-card border border-border rounded-2xl shadow-2xl w-full max-w-[340px] overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 space-y-4">
+                <div className="flex flex-col items-center text-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center text-red-500">
+                        <Trash2 className="w-6 h-6" />
+                    </div>
+                    <div className="space-y-1.5">
+                        <h3 className="text-[14px] font-black uppercase tracking-tight text-foreground">Remove Activity?</h3>
+                        <p className="text-[11px] text-muted-foreground font-medium leading-relaxed px-2">
+                            Are you sure you want to delete <span className="text-foreground font-bold">"{exerciseName}"</span>? This will remove all sets and logged data for this activity.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div className="flex border-t border-border divide-x divide-border">
+                <button 
+                    onClick={onCancel} 
+                    className="flex-1 py-3.5 text-[10px] font-black uppercase tracking-widest text-foreground/40 hover:bg-secondary/50 transition-colors"
+                >
+                    Keep Activity
+                </button>
+                <button 
+                    onClick={onConfirm} 
+                    className="flex-1 py-3.5 bg-red-500/10 text-red-600 hover:bg-red-500 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all"
+                >
+                    Delete Now
+                </button>
+            </div>
+        </div>
+    </div>
+);
 
 export default WorkoutSlot;

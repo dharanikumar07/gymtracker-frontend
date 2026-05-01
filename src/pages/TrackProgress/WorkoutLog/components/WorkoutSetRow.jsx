@@ -13,6 +13,8 @@ import { cn } from '../../../../lib/utils';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
+import { validateSetFields } from '../validation/validation';
+
 const WorkoutSetRow = ({ 
     set, 
     actualIdx, 
@@ -24,6 +26,7 @@ const WorkoutSetRow = ({
 }) => {
     const [showWeightInput, setShowWeightInput] = useState(Number(set.weight) > 0);
     const [isEditing, setIsEditing] = useState(!set.completed);
+    const [errors, setErrors] = useState({});
 
     const {
         attributes,
@@ -50,6 +53,16 @@ const WorkoutSetRow = ({
     const [isAnimating, setIsAnimating] = useState(false);
 
     const handleToggleComplete = () => {
+        // Run validation if we are completing it for the first time OR finishing an edit
+        if (!isCompleted || isEditing) {
+            const fieldErrors = validateSetFields(set, metricsType);
+            if (Object.keys(fieldErrors).length > 0) {
+                setErrors(fieldErrors);
+                return;
+            }
+        }
+        
+        setErrors({});
         setIsAnimating(true);
         setTimeout(() => {
             onUpdate(set.id, 'completed', true);
@@ -183,35 +196,49 @@ const WorkoutSetRow = ({
                 {(isStrength || showWeightInput) && (
                     <div className="space-y-1">
                         <label className="text-[8px] font-black uppercase tracking-widest text-foreground/30 ml-1">Weight</label>
-                        <div className="flex items-center gap-3 px-3 py-1.5 rounded-lg border border-border focus-within:border-emerald-600 focus-within:ring-1 focus-within:ring-emerald-600/20 transition-all">
+                        <div className={cn(
+                            "flex items-center gap-3 px-3 py-1.5 rounded-lg border transition-all",
+                            errors.weight ? "border-red-500 bg-red-500/5" : "border-border focus-within:border-emerald-600 focus-within:ring-1 focus-within:ring-emerald-600/20"
+                        )}>
                             <Dumbbell className="w-3.5 h-3.5 text-foreground/20" />
                             <input 
                                 type="number" placeholder="0.00" 
                                 className="flex-1 bg-transparent text-[13px] font-black outline-none text-right placeholder:text-foreground/5"
-                                value={set.weight || ''} 
-                                onChange={(e) => onUpdate(set.id, 'weight', e.target.value)}
+                                value={set.weight ?? ''} 
+                                onChange={(e) => {
+                                    onUpdate(set.id, 'weight', e.target.value);
+                                    if (errors.weight) setErrors(prev => ({ ...prev, weight: null }));
+                                }}
                                 disabled={isSaving || (isCompleted && !isEditing)}
                             />
                             <span className="text-[9px] font-black text-emerald-600 uppercase w-6 text-right">{weightUnit}</span>
                         </div>
+                        {errors.weight && <p className="text-[8px] font-bold text-red-500 ml-1 uppercase">{errors.weight}</p>}
                     </div>
                 )}
 
                 {/* Reps Input */}
-                {(isStrength || isTimed) && (
+                {isStrength && (
                     <div className="space-y-1">
                         <label className="text-[8px] font-black uppercase tracking-widest text-foreground/30 ml-1">Reps</label>
-                        <div className="flex items-center gap-3 px-3 py-1.5 rounded-lg border border-border focus-within:border-emerald-600 focus-within:ring-1 focus-within:ring-emerald-600/20 transition-all">
+                        <div className={cn(
+                            "flex items-center gap-3 px-3 py-1.5 rounded-lg border transition-all",
+                            errors.reps ? "border-red-500 bg-red-500/5" : "border-border focus-within:border-emerald-600 focus-within:ring-1 focus-within:ring-emerald-600/20"
+                        )}>
                             <PlusCircle className="w-3.5 h-3.5 text-foreground/20" />
                             <input 
                                 type="number" placeholder="0" 
                                 className="flex-1 bg-transparent text-[13px] font-black outline-none text-right placeholder:text-foreground/5"
-                                value={set.reps || ''} 
-                                onChange={(e) => onUpdate(set.id, 'reps', e.target.value)}
+                                value={set.reps ?? ''} 
+                                onChange={(e) => {
+                                    onUpdate(set.id, 'reps', e.target.value);
+                                    if (errors.reps) setErrors(prev => ({ ...prev, reps: null }));
+                                }}
                                 disabled={isSaving || (isCompleted && !isEditing)}
                             />
                             <span className="text-[9px] font-black text-emerald-600 uppercase w-6 text-right">Reps</span>
                         </div>
+                        {errors.reps && <p className="text-[8px] font-bold text-red-500 ml-1 uppercase">{errors.reps}</p>}
                     </div>
                 )}
 
@@ -219,17 +246,24 @@ const WorkoutSetRow = ({
                 {(isTimed || isEndurance) && (
                     <div className="space-y-1">
                         <label className="text-[8px] font-black uppercase tracking-widest text-foreground/30 ml-1">Duration</label>
-                        <div className="flex items-center gap-3 px-3 py-1.5 rounded-lg border border-border focus-within:border-emerald-600 focus-within:ring-1 focus-within:ring-emerald-600/20 transition-all">
+                        <div className={cn(
+                            "flex items-center gap-3 px-3 py-1.5 rounded-lg border transition-all",
+                            errors.duration ? "border-red-500 bg-red-500/5" : "border-border focus-within:border-emerald-600 focus-within:ring-1 focus-within:ring-emerald-600/20"
+                        )}>
                             <X className="w-3.5 h-3.5 text-foreground/20" />
                             <input 
                                 type="number" placeholder="0" 
                                 className="flex-1 bg-transparent text-[13px] font-black outline-none text-right placeholder:text-foreground/5"
-                                value={set.duration || ''} 
-                                onChange={(e) => onUpdate(set.id, 'duration', e.target.value)}
+                                value={set.duration ?? ''} 
+                                onChange={(e) => {
+                                    onUpdate(set.id, 'duration', e.target.value);
+                                    if (errors.duration) setErrors(prev => ({ ...prev, duration: null }));
+                                }}
                                 disabled={isSaving || (isCompleted && !isEditing)}
                             />
                             <span className="text-[9px] font-black text-emerald-600 uppercase w-6 text-right">{currentDurationUnit.slice(0, 3)}</span>
                         </div>
+                        {errors.duration && <p className="text-[8px] font-bold text-red-500 ml-1 uppercase">{errors.duration}</p>}
                     </div>
                 )}
             </div>

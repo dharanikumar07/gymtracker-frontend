@@ -153,7 +153,7 @@ const WorkoutLogContent = () => {
                 {/* 2. Pending Routine Section */}
                 {pending.length > 0 && (
                     <div className="space-y-4">
-                        <SectionLabel label={`${selectedDay}'s Routine`} count={pending.length} />
+                        <SectionLabel label={`Pending ${selectedDay}'s Routine`} count={pending.length} />
                         <div className="flex flex-col gap-4">
                             {pending.map((item) => (
                                 <WorkoutSlot key={`pend-${item.slot_uuid}-${selectedDate}`} slot={item} isPending />
@@ -176,9 +176,9 @@ const WorkoutLogContent = () => {
 
                 {/* 4. Skipped Activities */}
                 {skippedLogs.length > 0 && (
-                    <div className="space-y-4 opacity-50 grayscale-[0.5]">
+                    <div className="space-y-4">
                         <SectionLabel label="Skipped / Missed" count={skippedLogs.length} color="bg-orange-500" />
-                        <div className="flex flex-col gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {skippedLogs.map((log) => (
                                 <WorkoutSlot key={`skip-${log.uuid || log.slot_uuid}-${selectedDate}`} slot={log} />
                             ))}
