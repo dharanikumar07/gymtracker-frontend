@@ -21,7 +21,7 @@ import { toast } from 'sonner';
 import { Button } from '../../../../components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../../components/ui/popover';
 
-import { validateManualExercise } from '../validation/validation';
+import { validateManualExerciseFields } from '../validation/validation';
 
 const METRIC_CONFIG = {
     strength: { label: 'Strength', icon: Dumbbell },
@@ -47,19 +47,30 @@ const AddWorkoutCard = ({ onClose }) => {
     const [metricsType, setMetricsType] = useState('strength');
     const [sets, setSets] = useState(() => buildSets('strength', 3));
     const [isSaving, setIsSaving] = useState(false);
+    const [errors, setErrors] = useState({ name: null, sets: [] });
 
     const handleMetricsTypeChange = (newType) => {
         setMetricsType(newType);
         setSets(buildSets(newType, newType === 'endurance' ? 1 : 3));
+        setErrors({ name: null, sets: [] });
     };
 
     const updateSet = (id, field, value) => {
         setSets(prev => prev.map((s) => s.id === id ? { ...s, [field]: value } : s));
+        
+        // Clear error for this set when user types
+        const setIdx = sets.findIndex(s => s.id === id);
+        if (errors.sets[setIdx]?.[field]) {
+            const newSetsErrors = [...errors.sets];
+            newSetsErrors[setIdx] = { ...newSetsErrors[setIdx], [field]: null };
+            setErrors(prev => ({ ...prev, sets: newSetsErrors }));
+        }
     };
 
     const removeSet = (id) => {
         if (sets.length > 1) {
             setSets(prev => prev.filter(s => s.id !== id));
+            setErrors({ name: errors.name, sets: [] }); // Reset sets errors to re-validate on next save
         }
     };
 
@@ -68,7 +79,13 @@ const AddWorkoutCard = ({ onClose }) => {
     };
 
     const handleSave = () => {
-        if (!validateManualExercise(exerciseName, sets, metricsType)) return;
+        const validation = validateManualExerciseFields(exerciseName, sets, metricsType);
+        
+        if (!validation.isValid) {
+            setErrors(validation.errors);
+            return;
+        }
+
         setIsSaving(true);
         
         const metricsData = {
@@ -158,11 +175,18 @@ const AddWorkoutCard = ({ onClose }) => {
                         <input
                             value={exerciseName}
                             placeholder="e.g. Bench Press..."
-                            onChange={(e) => setExerciseName(e.target.value)}
+                            onChange={(e) => {
+                                setExerciseName(e.target.value);
+                                if (errors.name) setErrors(prev => ({ ...prev, name: null }));
+                            }}
                             disabled={isSaving}
                             autoFocus
-                            className="w-full h-9 bg-secondary/10 border border-border focus:border-emerald-600/50 rounded-xl px-4 text-[12px] font-black outline-none transition-all placeholder:text-foreground/10"
+                            className={cn(
+                                "w-full h-9 bg-secondary/10 border rounded-xl px-4 text-[12px] font-black outline-none transition-all placeholder:text-foreground/10",
+                                errors.name ? "border-red-500 bg-red-500/5" : "border-border focus:border-emerald-600/50"
+                            )}
                         />
+                        {errors.name && <p className="text-[8px] font-bold text-red-500 ml-1 uppercase">{errors.name}</p>}
                     </div>
 
                     <div className="space-y-1.5">
@@ -199,7 +223,6 @@ const AddWorkoutCard = ({ onClose }) => {
                     <div className="space-y-3">
                         <div className="flex items-center justify-between px-1">
                             <label className="text-[8px] font-black uppercase tracking-widest text-foreground/30">Initial Stats</label>
-                            {/* Moved Add Set Button here - Bordered with Emerald-600 Style */}
                             <button 
                                 onClick={() => setSets([...sets, { id: `added-${Date.now()}`, weight: '', weight_unit: 'kg', reps: '', duration: '', duration_unit: 'seconds', completed: true, showWeight: false }])}
                                 className="flex items-center justify-center sm:justify-start gap-1.5 px-2.5 sm:px-3 h-7 rounded-lg border border-dashed border-emerald-600/30 hover:border-emerald-600 text-emerald-600 transition-all text-[8px] font-black uppercase tracking-widest"
@@ -243,7 +266,10 @@ const AddWorkoutCard = ({ onClose }) => {
                                     <div className="space-y-2">
                                         {(metricsType === 'strength' || set.showWeight) && (
                                             <div className="space-y-1">
-                                                <div className="flex bg-transparent border border-border rounded-lg focus-within:border-emerald-600 transition-all h-8 items-center">
+                                                <div className={cn(
+                                                    "flex bg-transparent border rounded-lg transition-all h-8 items-center",
+                                                    errors.sets[idx]?.weight ? "border-red-500 bg-red-500/5" : "border-border focus-within:border-emerald-600"
+                                                )}>
                                                     <div className="pl-3 pr-2 border-r border-border h-full flex items-center">
                                                         <Dumbbell className="w-3 h-3 text-foreground/20" />
                                                     </div>
@@ -258,12 +284,16 @@ const AddWorkoutCard = ({ onClose }) => {
                                                         (val) => updateSet(set.id, 'weight_unit', val)
                                                     )}
                                                 </div>
+                                                {errors.sets[idx]?.weight && <p className="text-[7px] font-bold text-red-500 ml-1 uppercase">{errors.sets[idx].weight}</p>}
                                             </div>
                                         )}
                                         
                                         {metricsType === 'strength' && (
                                             <div className="space-y-1">
-                                                <div className="flex bg-transparent border border-border rounded-lg focus-within:border-emerald-600 transition-all h-8 items-center">
+                                                <div className={cn(
+                                                    "flex bg-transparent border rounded-lg transition-all h-8 items-center",
+                                                    errors.sets[idx]?.reps ? "border-red-500 bg-red-500/5" : "border-border focus-within:border-emerald-600"
+                                                )}>
                                                     <div className="pl-3 pr-2 border-r border-border h-full flex items-center">
                                                         <PlusCircle className="w-3 h-3 text-foreground/20" />
                                                     </div>
@@ -274,12 +304,16 @@ const AddWorkoutCard = ({ onClose }) => {
                                                     />
                                                     <div className="px-3 text-[8px] font-black text-emerald-600 uppercase">REPS</div>
                                                 </div>
+                                                {errors.sets[idx]?.reps && <p className="text-[7px] font-bold text-red-500 ml-1 uppercase">{errors.sets[idx].reps}</p>}
                                             </div>
                                         )}
 
                                         {(metricsType === 'timed_sets' || metricsType === 'endurance') && (
                                             <div className="space-y-1">
-                                                <div className="flex bg-transparent border border-border rounded-lg focus-within:border-emerald-600 transition-all h-8 items-center">
+                                                <div className={cn(
+                                                    "flex bg-transparent border rounded-lg transition-all h-8 items-center",
+                                                    errors.sets[idx]?.duration ? "border-red-500 bg-red-500/5" : "border-border focus-within:border-emerald-600"
+                                                )}>
                                                     <div className="pl-3 pr-2 border-r border-border h-full flex items-center">
                                                         <Timer className="w-3 h-3 text-foreground/20" />
                                                     </div>
@@ -294,6 +328,7 @@ const AddWorkoutCard = ({ onClose }) => {
                                                         (val) => updateSet(set.id, 'duration_unit', val)
                                                     )}
                                                 </div>
+                                                {errors.sets[idx]?.duration && <p className="text-[7px] font-bold text-red-500 ml-1 uppercase">{errors.sets[idx].duration}</p>}
                                             </div>
                                         )}
                                     </div>
@@ -307,7 +342,7 @@ const AddWorkoutCard = ({ onClose }) => {
             <div className="px-4 py-3 bg-secondary/5 border-t border-border flex items-center justify-end">
                 <Button 
                     onClick={handleSave} 
-                    disabled={isSaving || !exerciseName.trim()}
+                    disabled={isSaving}
                     className="h-9 px-8 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-emerald-600/10 bg-emerald-600 hover:bg-emerald-700"
                 >
                     {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Exercise"}

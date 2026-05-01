@@ -3,7 +3,6 @@
  * Returns an object with field-specific error messages.
  */
 export const validateSetFields = (set, metricsType) => {
-    console.log(set,metricsType)
     const errors = {};
     const weight = set.weight !== '' && set.weight !== null ? Number(set.weight) : null;
     const reps = set.reps !== '' && set.reps !== null ? Number(set.reps) : null;

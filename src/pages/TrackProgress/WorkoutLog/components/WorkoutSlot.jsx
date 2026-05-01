@@ -30,7 +30,7 @@ import {
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 
-import { validateSkip } from '../validation/validation';
+import { validateSkipField } from '../validation/validation';
 
 const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
     const { saveLog, isSaving, deleteSlot } = useWorkoutLog();
@@ -163,7 +163,7 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
     };
 
     const confirmSkip = () => {
-        if (!validateSkip(skipReason)) return;
+        if (!validateSkipField(skipReason)) return;
         triggerSync(localSets, 'skipped', { reason: skipReason });
         setShowSkipModal(false);
     };

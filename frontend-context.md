@@ -24,4 +24,6 @@ prompt: add validation for sets, skip modal, and add manual exercise. create a v
 answer: Created `validation/validation.jsx` with shared logic for `validateSet`, `validateManualExercise`, and `validateSkip`. Integrated these into `AddWorkoutCard.jsx` (name and sets check), `WorkoutSetRow.jsx` (per-set completion check), and `WorkoutSlot.jsx` (skip reason check). Used `sonner` toasts for user feedback.
 prompt: reduce the if statement in validation.jsx because so many if statement is there. use ternary operators where possible.
 answer: Refactored `validation.jsx` to significantly reduce `if` statements. `validateSet` now uses nested ternaries to evaluate rules for strength and timed/endurance metrics. `validateManualExercise` uses `.find()` on mapped results to identify and toast the first invalid set, and `validateSkip` was converted to a single ternary expression.
+prompt: add validation to the initial stats in the manual exercise menu. validate sets using validateSetFields before saving. display errors below input fields.
+answer: Updated `AddWorkoutCard.jsx` to manage set-level errors. Integrated `validateManualExerciseFields` into `handleSave` to ensure all initial sets meet requirements (reps > 0 for strength, duration > 0 for timed) before API submission. Errors are displayed inline beneath inputs, matching the `WorkoutSetRow` styling.
 ---
