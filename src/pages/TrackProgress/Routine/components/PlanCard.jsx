@@ -14,6 +14,7 @@ import { cn } from '../../../../lib/utils';
 import { Calendar } from "../../../../components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../../../../components/ui/popover";
 import { Button } from "../../../../components/ui/button";
+import DeleteConfirmModal from "../../../../components/ui/DeleteConfirmModal";
 import { useFormValidation } from '../../../../validation/ValidationWrapper';
 
 const TRAINING_TYPES = [
@@ -33,6 +34,7 @@ const PLAN_VALIDATION_SCHEMA = {
 const PlanCard = ({ plans, selectedPlan, onSave, onSelect, onDelete }) => {
     const [isCreating, setIsCreating] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     // Edit form states
     const [name, setName] = useState(selectedPlan?.name || '');
@@ -232,15 +234,14 @@ const PlanCard = ({ plans, selectedPlan, onSave, onSelect, onDelete }) => {
                         <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
                             {renderToggle(isActive, setIsActive)}
 
-                            <Button
-                                onClick={handleDelete}
-                                variant="outline"
-                                size="compact"
-                                className="gap-1.5 rounded-xl text-red-500 border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
-                            >
-                                <Trash2 className="w-3.5 h-3.5" />
-                                <span className="hidden sm:inline">Delete</span>
-                            </Button>
+                            {selectedPlan && (
+                                <button
+                                    onClick={() => setShowDeleteConfirm(true)}
+                                    className="text-red-500 hover:text-red-500/60 transition-all p-1.5"
+                                >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                            )}
 
                             <Button
                                 onClick={handleSave}
@@ -378,6 +379,18 @@ const PlanCard = ({ plans, selectedPlan, onSave, onSelect, onDelete }) => {
                     </div>
                 </div>
             </div>
+
+            {showDeleteConfirm && (
+                <DeleteConfirmModal
+                    title="Delete Workout Plan?"
+                    message={`Are you sure you want to delete "${selectedPlan?.name}"? This will permanently remove the plan and all its routine data.`}
+                    onCancel={() => setShowDeleteConfirm(false)}
+                    onConfirm={() => {
+                        handleDelete();
+                        setShowDeleteConfirm(false);
+                    }}
+                />
+            )}
         </div>
     );
 };
