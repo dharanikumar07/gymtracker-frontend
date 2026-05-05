@@ -1,29 +1,62 @@
 import React, { createContext, useContext, useState, useMemo } from 'react';
-import { useDietRoutineQuery, useDietTrackingQuery, useSaveDietLogMutation } from '../http/queries';
+import { 
+    useDietPlansQuery, 
+    useDietRoutineQuery, 
+    useDietTrackingQuery, 
+    useSaveDietLogMutation,
+    useSavePlanMutation,
+    useDeletePlanMutation,
+    useUpdatePlanStatusMutation
+} from '../http/queries';
 import { format, startOfWeek, addDays } from 'date-fns';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { updateDietRoutineApi } from '../http/api';
+import { toast } from 'sonner';
 
 const DietContext = createContext();
 
 export const DietProvider = ({ children }) => {
     const [selectedDate, setSelectedDate] = useState(new Date());
+    const [selectedPlanUuid, setSelectedPlanUuid] = useState(null);
+    const queryClient = useQueryClient();
 
     const formattedDate = format(selectedDate, 'yyyy-MM-dd');
     const selectedDay = useMemo(() => format(selectedDate, 'eee').toLowerCase(), [selectedDate]);
 
-    // Fetch diet routine (active plan + meal items)
-    const { data: routineData, isLoading: isLoadingRoutine } = useDietRoutineQuery();
+    // 1. Fetch all plans
+    const { data: plansData, isLoading: isLoadingPlans } = useDietPlansQuery();
+    const plans = plansData?.data || [];
+    
+    // Determine the current plan to view
+    const activePlan = plans.find(p => p.is_active) || (plans.length > 0 ? plans[0] : null);
+    const currentPlanUuid = selectedPlanUuid || activePlan?.uuid;
+    const currentPlan = plans.find(p => p.uuid === currentPlanUuid) || activePlan;
 
-    // Fetch tracking data for selected date
-    const { data: trackingData, isLoading: isLoadingTracking, isFetching } = useDietTrackingQuery(formattedDate);
+    // 2. Fetch diet routine (Weekly Setup) based on selected plan
+    const { data: routineData, isLoading: isLoadingRoutine } = useDietRoutineQuery(currentPlanUuid, !!currentPlanUuid);
 
-    // Save mutation
+    // 3. Fetch tracking data (Daily Execution) - DISABLED for now to avoid unnecessary API calls
+    const { data: trackingData, isLoading: isLoadingTracking, isFetching } = useDietTrackingQuery(formattedDate, false);
+
+    // Mutations
     const saveLogMutation = useSaveDietLogMutation(formattedDate);
+    const deletePlanMutation = useDeletePlanMutation();
+    const updatePlanStatusMutation = useUpdatePlanStatusMutation();
+    
+    const updateRoutineMutation = useMutation({
+        mutationFn: updateDietRoutineApi,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['diet', 'routine'] });
+            toast.success('Routine updated successfully');
+        },
+        onError: (error) => {
+            toast.error(error.response?.data?.message || 'Failed to update routine');
+        }
+    });
 
-    const plan = routineData?.plan || null;
-    const availablePlans = routineData?.available_plans || [];
     const meals = trackingData?.meals || { breakfast: [], lunch: [], dinner: [], snack: [] };
 
-    // Calculate consumed totals from logged items
+    // Calculate consumed totals
     const consumed = useMemo(() => {
         let calories = 0, protein = 0, carbs = 0, fats = 0;
         Object.values(meals).forEach(items => {
@@ -39,7 +72,6 @@ export const DietProvider = ({ children }) => {
         return { calories, protein, carbs, fats };
     }, [meals]);
 
-    // Week dates for day selector
     const weekDates = useMemo(() => {
         const start = startOfWeek(selectedDate, { weekStartsOn: 1 });
         return Array.from({ length: 7 }).map((_, i) => addDays(start, i));
@@ -49,12 +81,20 @@ export const DietProvider = ({ children }) => {
         saveLogMutation.mutate({ date: formattedDate, logs }, callbacks);
     };
 
+    const handleUpdateRoutine = async (newRoutine) => {
+        return await updateRoutineMutation.mutateAsync(newRoutine);
+    };
+
     const value = {
-        plan,
-        availablePlans,
+        plans,
+        activePlan: currentPlan,
+        selectedPlanUuid: currentPlanUuid,
+        setSelectedPlanUuid,
+        hasActivePlan: plans.length > 0,
+        routine: routineData,
         meals,
         consumed,
-        isLoading: isLoadingRoutine || isLoadingTracking,
+        isLoading: isLoadingPlans || isLoadingRoutine,
         isFetching,
         selectedDate,
         setSelectedDate,
@@ -62,7 +102,13 @@ export const DietProvider = ({ children }) => {
         formattedDate,
         weekDates,
         saveLog,
-        isSaving: saveLogMutation.isPending,
+        updateRoutine: handleUpdateRoutine,
+        deletePlan: (uuid) => deletePlanMutation.mutate(uuid),
+        updatePlanStatus: (payload) => updatePlanStatusMutation.mutate(payload),
+        isSavingRoutine: updateRoutineMutation.isPending,
+        isSavingLog: saveLogMutation.isPending,
+        isDeletingPlan: deletePlanMutation.isPending,
+        isUpdatingStatus: updatePlanStatusMutation.isPending,
     };
 
     return (

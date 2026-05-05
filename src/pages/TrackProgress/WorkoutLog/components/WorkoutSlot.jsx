@@ -14,6 +14,7 @@ import { cn } from '../../../../lib/utils';
 import { useWorkoutLog } from '../context/WorkoutLogContext';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../../components/ui/popover';
 import WorkoutSetRow from './WorkoutSetRow';
+import DeleteConfirmModal from '../../../../components/ui/DeleteConfirmModal';
 
 import {
     DndContext, 
@@ -217,12 +218,14 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
                     </button>
                 </div>
                 {showDeleteConfirm && (
-                    <DeleteConfirmModal 
-                        exerciseName={slot.exercise_name || "Routine Activity"} 
-                        onCancel={() => setShowDeleteConfirm(false)} 
-                        onConfirm={confirmDelete} 
+                    <DeleteConfirmModal
+                        title="Remove Activity?"
+                        message={`Are you sure you want to delete "${slot.exercise_name || "Routine Activity"}"? This will remove all sets and logged data for this activity.`}
+                        onCancel={() => setShowDeleteConfirm(false)}
+                        onConfirm={confirmDelete}
                     />
                 )}
+
             </div>
         );
     }
@@ -353,50 +356,16 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
 
             {/* Delete Confirmation Modal */}
             {showDeleteConfirm && (
-                <DeleteConfirmModal 
-                    exerciseName={slot.exercise_name || "Routine Activity"} 
-                    onCancel={() => setShowDeleteConfirm(false)} 
-                    onConfirm={confirmDelete} 
+                <DeleteConfirmModal
+                    title="Remove Activity?"
+                    message={`Are you sure you want to delete "${slot.exercise_name || "Routine Activity"}"? This will remove all sets and logged data for this activity.`}
+                    onCancel={() => setShowDeleteConfirm(false)}
+                    onConfirm={confirmDelete}
                 />
             )}
+
         </div>
     );
 };
-
-const DeleteConfirmModal = ({ exerciseName, onCancel, onConfirm }) => (
-    <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm animate-in fade-in duration-300" onClick={onCancel} />
-        <div className="relative bg-card border border-border rounded-2xl shadow-2xl w-full max-w-[340px] overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-6 space-y-4">
-                <div className="flex flex-col items-center text-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center text-red-500">
-                        <Trash2 className="w-6 h-6" />
-                    </div>
-                    <div className="space-y-1.5">
-                        <h3 className="text-[14px] font-black uppercase tracking-tight text-foreground">Remove Activity?</h3>
-                        <p className="text-[11px] text-muted-foreground font-medium leading-relaxed px-2">
-                            Are you sure you want to delete <span className="text-foreground font-bold">"{exerciseName}"</span>? This will remove all sets and logged data for this activity.
-                        </p>
-                    </div>
-                </div>
-            </div>
-            
-            <div className="flex border-t border-border divide-x divide-border">
-                <button 
-                    onClick={onCancel} 
-                    className="flex-1 py-3.5 text-[10px] font-black uppercase tracking-widest text-foreground/40 hover:bg-secondary/50 transition-colors"
-                >
-                    Keep Activity
-                </button>
-                <button 
-                    onClick={onConfirm} 
-                    className="flex-1 py-3.5 bg-red-500/10 text-red-600 hover:bg-red-500 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all"
-                >
-                    Delete Now
-                </button>
-            </div>
-        </div>
-    </div>
-);
 
 export default WorkoutSlot;
