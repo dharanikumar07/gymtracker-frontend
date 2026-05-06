@@ -14,8 +14,19 @@ export default defineConfig({
       overlay: true, // Show errors in browser
     },
   },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
+        },
+      },
+    },
+  },
   optimizeDeps: {
     include: ['@radix-ui/react-slot'],
-    // Explicitly exclude these if they cause issues, but usually include is enough
   },
 })
