@@ -18,6 +18,7 @@ export const QUERY_KEYS = {
     WORKOUT_LOG: (planUuid, date, day) => ['progress', 'workout-log', planUuid, date, day],
     DIET_ROUTINE: (planUuid) => ['progress', 'diet-routine', planUuid],
     DIET_TRACKING: (date) => ['progress', 'diet-tracking', date],
+    DIET_LOG: (planUuid, date, day) => ['progress', 'diet-log', planUuid, date, day],
   },
   ONBOARDING: {
     PROFILE: ['onboarding', 'profile'],

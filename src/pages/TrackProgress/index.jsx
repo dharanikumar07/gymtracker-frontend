@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { Dumbbell, UtensilsCrossed, Activity } from 'lucide-react';
+import { Dumbbell, UtensilsCrossed, Activity, Apple } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 import Routine from './Routine';
 import WorkoutLog from './WorkoutLog';
 import Diet from './Diet';
+import DietLog from './DietLog';
 
 const tabs = [
     { id: 'routine', label: 'Routine', icon: Activity },
     { id: 'workout', label: 'Workout', icon: Dumbbell },
-    { id: 'diet', label: 'Diet', icon: UtensilsCrossed },
+    { id: 'diet', label: 'Diet Setup', icon: UtensilsCrossed },
+    { id: 'diet_log', label: 'Diet Log', icon: Apple },
 ];
 
 const TrackProgress = () => {
@@ -62,6 +64,7 @@ const TrackProgress = () => {
                     {activeTab === 'routine' && <Routine />}
                     {activeTab === 'workout' && <WorkoutLog />}
                     {activeTab === 'diet' && <Diet />}
+                    {activeTab === 'diet_log' && <DietLog />}
                 </div>
             </div>
         </div>
