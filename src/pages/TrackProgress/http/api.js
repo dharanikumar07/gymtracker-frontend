@@ -1,25 +1,7 @@
 import api from '../../../lib/api';
+import { fetchPlansApi, savePlanApi, deletePlanApi } from '../../http/api';
 
-// ─── Common Plan APIs (shared across Routine, WorkoutLog, etc.) ───
-export const fetchPlansApi = async (type, is_active = null) => {
-    let url = `/plans?type=${type}`;
-    if (is_active !== null) {
-        const val = typeof is_active === 'boolean' ? (is_active ? 1 : 0) : is_active;
-        url += `&is_active=${val}`;
-    }
-    const response = await api.get(url);
-    return response.data;
-};
-
-export const savePlanApi = async (payload) => {
-    const response = await api.post('/plans', payload);
-    return response.data;
-};
-
-export const deletePlanApi = async (uuid) => {
-    const response = await api.delete(`/plans/${uuid}`);
-    return response.data;
-};
+export { fetchPlansApi, savePlanApi, deletePlanApi };
 
 // ─── Routine APIs ───
 export const fetchRoutineApi = async (planUuid = null) => {
