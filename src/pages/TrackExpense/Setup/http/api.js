@@ -1,7 +1,7 @@
 import api from '../../../../lib/api';
 
-export const fetchExpensesApi = async (date) => {
-    const response = await api.get('/expenses', { params: { date } });
+export const fetchExpensesApi = async (plan_uuid) => {
+    const response = await api.get('/expenses', { params: { plan_uuid } });
     return response.data;
 };
 

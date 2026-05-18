@@ -4,10 +4,11 @@ import { fetchExpensesApi, saveExpenseCategoryApi, deleteExpenseCategoryApi } fr
 import { QUERY_KEYS } from '../../../../constants/query.constants';
 import { toast } from 'sonner';
 
-export const useExpensesQuery = (date) => {
+export const useExpensesQuery = (planUuid) => {
     return useQuery({
-        queryKey: [QUERY_KEYS.EXPENSES.ALL, date],
-        queryFn: () => fetchExpensesApi(date),
+        queryKey: [QUERY_KEYS.EXPENSES, planUuid],
+        queryFn: () => fetchExpensesApi(planUuid),
+        enabled: !!planUuid
     });
 };
 

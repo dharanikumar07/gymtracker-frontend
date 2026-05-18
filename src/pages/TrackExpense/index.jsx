@@ -56,7 +56,7 @@ const TrackExpense = () => {
             </div>
 
             <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide no-scrollbar">
-                <div className="animate-in fade-in slide-in-from-bottom-2 duration-400 space-y-6 pb-24 w-full mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-400 space-y-6 w-full mx-auto px-4 sm:px-6 lg:px-8">
                     {activeTab === 'setup' && <ExpenseSetup />}
                     {activeTab === 'log' && <ExpenseLog />}
                 </div>

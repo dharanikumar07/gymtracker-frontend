@@ -32,7 +32,19 @@ export const completeOnboardingApi = async (payload) => {
   return response.data;
 };
 
-export const fetchExpensesApi = async () => {
-  const response = await api.get('/expenses');
+export const fetchExpensesApi = async (plan_uuid) => {
+  const response = await api.get('/expenses', {
+    params: { plan_uuid }
+  });
+  return response.data;
+};
+
+export const fetchPlansApi = async (type, is_active = null) => {
+  let url = `/plans?type=${type}`;
+  if (is_active !== null) {
+      const val = typeof is_active === 'boolean' ? (is_active ? 1 : 0) : is_active;
+      url += `&is_active=${val}`;
+  }
+  const response = await api.get(url);
   return response.data;
 };

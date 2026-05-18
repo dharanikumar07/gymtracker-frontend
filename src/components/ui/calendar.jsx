@@ -27,7 +27,12 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }) {
-  const initialDate = selected || new Date()
+  const initialDate = React.useMemo(() => {
+    if (!selected) return new Date();
+    const d = new Date(selected);
+    return isNaN(d.getTime()) ? new Date() : d;
+  }, [selected]);
+
   const [viewMonth, setViewMonth] = React.useState(initialDate.getMonth())
   const [viewYear, setViewYear] = React.useState(initialDate.getFullYear())
   const [showMonthDropdown, setShowMonthDropdown] = React.useState(false)

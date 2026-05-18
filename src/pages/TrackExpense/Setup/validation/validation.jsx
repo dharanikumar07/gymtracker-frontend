@@ -15,10 +15,6 @@ export const validateBudgetPlan = (plan) => {
         errors.start_date = "Start date is required";
     }
 
-    if (!plan.end_date) {
-        errors.end_date = "End date is required";
-    }
-
     return {
         isValid: Object.keys(errors).length === 0,
         errors
