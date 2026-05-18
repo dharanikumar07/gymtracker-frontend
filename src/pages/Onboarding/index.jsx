@@ -12,13 +12,14 @@ import {
     ChevronDown,
     LogOut
 } from 'lucide-react';
+import { format } from "date-fns";
 import { toast } from 'sonner';
 import { cn } from '../../lib/utils';
 import { useAuthStore } from '../../store/authStore';
 import { useOnboardingStore } from '../../store/onboardingStore';
 import { useQueryClient } from '@tanstack/react-query';
-import { useCompleteOnboardingMutation, useSaveProfileInformationMutation, useSavePhysicalActivityMutation, useExpenseQuery } from './http/onboardingQueries';
-import { fetchPhysicalActivityApi, fetchExpensesApi } from './http/onboardingApi';
+import { useCompleteOnboardingMutation, useSaveProfileInformationMutation, useSavePhysicalActivityMutation, useExpenseQuery, usePlanQuery } from './http/onboardingQueries';
+import { fetchPhysicalActivityApi, fetchExpensesApi, fetchPlansApi } from './http/onboardingApi';
 import { QUERY_KEYS } from '../../constants/query.constants';
 import ThemeToggle from '../../components/ThemeToggle';
 import LeftBanner from './components/LeftBanner';
@@ -86,6 +87,7 @@ const Onboarding = () => {
     
     const [loading, setLoading] = useState(false);
     const [stepErrors, setStepErrors] = useState({});
+    const [isStep3Submitted, setIsStep3Submitted] = useState(false);
     const [direction, setDirection] = useState('forward');
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const queryClient = useQueryClient();
@@ -176,14 +178,47 @@ const Onboarding = () => {
                 const routinePayload = transformRoutineForApi(formData);
                 await savePhysicalActivityMutation.mutateAsync(routinePayload);
                 
+                // Fetch active budget plan
+                const plansData = await queryClient.fetchQuery({
+                    queryKey: ['plans', 'budget', true],
+                    queryFn: () => fetchPlansApi('budget', true),
+                });
+
+                const activePlan = plansData?.data?.[0];
+                let planUuid = activePlan?.uuid;
+
+                if (activePlan) {
+                    updateFormData({
+                        plan: {
+                            uuid: activePlan.uuid,
+                            name: activePlan.name,
+                            amount: activePlan.meta_data?.amount || '',
+                            budget_type: activePlan.meta_data?.budget_type || 'monthly',
+                            start_date: activePlan.start_date || new Date(),
+                            is_active: true
+                        }
+                    });
+                } else {
+                    // Default plan state if no active plan exists
+                    updateFormData({
+                        plan: {
+                            name: '',
+                            amount: '',
+                            budget_type: 'monthly',
+                            start_date: new Date(),
+                            is_active: true
+                        }
+                    });
+                }
+                
                 const expenseData = await queryClient.fetchQuery({
-                    queryKey: ['expenses'],
-                    queryFn: fetchExpensesApi,
+                    queryKey: ['expenses', planUuid],
+                    queryFn: () => fetchExpensesApi(planUuid),
                 });
                 
-                if (expenseData?.expenses?.length > 0) {
-                    const mappedExpenses = expenseData.expenses.map(e => ({
-                        type: e.category_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                if (expenseData?.data?.length > 0) {
+                    const mappedExpenses = expenseData.data.map(e => ({
+                        type: e.category_name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
                         period: e.expense_period,
                         amount: e.default_amount || ''
                     }));
@@ -202,9 +237,36 @@ const Onboarding = () => {
         }
     };
 
+    const validateStep3 = () => {
+        const { plan, expenses } = formData;
+        setIsStep3Submitted(true);
+        
+        if (!plan?.name || plan.name.trim() === '') {
+            toast.error("Budget plan name is required");
+            return false;
+        }
+
+        if (!plan?.amount || parseFloat(plan.amount) <= 0) {
+            toast.error("Valid total budget amount is required");
+            return false;
+        }
+
+        if (expenses && expenses.length > 0) {
+            const invalidExpense = expenses.find(e => !e.type || !e.amount || parseFloat(e.amount) < 0);
+            if (invalidExpense) {
+                toast.error("Please fix errors in your expenses list");
+                return false;
+            }
+        }
+
+        return true;
+    };
+
     const handleNext = () => {
         if (step === 3) {
-            handleFinalSubmit({ ...stepsStatus, 'step-3': true });
+            if (validateStep3()) {
+                handleFinalSubmit({ ...stepsStatus, 'step-3': true });
+            }
         } else {
             goToStep(step + 1);
         }
@@ -212,11 +274,12 @@ const Onboarding = () => {
     const handleBack = () => goToStep(step - 1);
 
     const handleSkip = () => {
-        setDirection('forward');
         if (step === 1) {
-            setStepsStatus({ 'step-1': false });
-            setStep(2);
-        } else if (step === 2) {
+            toast.error("Please complete your profile details first.");
+            return;
+        }
+        setDirection('forward');
+        if (step === 2) {
             setStepsStatus({ 'step-2': false });
             setStep(3);
         } else {
@@ -228,14 +291,26 @@ const Onboarding = () => {
         setLoading(true);
         
         const transformedExpenses = (formData.expenses || []).map(exp => ({
-            category_type: exp.type.toLowerCase().replace(/\s+/g, '_'),
+            category_name: exp.type.toLowerCase().replace(/\s+/g, '_'),
             expense_period: exp.period || 'fixed',
             default_amount: parseFloat(exp.amount) || 0
         }));
 
+        const planPayload = formData.plan ? {
+            name: formData.plan.name || 'Initial Budget',
+            type: 'budget',
+            start_date: format(new Date(formData.plan.start_date || new Date()), "yyyy-MM-dd"),
+            meta_data: {
+                amount: parseFloat(formData.plan.amount) || 0,
+                budget_type: formData.plan.budget_type || 'monthly'
+            },
+            is_active: true
+        } : null;
+
         try {
             await completeOnboardingMutation.mutateAsync({
-                expenses: transformedExpenses
+                expenses: transformedExpenses,
+                plan: planPayload
             });
             
             await fetchUser();
@@ -373,24 +448,26 @@ const Onboarding = () => {
                         <div className={cn("mb-6 sm:mb-8", animationClass)} key={step}>
                             {step === 1 && <Step1 data={formData} updateData={updateFormData} errors={stepErrors} />}
                             {step === 2 && <Step2 data={formData} updateData={updateFormData} />}
-                            {step === 3 && <Step3 data={formData} updateData={updateFormData} />}
+                            {step === 3 && <Step3 data={formData} updateData={updateFormData} isSubmitted={isStep3Submitted} />}
                         </div>
 
                         <div className="flex items-center gap-3 sm:gap-4">
-                            <button 
-                                onClick={handleSkip}
-                                disabled={loading}
-                                className="h-10 sm:h-12 px-3 sm:px-4 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors shrink-0"
-                            >
-                                Skip
-                            </button>
+                            {step !== 1 && (
+                                <button 
+                                    onClick={handleSkip}
+                                    disabled={loading}
+                                    className="h-8 sm:h-9 px-3 sm:px-4 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                                >
+                                    Skip
+                                </button>
+                            )}
                             
-                            <div className="flex-1 flex items-center gap-2 sm:gap-3">
+                            <div className={cn("flex-1 flex items-center gap-2 sm:gap-3", step === 1 && "justify-end")}>
                                 {step > 1 && (
                                     <button 
                                         onClick={handleBack}
                                         disabled={loading}
-                                        className="h-10 sm:h-12 px-4 sm:px-6 bg-secondary hover:bg-secondary/80 rounded-xl font-semibold text-[10px] sm:text-xs uppercase tracking-wider flex items-center gap-1.5 sm:gap-2 transition-all shrink-0"
+                                        className="h-8 sm:h-9 px-4 sm:px-6 bg-secondary hover:bg-secondary/80 rounded-xl font-semibold text-[10px] sm:text-xs uppercase tracking-wider flex items-center gap-1.5 sm:gap-2 transition-all shrink-0"
                                     >
                                         <ArrowLeft className="w-3 sm:w-4 h-3 sm:h-4" /> Back
                                     </button>
@@ -399,7 +476,10 @@ const Onboarding = () => {
                                 <button 
                                     onClick={handleNext}
                                     disabled={loading}
-                                    className="flex-1 h-10 sm:h-12 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold text-[11px] sm:text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 sm:gap-2 shadow-lg shadow-primary/30 disabled:opacity-70"
+                                    className={cn(
+                                        "h-8 sm:h-9 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold text-[11px] sm:text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 sm:gap-2 shadow-lg shadow-primary/30 disabled:opacity-70 px-6",
+                                        step === 1 ? "w-fit" : "flex-1"
+                                    )}
                                 >
                                     {loading ? (
                                         <Loader2 className="w-4 sm:w-4 h-4 sm:h-4 animate-spin" />

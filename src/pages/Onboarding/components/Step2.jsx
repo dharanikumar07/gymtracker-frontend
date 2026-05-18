@@ -13,7 +13,10 @@ import {
 import { cn } from '../../../lib/utils';
 import { usePhysicalActivityQuery, useDeleteWorkoutSlotMutation } from '../http/onboardingQueries';
 import WorkoutMetricEditor from '../../../components/WorkoutMetricEditor';
-import Calendar from '../../../components/Calendar';
+import { Calendar } from '../../../components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover';
+import { Button } from '../../../components/ui/button';
+import { format } from 'date-fns';
 import {
     DndContext,
     closestCenter,
@@ -408,21 +411,49 @@ const Step2 = ({ data, updateData }) => {
                     </div>
                     <div className="space-y-1.5 relative sm:col-span-2">
                         <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Start Date</label>
-                        <Calendar
-                            selectedDate={plan.start_date}
-                            onSelect={(date) => updatePlan({ start_date: date })}
-                            triggerClassName="w-full h-10 px-4 bg-secondary/30 border border-border rounded-xl focus:border-primary/50 outline-none text-xs font-semibold transition-all flex items-center justify-between"
-                            triggerContent="Select date"
-                        />
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                        "w-full h-10 px-4 bg-secondary/30 border border-border rounded-xl focus:border-primary/50 outline-none text-xs font-semibold transition-all flex items-center justify-between",
+                                        !plan.start_date && "text-muted-foreground"
+                                    )}
+                                >
+                                    {plan.start_date ? format(new Date(plan.start_date), "PPP") : "Select date"}
+                                    <CalendarDays className="w-4 h-4 text-muted-foreground" />
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                    selected={plan.start_date ? new Date(plan.start_date) : null}
+                                    onSelect={(date) => updatePlan({ start_date: date.toISOString().split('T')[0] })}
+                                />
+                            </PopoverContent>
+                        </Popover>
                     </div>
                     <div className="space-y-1.5 relative sm:col-span-2">
                         <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">End Date</label>
-                        <Calendar
-                            selectedDate={plan.end_date}
-                            onSelect={(date) => updatePlan({ end_date: date })}
-                            triggerClassName="w-full h-10 px-4 bg-secondary/30 border border-border rounded-xl focus:border-primary/50 outline-none text-xs font-semibold transition-all flex items-center justify-between"
-                            triggerContent="Select date"
-                        />
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                        "w-full h-10 px-4 bg-secondary/30 border border-border rounded-xl focus:border-primary/50 outline-none text-xs font-semibold transition-all flex items-center justify-between",
+                                        !plan.end_date && "text-muted-foreground"
+                                    )}
+                                >
+                                    {plan.end_date ? format(new Date(plan.end_date), "PPP") : "Select date"}
+                                    <CalendarDays className="w-4 h-4 text-muted-foreground" />
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                    selected={plan.end_date ? new Date(plan.end_date) : null}
+                                    onSelect={(date) => updatePlan({ end_date: date.toISOString().split('T')[0] })}
+                                />
+                            </PopoverContent>
+                        </Popover>
                     </div>
                 </div>
                 <div className="flex items-center justify-between pt-2 border-t border-border/50">

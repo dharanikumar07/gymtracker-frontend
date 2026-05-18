@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { 
     useBudgetPlansQuery, 
     useSaveBudgetPlanMutation, 
@@ -13,18 +13,8 @@ const ExpenseContext = createContext();
 
 export const ExpenseProvider = ({ children }) => {
     const { data: plansData, isLoading: isLoadingPlans } = useBudgetPlansQuery();
-    const { data: expensesData, isLoading: isLoadingExpenses } = useExpensesQuery(new Date().toISOString().split('T')[0]);
     
-    const savePlanMutation = useSaveBudgetPlanMutation();
-    const deletePlanMutation = useDeleteBudgetPlanMutation();
-    const updatePlanStatusMutation = useUpdateBudgetPlanStatusMutation();
-    
-    const saveCategoryMutation = useSaveExpenseCategoryMutation();
-    const deleteCategoryMutation = useDeleteExpenseCategoryMutation();
-
     const plans = plansData?.data || [];
-    const fixedExpenses = expensesData?.expenses || [];
-    
     const activePlan = plans.find(p => p.is_active) || plans[0];
     const [selectedPlanUuid, setSelectedPlanUuid] = useState(null);
     const [isCreatingPlan, setIsCreatingPlan] = useState(false);
@@ -35,6 +25,18 @@ export const ExpenseProvider = ({ children }) => {
         }
     }, [activePlan, selectedPlanUuid]);
 
+    const { data: expensesData, isLoading: isLoadingExpenses } = useExpensesQuery(selectedPlanUuid);
+    
+    const savePlanMutation = useSaveBudgetPlanMutation();
+    const deletePlanMutation = useDeleteBudgetPlanMutation();
+    const updatePlanStatusMutation = useUpdateBudgetPlanStatusMutation();
+    
+    const saveCategoryMutation = useSaveExpenseCategoryMutation();
+    const deleteCategoryMutation = useDeleteExpenseCategoryMutation();
+
+    const fixedExpenses = useMemo(() => {
+        return (expensesData?.data || []);
+    }, [expensesData]);
     const selectedPlan = plans.find(p => p.uuid === selectedPlanUuid) || activePlan;
 
     const value = {

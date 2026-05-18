@@ -94,9 +94,18 @@ export const useCompleteOnboardingMutation = () => {
   });
 };
 
-export const useExpenseQuery = () => {
+export const useExpenseQuery = (planUuid) => {
   return useQuery({
-    queryKey: ['expenses'],
-    queryFn: fetchExpensesApi,
+    queryKey: ['expenses', planUuid],
+    queryFn: () => fetchExpensesApi(planUuid),
+    enabled: !!planUuid,
+  });
+};
+
+export const usePlanQuery = (type, is_active = null) => {
+  return useQuery({
+    queryKey: ['plans', type, is_active],
+    queryFn: () => fetchPlansApi(type, is_active),
+    enabled: !!type,
   });
 };
