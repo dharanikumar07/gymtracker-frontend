@@ -24,10 +24,8 @@ const ExpenseSetupContent = () => {
     );
 };
 
-const ExpenseSetup = () => (
-    <ExpenseProvider>
-        <ExpenseSetupContent />
-    </ExpenseProvider>
-);
+const ExpenseSetup = () => {
+    return <ExpenseSetupContent />;
+};
 
 export default ExpenseSetup;

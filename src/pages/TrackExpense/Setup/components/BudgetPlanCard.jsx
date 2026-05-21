@@ -35,7 +35,8 @@ const BudgetPlanCard = () => {
         deletePlan, 
         isDeletingPlan,
         updatePlanStatus,
-        isUpdatingStatus 
+        isUpdatingStatus,
+        setHasPlanChanges
     } = useExpense();
     
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -49,6 +50,21 @@ const BudgetPlanCard = () => {
     const [isActive, setIsActive] = useState(true);
     const [startDate, setStartDate] = useState(new Date());
     const [errors, setErrors] = useState({});
+
+    // Track unsaved changes
+    const hasChanges = isCreating || (
+        selectedPlan && (
+            name !== (selectedPlan.name || '') ||
+            parseFloat(amount) !== (selectedPlan.meta_data?.amount || 0) ||
+            budgetType !== (selectedPlan.meta_data?.budget_type || 'monthly') ||
+            isActive !== (selectedPlan.is_active ?? true) ||
+            format(startDate, "yyyy-MM-dd") !== (selectedPlan.start_date || format(new Date(), "yyyy-MM-dd"))
+        )
+    );
+
+    useEffect(() => {
+        setHasPlanChanges(hasChanges);
+    }, [hasChanges, setHasPlanChanges]);
 
     useEffect(() => {
         if (selectedPlan && !isCreating) {
@@ -162,7 +178,7 @@ const BudgetPlanCard = () => {
                             <div className="relative min-w-[200px]">
                                 <button
                                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                    className="h-10 w-full px-3 bg-secondary/30 border border-border/50 rounded-xl flex items-center justify-between hover:bg-secondary/50 transition-all text-[12px] font-black uppercase tracking-tight"
+                                    className="h-10 w-full px-3 bg-secondary/30 border border-border/50 rounded-xl flex items-center justify-between hover:bg-secondary/50 transition-all text-[12px] font-black tracking-tight"
                                 >
                                     <div className="flex items-center gap-2 truncate pr-2">
                                         <Wallet className="w-3.5 h-3.5 text-emerald-600 shrink-0" />

@@ -33,7 +33,7 @@ const FixedExpenseRow = ({ expense, onChange, onDelete, isDeleting, error, nameE
     };
 
     return (
-        <div className="group flex flex-col sm:flex-row sm:items-start justify-between p-3.5 rounded-2xl bg-secondary/10 border border-transparent hover:border-border transition-all gap-3 sm:gap-4">
+        <div className="group flex flex-col sm:flex-row sm:items-start justify-between p-3.5 rounded-2xl bg-secondary/10 border border-emerald-800/50 hover:border-border transition-all gap-3 sm:gap-4">
             <div className="flex items-start gap-3 flex-1 min-w-0">
                 <div className="w-8 h-8 rounded-lg bg-background border border-border flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform shrink-0 shadow-sm mt-0.5">
                     <DollarSign className="w-3.5 h-3.5" />
@@ -44,7 +44,7 @@ const FixedExpenseRow = ({ expense, onChange, onDelete, isDeleting, error, nameE
                         value={name} 
                         onChange={(e) => handleNameChange(e.target.value)}
                         className={cn(
-                            "w-full h-9 sm:h-8 bg-background border px-3 rounded-xl text-[12px] font-bold text-foreground italic outline-none focus:ring-1 focus:ring-emerald-500/30 transition-all",
+                            "w-full h-9 sm:h-8 bg-background border px-3 rounded-xl text-[13px] font-bold text-foreground italic outline-none focus:ring-1 focus:ring-emerald-500/30 transition-all",
                             nameError ? "border-red-500/50 ring-1 ring-red-500/20" : "border-border/50"
                         )}
                         placeholder="Expense Name"
@@ -107,13 +107,21 @@ const FixedExpenses = () => {
         saveCategory, 
         isSavingCategory, 
         deleteCategory, 
-        isDeletingCategory 
+        isDeletingCategory,
+        setHasFixedChanges
     } = useExpense();
 
     const [stagedExpenses, setStagedExpenses] = useState([]);
     const [edits, setEdits] = useState({});
     const [errors, setErrors] = useState({});
     const [expenseToDelete, setExpenseToDelete] = useState(null);
+
+    const hasChanges = stagedExpenses.length > 0 || Object.keys(edits).length > 0;
+
+    // Sync with context for unsaved changes guard
+    useEffect(() => {
+        setHasFixedChanges(hasChanges);
+    }, [hasChanges, setHasFixedChanges]);
 
     const addCustom = () => {
         setStagedExpenses(prev => [{ id: Date.now(), name: '', amount: '' }, ...prev]);
@@ -210,8 +218,6 @@ const FixedExpenses = () => {
             }
         });
     };
-
-    const hasChanges = stagedExpenses.length > 0 || Object.keys(edits).length > 0;
 
     return (
         <div className="space-y-4">

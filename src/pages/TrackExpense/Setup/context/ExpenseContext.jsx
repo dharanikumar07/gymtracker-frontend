@@ -18,6 +18,17 @@ export const ExpenseProvider = ({ children }) => {
     const activePlan = plans.find(p => p.is_active) || plans[0];
     const [selectedPlanUuid, setSelectedPlanUuid] = useState(null);
     const [isCreatingPlan, setIsCreatingPlan] = useState(false);
+    
+    // Track unsaved changes from different sources
+    const [hasPlanChanges, setHasPlanChanges] = useState(false);
+    const [hasFixedChanges, setHasFixedChanges] = useState(false);
+
+    const hasUnsavedChanges = useMemo(() => hasPlanChanges || hasFixedChanges, [hasPlanChanges, hasFixedChanges]);
+
+    const clearUnsavedChanges = () => {
+        setHasPlanChanges(false);
+        setHasFixedChanges(false);
+    };
 
     useEffect(() => {
         if (activePlan && !selectedPlanUuid) {
@@ -58,6 +69,10 @@ export const ExpenseProvider = ({ children }) => {
         isSavingCategory: saveCategoryMutation.isPending,
         deleteCategory: deleteCategoryMutation.mutate,
         isDeletingCategory: deleteCategoryMutation.isPending,
+        hasUnsavedChanges,
+        setHasPlanChanges,
+        setHasFixedChanges,
+        clearUnsavedChanges
     };
 
     return (

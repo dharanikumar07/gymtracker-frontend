@@ -17,7 +17,7 @@ export const useSaveExpenseCategoryMutation = () => {
     return useMutation({
         mutationFn: saveExpenseCategoryApi,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.EXPENSES.ALL] });
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.EXPENSES] });
             toast.success("Expense category saved");
         },
         onError: (error) => toast.error(error.response?.data?.errors || "Failed to save category"),
@@ -29,7 +29,7 @@ export const useDeleteExpenseCategoryMutation = () => {
     return useMutation({
         mutationFn: deleteExpenseCategoryApi,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.EXPENSES.ALL] });
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.EXPENSES] });
             toast.success("Category deleted");
         },
     });
