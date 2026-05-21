@@ -5,7 +5,6 @@ import {
     logExpenseApi, 
     deleteExpenseLogApi 
 } from './api';
-import { QUERY_KEYS } from '../../../../constants/query.constants';
 import { toast } from 'sonner';
 
 export const useExpenseLogQuery = (date) => {
@@ -16,20 +15,22 @@ export const useExpenseLogQuery = (date) => {
     });
 };
 
-export const useAvailableCategoriesQuery = () => {
+export const useAvailableCategoriesQuery = (planUuid) => {
     return useQuery({
-        queryKey: ['available-categories'],
-        queryFn: () => getAvailableCategoriesApi(),
+        queryKey: ['available-categories', planUuid],
+        queryFn: () => getAvailableCategoriesApi(planUuid),
+        enabled: !!planUuid,
         select: (res) => res.data.categories
     });
 };
 
-export const useLogExpenseMutation = () => {
+export const useLogExpenseMutation = (planUuid) => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: logExpenseApi,
         onSuccess: (res) => {
             queryClient.invalidateQueries({ queryKey: ['expense-log'] });
+            queryClient.invalidateQueries({ queryKey: ['available-categories', planUuid] });
             toast.success(res.data.message || 'Expense logged successfully');
         },
         onError: (err) => {
@@ -38,12 +39,13 @@ export const useLogExpenseMutation = () => {
     });
 };
 
-export const useDeleteExpenseLogMutation = () => {
+export const useDeleteExpenseLogMutation = (planUuid) => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: deleteExpenseLogApi,
         onSuccess: (res) => {
             queryClient.invalidateQueries({ queryKey: ['expense-log'] });
+            queryClient.invalidateQueries({ queryKey: ['available-categories', planUuid] });
             toast.success(res.data.message || 'Expense deleted successfully');
         },
         onError: (err) => {

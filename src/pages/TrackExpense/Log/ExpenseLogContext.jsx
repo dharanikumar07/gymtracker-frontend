@@ -11,14 +11,31 @@ const ExpenseLogContext = createContext();
 
 export const ExpenseLogProvider = ({ children }) => {
     const [selectedDate, setSelectedDate] = useState(new Date());
+    const [activeEdits, setActiveEdits] = useState(new Set());
+    const [hasStagedLogs, setHasStagedLogs] = useState(false);
+    
     const formattedDate = format(selectedDate, 'yyyy-MM-dd');
 
     const { data: logData, isLoading: isLogLoading } = useExpenseLogQuery(formattedDate);
     const planUuid = logData?.plan_summary?.plan_uuid;
     const { data: availableCategories, isLoading: isCatLoading } = useAvailableCategoriesQuery(planUuid);
     
-    const logExpenseMutation = useLogExpenseMutation();
-    const deleteLogMutation = useDeleteExpenseLogMutation();
+    const logExpenseMutation = useLogExpenseMutation(planUuid);
+    const deleteLogMutation = useDeleteExpenseLogMutation(planUuid);
+
+    const setEditing = (id, isEditing) => {
+        setActiveEdits(prev => {
+            const next = new Set(prev);
+            if (isEditing) next.add(id);
+            else next.delete(id);
+            return next;
+        });
+    };
+
+    const clearUnsavedChanges = () => {
+        setActiveEdits(new Set());
+        setHasStagedLogs(false);
+    };
 
     const value = {
         selectedDate,
@@ -30,7 +47,11 @@ export const ExpenseLogProvider = ({ children }) => {
         logExpense: logExpenseMutation.mutate,
         isLogging: logExpenseMutation.isPending,
         deleteLog: deleteLogMutation.mutate,
-        isDeleting: deleteLogMutation.isPending
+        isDeleting: deleteLogMutation.isPending,
+        hasUnsavedChanges: activeEdits.size > 0 || hasStagedLogs,
+        setEditing,
+        setHasStagedLogs,
+        clearUnsavedChanges
     };
 
     return (
