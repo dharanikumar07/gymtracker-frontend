@@ -33,10 +33,10 @@ export const useLogExpenseMutation = (planUuid) => {
         onSuccess: (res) => {
             queryClient.invalidateQueries({ queryKey: ['expense-log'] });
             queryClient.invalidateQueries({ queryKey: ['available-categories', planUuid] });
-            toast.success(res.data.message || 'Expense logged successfully');
+            toast.success(res.message || 'Expenses saved successfully');
         },
         onError: (err) => {
-            toast.error(err.response?.data?.message || 'Failed to log expense');
+            toast.error(err.response?.data?.message || 'Failed to save expenses');
         }
     });
 };

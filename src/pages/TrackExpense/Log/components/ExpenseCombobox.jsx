@@ -2,8 +2,10 @@ import React, { useState, useMemo } from 'react';
 import { Search, Plus, Loader2, IndianRupee } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../../components/ui/popover';
 import { cn } from '../../../../lib/utils';
+import { useExpenseLog } from '../ExpenseLogContext';
 
-const ExpenseCombobox = ({ onAdd, categories = [], isLoading = false }) => {
+const ExpenseCombobox = ({ categories = [], isLoading = false }) => {
+    const { addStagedLog } = useExpenseLog();
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState('');
 
@@ -15,10 +17,9 @@ const ExpenseCombobox = ({ onAdd, categories = [], isLoading = false }) => {
     }, [categories, search]);
 
     const handleSelect = (category) => {
-        onAdd({
-            name: category.name,
-            amount: category.amount || 0,
+        addStagedLog({
             category_name: category.name,
+            amount: category.amount || 0,
             is_fixed: category.type === 'fixed',
             is_custom: false
         });
@@ -27,10 +28,9 @@ const ExpenseCombobox = ({ onAdd, categories = [], isLoading = false }) => {
     };
 
     const handleCustomAdd = () => {
-        onAdd({
-            name: search || '',
-            amount: 0,
+        addStagedLog({
             category_name: search || 'Custom',
+            amount: 0,
             is_fixed: false,
             is_custom: true
         });

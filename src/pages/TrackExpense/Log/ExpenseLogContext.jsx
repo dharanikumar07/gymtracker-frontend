@@ -11,8 +11,8 @@ const ExpenseLogContext = createContext();
 
 export const ExpenseLogProvider = ({ children, isActive }) => {
     const [selectedDate, setSelectedDate] = useState(new Date());
-    const [activeEdits, setActiveEdits] = useState(new Set());
-    const [hasStagedLogs, setHasStagedLogs] = useState(false);
+    const [stagedLogs, setStagedLogs] = useState([]);
+    const [editedLogs, setEditedLogs] = useState({});
     
     const formattedDate = format(selectedDate, 'yyyy-MM-dd');
 
@@ -27,18 +27,50 @@ export const ExpenseLogProvider = ({ children, isActive }) => {
     const logExpenseMutation = useLogExpenseMutation(planUuid);
     const deleteLogMutation = useDeleteExpenseLogMutation(planUuid);
 
-    const setEditing = (id, isEditing) => {
-        setActiveEdits(prev => {
-            const next = new Set(prev);
-            if (isEditing) next.add(id);
-            else next.delete(id);
+    // Reset staging when date changes
+    React.useEffect(() => {
+        setStagedLogs([]);
+        setEditedLogs({});
+    }, [formattedDate]);
+
+    const addStagedLog = (data) => {
+        setStagedLogs(prev => [...prev, {
+            ...data,
+            tempId: `temp-${Date.now()}`
+        }]);
+    };
+
+    const updateStagedLog = (tempId, updates) => {
+        setStagedLogs(prev => prev.map(log => 
+            log.tempId === tempId ? { ...log, ...updates } : log
+        ));
+    };
+
+    const deleteStagedLog = (tempId) => {
+        setStagedLogs(prev => prev.filter(log => log.tempId !== tempId));
+    };
+
+    const updateExistingLog = (uuid, updates) => {
+        const originalLog = logData?.daily_logs?.find(l => l.uuid === uuid);
+        if (!originalLog) return;
+
+        // Check if anything actually changed
+        const hasChanges = Object.keys(updates).some(key => updates[key] !== originalLog[key]);
+
+        setEditedLogs(prev => {
+            const next = { ...prev };
+            if (hasChanges) {
+                next[uuid] = { ...originalLog, ...updates };
+            } else {
+                delete next[uuid];
+            }
             return next;
         });
     };
 
     const clearUnsavedChanges = () => {
-        setActiveEdits(new Set());
-        setHasStagedLogs(false);
+        setStagedLogs([]);
+        setEditedLogs({});
     };
 
     const value = {
@@ -52,9 +84,13 @@ export const ExpenseLogProvider = ({ children, isActive }) => {
         isLogging: logExpenseMutation.isPending,
         deleteLog: deleteLogMutation.mutate,
         isDeleting: deleteLogMutation.isPending,
-        hasUnsavedChanges: activeEdits.size > 0 || hasStagedLogs,
-        setEditing,
-        setHasStagedLogs,
+        stagedLogs,
+        editedLogs,
+        addStagedLog,
+        updateStagedLog,
+        deleteStagedLog,
+        updateExistingLog,
+        hasUnsavedChanges: stagedLogs.length > 0 || Object.keys(editedLogs).length > 0,
         clearUnsavedChanges
     };
 

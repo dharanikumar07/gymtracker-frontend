@@ -3,57 +3,47 @@ import { IndianRupee } from 'lucide-react';
 import { useExpenseLog } from '../ExpenseLogContext';
 import ExpenseCombobox from './ExpenseCombobox';
 import ExpenseLogSlot from './ExpenseLogSlot';
-import { useLogExpenseMutation } from '../http/queries';
+import { cn } from '../../../../lib/utils';
 
 const DailyExpenseLog = ({ dailyLogs, categories }) => {
-    const { logData, deleteLog, formattedDate, isLoading: isCatLoading, setHasStagedLogs } = useExpenseLog();
-    const [stagedLogs, setStagedLogs] = useState([]);
+    const { 
+        logData, 
+        formattedDate, 
+        isLoading: isCatLoading, 
+        stagedLogs, 
+        editedLogs, 
+        logExpense, 
+        isLogging,
+        clearUnsavedChanges
+    } = useExpenseLog();
     
-    const planUuid = logData?.plan_summary?.plan_uuid;
-    const logMutation = useLogExpenseMutation(planUuid);
-
-    // Sync with context for unsaved changes guard
-    React.useEffect(() => {
-        setHasStagedLogs(stagedLogs.length > 0);
-    }, [stagedLogs, setHasStagedLogs]);
-
-    const handleAddStaged = (data) => {
-        setStagedLogs([...stagedLogs, { 
-            name: data.name,
-            amount: data.amount,
-            category_name: data.category_name,
-            is_fixed: data.is_fixed,
-            uuid: `temp-${Date.now()}`,
-            is_custom: data.is_custom
-        }]);
-    };
-
-    const handleUpdateStaged = (updatedLog) => {
-        setStagedLogs(stagedLogs.map(l => l.uuid === updatedLog.uuid ? updatedLog : l));
-    };
-
-    const handleDeleteStaged = (uuid) => {
-        setStagedLogs(stagedLogs.filter(l => l.uuid !== uuid));
-    };
-
     const handleSaveAll = () => {
-        // Handle staged logs (new entries)
-        stagedLogs.forEach(log => {
-            logMutation.mutate({
-                name: log.name,
-                amount: log.amount,
-                category_name: log.category_name,
-                is_fixed: log.is_fixed,
-                expense_date: formattedDate
-            });
-        });
-        setStagedLogs([]);
+        // Collect new logs (removing tempId)
+        const newExpenses = stagedLogs.map(({ tempId, ...rest }) => ({
+            ...rest,
+            amount: parseFloat(rest.amount) || 0
+        }));
 
-        // Handle saved logs that are currently being edited
-        // We need to trigger saves for any log currently in an 'editing' state
-        // This relies on the context providing a way to save active edits
-        // Since handleSaveEdit is inside ExpenseLogSlot, we'll need to trigger 
-        // a broadcast or state update. For now, this placeholder ensures the button is enabled.
+        // Collect edited logs
+        const updatedExpenses = Object.values(editedLogs).map(log => ({
+            uuid: log.uuid,
+            category_name: log.category_name,
+            amount: parseFloat(log.amount) || 0,
+            is_fixed: log.is_fixed
+        }));
+
+        const expenses = [...newExpenses, ...updatedExpenses];
+
+        if (expenses.length === 0) return;
+
+        logExpense({
+            expense_date: formattedDate,
+            expenses
+        }, {
+            onSuccess: () => {
+                clearUnsavedChanges();
+            }
+        });
     };
 
     return (
@@ -67,39 +57,35 @@ const DailyExpenseLog = ({ dailyLogs, categories }) => {
                 <div className="flex items-center gap-2">
                     <button 
                         onClick={handleSaveAll}
-                        disabled={logMutation.isPending}
-                        className="h-7 px-3 rounded-lg bg-emerald-600 text-white text-[8px] font-black uppercase tracking-widest hover:bg-emerald-700 transition-all shrink-0"
+                        disabled={isLogging || (stagedLogs.length === 0 && Object.keys(editedLogs).length === 0)}
+                        className={cn(
+                            "h-7 px-3 rounded-lg text-white text-[8px] font-black uppercase tracking-widest transition-all shrink-0",
+                            isLogging || (stagedLogs.length === 0 && Object.keys(editedLogs).length === 0)
+                                ? "bg-muted text-muted-foreground cursor-not-allowed"
+                                : "bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-600/20"
+                        )}
                     >
-                        {logMutation.isPending ? '...' : `Save ${stagedLogs.length > 0 ? stagedLogs.length : ''} Logs`}
+                        {isLogging ? 'Saving...' : `Save ${stagedLogs.length + Object.keys(editedLogs).length || ''} Changes`}
                     </button>
                     
                     <div className="shrink-0">
                         <ExpenseCombobox 
                             categories={categories || []} 
                             isLoading={isCatLoading}
-                            onAdd={handleAddStaged}
                         />
                     </div>
                 </div>
             </div>
 
             <div className="space-y-3">
+                {/* Render staged logs first */}
                 {stagedLogs.map((log) => (
-                    <ExpenseLogSlot 
-                        key={log.uuid} 
-                        log={log} 
-                        onDelete={handleDeleteStaged}
-                        onUpdate={handleUpdateStaged}
-                    />
+                    <ExpenseLogSlot key={log.tempId} log={log} />
                 ))}
 
+                {/* Render saved logs */}
                 {dailyLogs?.map((log) => (
-                    <ExpenseLogSlot 
-                        key={log.uuid} 
-                        log={log} 
-                        onDelete={deleteLog}
-                        onUpdate={() => {}} 
-                    />
+                    <ExpenseLogSlot key={log.uuid} log={log} />
                 ))}
 
                 {(!dailyLogs?.length && !stagedLogs.length) && (

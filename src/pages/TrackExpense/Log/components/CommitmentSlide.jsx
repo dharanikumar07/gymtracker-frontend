@@ -4,16 +4,18 @@ import { useExpenseLog } from '../ExpenseLogContext';
 import { cn } from '../../../../lib/utils';
 
 const CommitmentItem = ({ commitment }) => {
-    const { logExpense, isLogging } = useExpenseLog();
+    const { logExpense, isLogging, formattedDate } = useExpenseLog();
 
     const handlePaid = () => {
         if (commitment.is_paid) return;
         
         logExpense({
-            category_uuid: commitment.uuid,
-            name: commitment.name,
-            amount: commitment.amount,
-            is_fixed: true
+            expense_date: formattedDate,
+            expenses: [{
+                category_name: commitment.name,
+                amount: commitment.amount,
+                is_fixed: true
+            }]
         });
     };
 
