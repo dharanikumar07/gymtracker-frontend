@@ -7,20 +7,22 @@ import {
 } from './api';
 import { toast } from 'sonner';
 
-export const useExpenseLogQuery = (date) => {
+export const useExpenseLogQuery = (date, options = {}) => {
     return useQuery({
         queryKey: ['expense-log', date],
         queryFn: () => getExpenseLogApi(date),
-        select: (res) => res.data
+        select: (res) => res.data,
+        ...options
     });
 };
 
-export const useAvailableCategoriesQuery = (planUuid) => {
+export const useAvailableCategoriesQuery = (planUuid, options = {}) => {
     return useQuery({
         queryKey: ['available-categories', planUuid],
         queryFn: () => getAvailableCategoriesApi(planUuid),
         enabled: !!planUuid,
-        select: (res) => res.data.categories
+        select: (res) => res.data.categories,
+        ...options
     });
 };
 

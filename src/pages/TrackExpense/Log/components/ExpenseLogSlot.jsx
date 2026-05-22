@@ -60,7 +60,7 @@ const ExpenseLogSlot = ({ log, onDelete, onUpdate }) => {
                 <div className="flex-1 min-w-0">
                     <input
                         type="text"
-                        value={isSaved ? editData.name : log.name}
+                        value={isSaved ? editData.category_name : log.category_name}
                         onChange={(e) => handleUpdate('name', e.target.value)}
                         readOnly={isReadOnly}
                         placeholder="Expense Name"

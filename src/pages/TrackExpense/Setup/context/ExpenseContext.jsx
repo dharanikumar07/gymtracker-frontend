@@ -11,8 +11,8 @@ import {
 
 const ExpenseContext = createContext();
 
-export const ExpenseProvider = ({ children }) => {
-    const { data: plansData, isLoading: isLoadingPlans } = useBudgetPlansQuery();
+export const ExpenseProvider = ({ children, isActive }) => {
+    const { data: plansData, isLoading: isLoadingPlans } = useBudgetPlansQuery({ enabled: isActive });
     
     const plans = plansData?.data || [];
     const activePlan = plans.find(p => p.is_active) || plans[0];
@@ -36,7 +36,9 @@ export const ExpenseProvider = ({ children }) => {
         }
     }, [activePlan, selectedPlanUuid]);
 
-    const { data: expensesData, isLoading: isLoadingExpenses } = useExpensesQuery(selectedPlanUuid);
+    const { data: expensesData, isLoading: isLoadingExpenses } = useExpensesQuery(selectedPlanUuid, { 
+        enabled: isActive && !!selectedPlanUuid 
+    });
     
     const savePlanMutation = useSaveBudgetPlanMutation();
     const deletePlanMutation = useDeleteBudgetPlanMutation();

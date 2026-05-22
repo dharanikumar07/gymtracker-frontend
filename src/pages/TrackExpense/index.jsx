@@ -46,8 +46,7 @@ const UnsavedChangesModal = ({ isOpen, onCancel, onConfirm }) => {
     );
 };
 
-const TrackExpenseContent = () => {
-    const [activeTab, setActiveTab] = useState('setup');
+const TrackExpenseContent = ({ activeTab, setActiveTab }) => {
     const [pendingTab, setPendingTab] = useState(null);
     const { hasUnsavedChanges: hasLogChanges, clearUnsavedChanges: clearLogChanges } = useExpenseLog();
     const { hasUnsavedChanges: hasSetupChanges, clearUnsavedChanges: clearSetupChanges } = useExpense();
@@ -132,10 +131,12 @@ const TrackExpenseContent = () => {
 };
 
 const TrackExpense = () => {
+    const [activeTab, setActiveTab] = useState('setup');
+
     return (
-        <ExpenseProvider>
-            <ExpenseLogProvider>
-                <TrackExpenseContent />
+        <ExpenseProvider isActive={activeTab === 'setup'}>
+            <ExpenseLogProvider isActive={activeTab === 'log'}>
+                <TrackExpenseContent activeTab={activeTab} setActiveTab={setActiveTab} />
             </ExpenseLogProvider>
         </ExpenseProvider>
     );

@@ -9,16 +9,20 @@ import {
 
 const ExpenseLogContext = createContext();
 
-export const ExpenseLogProvider = ({ children }) => {
+export const ExpenseLogProvider = ({ children, isActive }) => {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [activeEdits, setActiveEdits] = useState(new Set());
     const [hasStagedLogs, setHasStagedLogs] = useState(false);
     
     const formattedDate = format(selectedDate, 'yyyy-MM-dd');
 
-    const { data: logData, isLoading: isLogLoading } = useExpenseLogQuery(formattedDate);
+    const { data: logData, isLoading: isLogLoading } = useExpenseLogQuery(formattedDate, { 
+        enabled: isActive 
+    });
     const planUuid = logData?.plan_summary?.plan_uuid;
-    const { data: availableCategories, isLoading: isCatLoading } = useAvailableCategoriesQuery(planUuid);
+    const { data: availableCategories, isLoading: isCatLoading } = useAvailableCategoriesQuery(planUuid, { 
+        enabled: isActive && !!planUuid 
+    });
     
     const logExpenseMutation = useLogExpenseMutation(planUuid);
     const deleteLogMutation = useDeleteExpenseLogMutation(planUuid);
