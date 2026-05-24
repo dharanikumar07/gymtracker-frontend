@@ -4,11 +4,12 @@ import { fetchExpensesApi, saveExpenseCategoryApi, deleteExpenseCategoryApi } fr
 import { QUERY_KEYS } from '../../../../constants/query.constants';
 import { toast } from 'sonner';
 
-export const useExpensesQuery = (planUuid) => {
+export const useExpensesQuery = (planUuid, options = {}) => {
     return useQuery({
         queryKey: [QUERY_KEYS.EXPENSES, planUuid],
         queryFn: () => fetchExpensesApi(planUuid),
-        enabled: !!planUuid
+        enabled: !!planUuid,
+        ...options
     });
 };
 
@@ -35,10 +36,11 @@ export const useDeleteExpenseCategoryMutation = () => {
     });
 };
 
-export const useBudgetPlansQuery = () => {
+export const useBudgetPlansQuery = (options = {}) => {
     return useQuery({
         queryKey: [QUERY_KEYS.EXPENSES.BUDGET_PLANS],
         queryFn: () => fetchPlansApi('budget'),
+        ...options
     });
 };
 
