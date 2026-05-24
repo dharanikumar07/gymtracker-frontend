@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Trash2, DollarSign, ChevronDown, Check, Edit2, X } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../../components/ui/popover';
@@ -10,13 +10,14 @@ const ExpenseLogSlot = ({ log }) => {
         updateStagedLog, 
         deleteStagedLog, 
         deleteLog,
-        editedLogs 
+        editedLogs,
+        editingUuids,
+        setEditing
     } = useExpenseLog();
-    
-    const [isEditing, setIsEditing] = useState(false);
     
     const isSaved = !!log.uuid && !log.uuid.toString().startsWith('temp-');
     const isStaged = !!log.tempId;
+    const isEditing = isSaved && editingUuids.has(log.uuid);
     
     // Display data is either from editedLogs map or the log object itself
     const displayData = isSaved ? (editedLogs[log.uuid] || log) : log;
@@ -135,7 +136,7 @@ const ExpenseLogSlot = ({ log }) => {
                 <div className="flex items-center gap-0.5 shrink-0 mt-0.5">
                     {isSaved && (
                         <button 
-                            onClick={() => setIsEditing(!isEditing)}
+                            onClick={() => setEditing(log.uuid, !isEditing)}
                             className={cn(
                                 "transition-all p-1.5 rounded-lg",
                                 isEditing ? "text-amber-500 bg-amber-500/10" : "text-muted-foreground hover:text-emerald-600 hover:bg-emerald-500/10"

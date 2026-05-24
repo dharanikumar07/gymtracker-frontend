@@ -13,6 +13,7 @@ export const ExpenseLogProvider = ({ children, isActive }) => {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [stagedLogs, setStagedLogs] = useState([]);
     const [editedLogs, setEditedLogs] = useState({});
+    const [editingUuids, setEditingUuids] = useState(new Set());
     
     const formattedDate = format(selectedDate, 'yyyy-MM-dd');
 
@@ -31,7 +32,17 @@ export const ExpenseLogProvider = ({ children, isActive }) => {
     React.useEffect(() => {
         setStagedLogs([]);
         setEditedLogs({});
+        setEditingUuids(new Set());
     }, [formattedDate]);
+
+    const setEditing = (uuid, isEditing) => {
+        setEditingUuids(prev => {
+            const next = new Set(prev);
+            if (isEditing) next.add(uuid);
+            else next.delete(uuid);
+            return next;
+        });
+    };
 
     const addStagedLog = (data) => {
         setStagedLogs(prev => [...prev, {
@@ -71,6 +82,7 @@ export const ExpenseLogProvider = ({ children, isActive }) => {
     const clearUnsavedChanges = () => {
         setStagedLogs([]);
         setEditedLogs({});
+        setEditingUuids(new Set());
     };
 
     const value = {
@@ -86,6 +98,8 @@ export const ExpenseLogProvider = ({ children, isActive }) => {
         isDeleting: deleteLogMutation.isPending,
         stagedLogs,
         editedLogs,
+        editingUuids,
+        setEditing,
         addStagedLog,
         updateStagedLog,
         deleteStagedLog,
