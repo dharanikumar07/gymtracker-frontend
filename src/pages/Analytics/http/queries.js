@@ -5,7 +5,12 @@ import {
     fetchWorkoutInsightsApi,
     fetchAvailableExercisesApi,
     fetchProgressiveOverloadApi,
-    fetchMuscleDistributionApi
+    fetchMuscleDistributionApi,
+    fetchExpenseLogApi,
+    fetchExpenseInsightsApi,
+    fetchExpenseTrendApi,
+    fetchExpenseDistributionApi,
+    fetchAvailableExpenseCategoriesApi
 } from './api';
 
 export const useAnalyticsOverviewQuery = (date) => {
@@ -16,6 +21,7 @@ export const useAnalyticsOverviewQuery = (date) => {
     });
 };
 
+// WORKOUT QUERIES
 export const useWorkoutLogQuery = ({ startDate, endDate, enabled = true }) => {
     return useQuery({
         queryKey: ['analytics', 'workout-log', startDate, endDate],
@@ -51,6 +57,46 @@ export const useMuscleDistributionQuery = ({ periodType, lookback, enabled = tru
     return useQuery({
         queryKey: ['analytics', 'muscle-distribution', periodType, lookback],
         queryFn: () => fetchMuscleDistributionApi({ periodType, lookback }),
+        enabled: enabled
+    });
+};
+
+// EXPENSE QUERIES
+export const useExpenseLogQuery = ({ startDate, endDate, enabled = true }) => {
+    return useQuery({
+        queryKey: ['analytics', 'expense-log', startDate, endDate],
+        queryFn: () => fetchExpenseLogApi({ startDate, endDate }),
+        enabled: enabled && !!startDate
+    });
+};
+
+export const useExpenseInsightsQuery = ({ startDate, endDate, enabled = true }) => {
+    return useQuery({
+        queryKey: ['analytics', 'expense-insights', startDate, endDate],
+        queryFn: () => fetchExpenseInsightsApi({ startDate, endDate }),
+        enabled: enabled && !!startDate
+    });
+};
+
+export const useExpenseTrendQuery = ({ periodType, lookback, categoryUuid, enabled = true }) => {
+    return useQuery({
+        queryKey: ['analytics', 'expense-trend', periodType, lookback, categoryUuid],
+        queryFn: () => fetchExpenseTrendApi({ periodType, lookback, categoryUuid }),
+        enabled: enabled
+    });
+};
+
+export const useAvailableExpenseCategoriesQuery = () => {
+    return useQuery({
+        queryKey: ['analytics', 'available-expense-categories'],
+        queryFn: fetchAvailableExpenseCategoriesApi
+    });
+};
+
+export const useExpenseDistributionQuery = ({ periodType, lookback, enabled = true }) => {
+    return useQuery({
+        queryKey: ['analytics', 'expense-distribution', periodType, lookback],
+        queryFn: () => fetchExpenseDistributionApi({ periodType, lookback }),
         enabled: enabled
     });
 };

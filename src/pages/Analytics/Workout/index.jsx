@@ -22,8 +22,8 @@ import {
     CartesianGrid, 
     Tooltip, 
     ResponsiveContainer,
-    LineChart,
-    Line,
+    AreaChart,
+    Area,
     PieChart,
     Pie,
     Legend,
@@ -172,8 +172,8 @@ const DateGroup = ({ date, workouts }) => (
 );
 
 const SectionHeader = ({ icon: Icon, title, subtitle, colorClass = "bg-primary/10 text-primary" }) => (
-    <div className="flex items-center gap-3 mb-6">
-        <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center", colorClass)}>
+    <div className="flex items-center gap-3 mb-6 lg:mb-0 lg:mr-auto">
+        <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center shrink-0", colorClass)}>
             <Icon className="w-4 h-4" />
         </div>
         <div className="min-w-0">
@@ -182,6 +182,27 @@ const SectionHeader = ({ icon: Icon, title, subtitle, colorClass = "bg-primary/1
         </div>
     </div>
 );
+
+const CustomDistributionTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+        const data = payload[0].payload;
+        return (
+            <div className="bg-slate-950 border border-slate-800 p-3 rounded-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-200 min-w-[140px]">
+                <p className="text-[10px] font-black uppercase text-white mb-1 tracking-wider">{data.name}</p>
+                <div className="space-y-1">
+                    <p className="text-xl font-black text-emerald-500 leading-none">
+                        {data.value}<span className="text-[10px] ml-0.5 opacity-70">%</span>
+                    </p>
+                    <div className="pt-1.5 border-t border-white/5">
+                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Total Volume</p>
+                        <p className="text-[11px] font-black text-white">{data.raw_volume?.toLocaleString()}kg</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+    return null;
+};
 
 const Workout = () => {
     const { selectedDate, setSelectedDate, formattedDate } = useAnalytics();
@@ -192,7 +213,7 @@ const Workout = () => {
     
     // Progressive Overload State
     const [selectedExercise, setSelectedExercise] = useState(null);
-    const [overloadType, setOverloadType] = useState('month');
+    const [overloadType, setOverloadType] = useState('month'); 
     const [lookbackPeriod, setLookbackPeriod] = useState('4');
 
     // Muscle Distribution State
@@ -269,11 +290,14 @@ const Workout = () => {
         return rawData[rawData.length - 1]?.label || 'Current Period';
     }, [muscleData]);
 
-    // Calculate dynamic chart width for scrolling ONLY when data is dense
+    const currentMuscleTotal = useMemo(() => {
+        const rawData = muscleData?.data || [];
+        return rawData[rawData.length - 1]?.volume || 0;
+    }, [muscleData]);
+
     const scrollableChartWidth = useMemo(() => {
         const pointsCount = chartData.length;
-        if (pointsCount <= 6) return '100%'; // No scroll for small datasets
-        
+        if (pointsCount <= 6) return '100%';
         const minPointWidth = 80; 
         return `${pointsCount * minPointWidth}px`;
     }, [chartData]);
@@ -299,63 +323,65 @@ const Workout = () => {
                         </div>
                     </div>
 
-                    <div className="flex items-center flex-wrap gap-2 md:gap-3">
-                        <Popover open={isRangeOpen} onOpenChange={setIsRangeOpen}>
-                            <PopoverTrigger asChild>
-                                <button className="flex items-center gap-2 h-8 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 border-none">
-                                    {selectedRangeLabel}
-                                    <ChevronDown className="w-3.5 h-3.5" />
-                                </button>
-                            </PopoverTrigger>
-                            <PopoverContent align="end" className="w-[160px] p-1.5 rounded-2xl">
-                                {rangeOptions.map((opt) => (
-                                    <button
-                                        key={opt.id}
-                                        onClick={() => {
-                                            setFilterMode(opt.id);
-                                            setIsRangeOpen(false);
-                                        }}
-                                        className={cn(
-                                            "flex items-center justify-between w-full px-3 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition-colors",
-                                            filterMode === opt.id ? "bg-emerald-500/10 text-emerald-500" : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
-                                        )}
-                                    >
-                                        {opt.label}
-                                        {filterMode === opt.id && <Check className="w-3 h-3" />}
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:gap-3 w-full md:w-auto">
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                            <Popover open={isRangeOpen} onOpenChange={setIsRangeOpen}>
+                                <PopoverTrigger asChild>
+                                    <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-8 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 border-none">
+                                        <span className="truncate">{selectedRangeLabel}</span>
+                                        <ChevronDown className="w-3.5 h-3.5 shrink-0" />
                                     </button>
-                                ))}
-                            </PopoverContent>
-                        </Popover>
+                                </PopoverTrigger>
+                                <PopoverContent align="end" className="w-[160px] p-1.5 rounded-2xl">
+                                    {rangeOptions.map((opt) => (
+                                        <button
+                                            key={opt.id}
+                                            onClick={() => {
+                                                setFilterMode(opt.id);
+                                                setIsRangeOpen(false);
+                                            }}
+                                            className={cn(
+                                                "flex items-center justify-between w-full px-3 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition-colors",
+                                                filterMode === opt.id ? "bg-emerald-500/10 text-emerald-500" : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+                                            )}
+                                        >
+                                            {opt.label}
+                                            {filterMode === opt.id && <Check className="w-3 h-3" />}
+                                        </button>
+                                    ))}
+                                </PopoverContent>
+                            </Popover>
 
-                        <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-                            <PopoverTrigger asChild>
-                                <button className="flex items-center gap-2 h-8 px-4 rounded-xl border border-border/40 bg-background text-foreground hover:bg-secondary/40 transition-all shadow-sm">
-                                    <CalendarIcon className="w-3.5 h-3.5 text-muted-foreground" />
-                                    <span className="text-[9px] font-black uppercase tracking-wider whitespace-nowrap">
-                                        {format(selectedDate, 'dd MMM')}
-                                    </span>
-                                </button>
-                            </PopoverTrigger>
-                            <PopoverContent align="end" className="p-0 border-none bg-transparent shadow-none">
-                                <div className="bg-card border-2 border-border rounded-[2rem] shadow-2xl overflow-hidden">
-                                    <Calendar 
-                                        mode="single"
-                                        selected={selectedDate}
-                                        onSelect={(date) => {
-                                            if (date) {
-                                                setSelectedDate(date);
-                                                setIsCalendarOpen(false);
-                                            }
-                                        }}
-                                        className="p-3"
-                                    />
-                                </div>
-                            </PopoverContent>
-                        </Popover>
+                            <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                                <PopoverTrigger asChild>
+                                    <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-8 px-4 rounded-xl border border-border/40 bg-background text-foreground hover:bg-secondary/40 transition-all shadow-sm">
+                                        <CalendarIcon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                                        <span className="text-[9px] font-black uppercase tracking-wider whitespace-nowrap">
+                                            {format(selectedDate, 'dd MMM')}
+                                        </span>
+                                    </button>
+                                </PopoverTrigger>
+                                <PopoverContent align="end" className="p-0 border-none bg-transparent shadow-none">
+                                    <div className="bg-card border-2 border-border rounded-[2rem] shadow-2xl overflow-hidden">
+                                        <Calendar 
+                                            mode="single"
+                                            selected={selectedDate}
+                                            onSelect={(date) => {
+                                                if (date) {
+                                                    setSelectedDate(date);
+                                                    setIsCalendarOpen(false);
+                                                }
+                                            }}
+                                            className="p-3"
+                                        />
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
+                        </div>
 
                         <div className="hidden md:block w-px h-6 bg-border/40 mx-1" />
 
-                        <div className="flex bg-secondary/30 p-1 rounded-xl border border-border/30 ml-auto md:ml-0">
+                        <div className="flex bg-secondary/30 p-1 rounded-xl border border-border/30 w-full sm:w-auto">
                             {[
                                 { id: 'log', icon: History, label: 'Log' },
                                 { id: 'analytics', icon: BarChart3, label: 'Insights' }
@@ -364,14 +390,14 @@ const Workout = () => {
                                     key={mode.id}
                                     onClick={() => setViewMode(mode.id)}
                                     className={cn(
-                                        "flex items-center gap-2 px-3 sm:px-4 h-7 rounded-[10px] text-[8px] font-black uppercase tracking-widest transition-all",
+                                        "flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 h-7 rounded-[10px] text-[8px] font-black uppercase tracking-widest transition-all",
                                         viewMode === mode.id 
                                             ? "bg-card text-foreground shadow-sm border border-border/20" 
                                             : "text-muted-foreground hover:text-foreground"
                                     )}
                                 >
                                     <mode.icon className="w-3 h-3" />
-                                    <span className="hidden sm:inline">{mode.label}</span>
+                                    <span>{mode.label}</span>
                                 </button>
                             ))}
                         </div>
@@ -416,12 +442,13 @@ const Workout = () => {
                                         <SectionHeader 
                                             icon={TrendingUp} 
                                             title="Progressive Overload" 
-                                            subtitle="Track your weight volume growth"
+                                            subtitle={selectedExercise ? `Progress for ${selectedExercise.name}` : "Track your weight volume growth"}
                                             colorClass="bg-emerald-500/10 text-emerald-500"
                                         />
 
                                         <div className="flex flex-col lg:flex-row lg:items-center gap-3">
                                             <div className="flex items-center gap-2 w-full lg:w-auto">
+                                                {/* Original Toggle Switch */}
                                                 <div className="flex bg-secondary/30 p-1 rounded-xl border border-border/30 shrink-0">
                                                     {['week', 'month'].map((t) => (
                                                         <button 
@@ -436,12 +463,14 @@ const Workout = () => {
                                                         </button>
                                                     ))}
                                                 </div>
+
+                                                {/* Selection 2: Range */}
                                                 <div className="flex-1 lg:w-[160px]">
                                                     <Popover>
                                                         <PopoverTrigger asChild>
                                                             <button className="flex items-center justify-between w-full h-8 px-3 rounded-xl bg-background border border-border/40 text-[9px] font-black uppercase tracking-widest hover:bg-secondary/40 transition-all">
                                                                 <div className="flex items-center gap-1.5 truncate">
-                                                                    <Clock className="w-3 h-3 text-blue-500" />
+                                                                    <Clock className="w-3 h-3 text-emerald-500" />
                                                                     <span className="truncate">{periodOptions[overloadType].find(p => p.id === lookbackPeriod)?.label || 'Period'}</span>
                                                                 </div>
                                                                 <ChevronDown className="w-3 h-3 opacity-50" />
@@ -466,6 +495,7 @@ const Workout = () => {
                                                 </div>
                                             </div>
 
+                                            {/* Selection 3: Exercise */}
                                             <div className="w-full lg:w-auto">
                                                 <ExerciseCombobox 
                                                     exercises={exercisesData?.data}
@@ -476,11 +506,16 @@ const Workout = () => {
                                         </div>
                                     </div>
 
-                                    {/* Progressive Overload Chart - Scrollable Wrapper */}
                                     <div className="w-full overflow-x-auto scrollbar-none pb-2">
                                         <div style={{ width: scrollableChartWidth }} className="h-[300px] sm:h-[400px]">
                                             <ResponsiveContainer width="100%" height="100%">
-                                                <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 10 }}>
+                                                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 10 }}>
+                                                    <defs>
+                                                        <linearGradient id="workoutGradient" x1="0" y1="0" x2="0" y2="1">
+                                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.15}/>
+                                                            <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                                        </linearGradient>
+                                                    </defs>
                                                     <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
                                                     <XAxis 
                                                         dataKey="label" 
@@ -500,15 +535,16 @@ const Workout = () => {
                                                         itemStyle={{ color: '#10b981', fontSize: '14px', fontWeight: 'black' }}
                                                         formatter={(value) => [`${value.toLocaleString()} kg`, 'Volume']}
                                                     />
-                                                    <Line 
+                                                    <Area 
                                                         type="monotone" 
                                                         dataKey="volume" 
                                                         stroke="#10b981" 
                                                         strokeWidth={4}
-                                                        dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
+                                                        fillOpacity={1} 
+                                                        fill="url(#workoutGradient)" 
                                                         activeDot={{ r: 6, strokeWidth: 0, fill: '#10b981' }}
                                                     />
-                                                </LineChart>
+                                                </AreaChart>
                                             </ResponsiveContainer>
                                         </div>
                                     </div>
@@ -516,7 +552,7 @@ const Workout = () => {
 
                                 {/* Muscle Group Distribution Section (Pie Chart) */}
                                 <div className="bg-card border border-border/40 rounded-[2.5rem] p-4 sm:p-8 shadow-sm flex flex-col overflow-hidden">
-                                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 sm:mb-10">
+                                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-6 sm:mb-10">
                                         <SectionHeader 
                                             icon={PieChartIcon} 
                                             title="Muscle Distribution" 
@@ -525,6 +561,7 @@ const Workout = () => {
                                         />
 
                                         <div className="flex items-center gap-2 w-full lg:w-auto">
+                                            {/* Original Toggle Switch */}
                                             <div className="flex bg-secondary/30 p-1 rounded-xl border border-border/30 shrink-0">
                                                 {['week', 'month'].map((t) => (
                                                     <button 
@@ -540,12 +577,13 @@ const Workout = () => {
                                                 ))}
                                             </div>
 
+                                            {/* Range Dropdown */}
                                             <div className="flex-1 lg:w-[160px]">
                                                 <Popover>
                                                     <PopoverTrigger asChild>
                                                         <button className="flex items-center justify-between w-full h-8 px-3 rounded-xl bg-background border border-border/40 text-[9px] font-black uppercase tracking-widest hover:bg-secondary/40 transition-all">
                                                             <div className="flex items-center gap-1.5 truncate">
-                                                                <Clock className="w-3 h-3 text-blue-500" />
+                                                                <Clock className="w-3 h-3 text-emerald-500" />
                                                                 <span className="truncate">{periodOptions[muscleOverloadType].find(p => p.id === muscleLookbackPeriod)?.label || 'Period'}</span>
                                                             </div>
                                                             <ChevronDown className="w-3 h-3 opacity-50" />
@@ -571,39 +609,48 @@ const Workout = () => {
                                         </div>
                                     </div>
 
-                                    <div className="w-full h-[350px] sm:h-[400px] flex items-center justify-center overflow-hidden">
+                                    <div className="relative w-full h-[350px] sm:h-[400px] flex items-center justify-center overflow-hidden">
                                         {muscleDistributionData.length > 0 ? (
-                                            <ResponsiveContainer width="100%" height="100%">
-                                                <PieChart>
-                                                    <Pie
-                                                        data={muscleDistributionData}
-                                                        cx="50%"
-                                                        cy="45%"
-                                                        innerRadius="50%"
-                                                        outerRadius="80%"
-                                                        paddingAngle={5}
-                                                        dataKey="value"
-                                                        animationDuration={1000}
-                                                    >
-                                                        {muscleDistributionData.map((entry, index) => (
-                                                            <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} stroke="transparent" />
-                                                        ))}
-                                                    </Pie>
-                                                    <Tooltip 
-                                                        contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '16px', padding: '12px' }}
-                                                        itemStyle={{ fontSize: '12px', fontWeight: 'black' }}
-                                                        formatter={(value) => [`${value}%`, 'Distribution']}
-                                                    />
-                                                    <Legend 
-                                                        verticalAlign="bottom" 
-                                                        height={60}
-                                                        formatter={(value) => <span className="text-[9px] font-black uppercase text-muted-foreground tracking-tighter">{value}</span>}
-                                                    />
-                                                </PieChart>
-                                            </ResponsiveContainer>
+                                            <>
+                                                {/* Center Label for Donut */}
+                                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mb-10 sm:mb-0">
+                                                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none mb-1 opacity-40">Total Volume</p>
+                                                    <p className="text-2xl sm:text-3xl font-black text-foreground">{currentMuscleTotal.toLocaleString()}kg</p>
+                                                </div>
+
+                                                <ResponsiveContainer width="100%" height="100%">
+                                                    <PieChart>
+                                                        <Pie
+                                                            data={muscleDistributionData}
+                                                            cx="50%"
+                                                            cy="50%"
+                                                            innerRadius="60%"
+                                                            outerRadius="85%"
+                                                            paddingAngle={5}
+                                                            dataKey="value"
+                                                            animationDuration={1000}
+                                                            stroke="transparent"
+                                                        >
+                                                            {muscleDistributionData.map((entry, index) => (
+                                                                <Cell 
+                                                                  key={`cell-${index}`} 
+                                                                  fill={CHART_COLORS[index % CHART_COLORS.length]} 
+                                                                  className="outline-none hover:opacity-80 transition-opacity"
+                                                                />
+                                                            ))}
+                                                        </Pie>
+                                                        <Tooltip content={<CustomDistributionTooltip />} />
+                                                        <Legend 
+                                                            verticalAlign="bottom" 
+                                                            height={60}
+                                                            formatter={(value) => <span className="text-[9px] font-black uppercase text-muted-foreground tracking-widest">{value}</span>}
+                                                        />
+                                                    </PieChart>
+                                                </ResponsiveContainer>
+                                            </>
                                         ) : (
                                             <div className="flex flex-col items-center justify-center opacity-20 text-center animate-in fade-in zoom-in duration-500">
-                                                <PieChartIcon className="w-12 h-12 mb-3 text-blue-500" />
+                                                <PieChartIcon className="w-12 h-12 mb-3 text-emerald-500" />
                                                 <p className="text-[10px] font-black uppercase tracking-[0.2em]">No Muscle Logs Found</p>
                                                 <p className="text-[8px] font-bold uppercase tracking-widest mt-1">Try changing the period</p>
                                             </div>
