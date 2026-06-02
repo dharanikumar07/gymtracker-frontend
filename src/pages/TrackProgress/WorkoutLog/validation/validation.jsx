@@ -2,7 +2,7 @@
  * Validates a single workout set based on its metrics type.
  * Returns an object with field-specific error messages.
  */
-export const validateSetFields = (set, metricsType) => {
+export const validateSetFields = (set, metricsType, isWeightEnabled = false) => {
     const errors = {};
     const weight = set.weight !== '' && set.weight !== null ? Number(set.weight) : null;
     const reps = set.reps !== '' && set.reps !== null ? Number(set.reps) : null;
@@ -16,7 +16,7 @@ export const validateSetFields = (set, metricsType) => {
                 errors.reps = 'Reps must be greater than zero';
             }
 
-            if (weight === null) {
+            if (weight === null || set.weight === '') {
                 errors.weight = 'Weight is mandatory';
             } else if (weight < 0) {
                 errors.weight = 'Weight cannot be negative';
@@ -31,8 +31,12 @@ export const validateSetFields = (set, metricsType) => {
                 errors.duration = 'Duration must be positive';
             }
 
-            if (weight !== null && weight <= 0 && set.weight !== '') {
-                errors.weight = 'Weight must be greater than zero';
+            if (isWeightEnabled) {
+                if (weight === null || set.weight === '') {
+                    errors.weight = 'Weight is required';
+                } else if (weight <= 0) {
+                    errors.weight = 'Weight must be greater than zero';
+                }
             }
             break;
 
@@ -46,14 +50,15 @@ export const validateSetFields = (set, metricsType) => {
 /**
  * Validates the manual exercise addition.
  */
-export const validateManualExerciseFields = (name, sets, metricsType) => {
+export const validateManualExerciseFields = (name, sets, metricsType, targetMuscles = []) => {
     const errors = {
         name: !name?.trim() ? 'Exercise name is required' : null,
-        sets: sets.map(s => validateSetFields(s, metricsType))
+        target_muscles: (!targetMuscles || targetMuscles.length === 0) ? 'At least one muscle is required' : null,
+        sets: sets.map(s => validateSetFields(s, metricsType, s.showWeight))
     };
 
     const hasSetErrors = errors.sets.some(setErrors => Object.keys(setErrors).length > 0);
-    const isValid = !errors.name && !hasSetErrors;
+    const isValid = !errors.name && !errors.target_muscles && !hasSetErrors;
 
     return { isValid, errors };
 };

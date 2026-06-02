@@ -8,11 +8,13 @@ import {
     Loader2,
     Moon,
     Coffee,
-    CalendarDays
+    CalendarDays,
+    AlertCircle
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { usePhysicalActivityQuery, useDeleteWorkoutSlotMutation } from '../http/onboardingQueries';
 import WorkoutMetricEditor from '../../../components/WorkoutMetricEditor';
+import TargetMusclesInput from '../../../components/TargetMusclesInput';
 import { Calendar } from '../../../components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover';
 import { Button } from '../../../components/ui/button';
@@ -62,6 +64,7 @@ const transformApiResponse = (apiData) => {
                 name: slot.exercise_name,
                 exercise_order: slot.exercise_order,
                 sample_video_link: slot.meta_data?.sample_video_link || '',
+                target_muscles: slot.meta_data?.target_muscles || [],
                 metrics: {
                     type: slot.metrics_type,
                     data: slot.metrics_data || {}
@@ -132,7 +135,7 @@ const RestSlot = ({ ex, exIdx, handleRemoveWorkout, updateWorkout }) => (
                         data: { sets: 3, reps: 10, rest: 60 } 
                     } 
                 })}
-                className="mt-4 px-4 py-2 text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                className="mt-4 px-4 py-2 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/10 rounded-lg transition-colors"
             >
                 Back to Workout
             </button>
@@ -147,7 +150,7 @@ const RestSlot = ({ ex, exIdx, handleRemoveWorkout, updateWorkout }) => (
     </div>
 );
 
-const SortableExercise = ({ ex, exIdx, isExpanded, setExpandedExercise, updateWorkout, handleRemoveWorkout, config }) => {
+const SortableExercise = ({ ex, exIdx, isExpanded, setExpandedExercise, updateWorkout, handleRemoveWorkout, config, error }) => {
     const {
         attributes,
         listeners,
@@ -193,7 +196,7 @@ const SortableExercise = ({ ex, exIdx, isExpanded, setExpandedExercise, updateWo
             style={style}
             className={cn(
                 "border-2 rounded-xl sm:rounded-2xl overflow-hidden transition-all duration-200",
-                isExpanded ? "border-primary/30 bg-primary/5" : "border-border bg-secondary/20",
+                error ? "border-red-500/50 bg-red-500/5" : isExpanded ? "border-primary/30 bg-primary/5" : "border-border bg-secondary/20",
                 isDragging && "shadow-xl shadow-primary/20"
             )}
         >
@@ -205,7 +208,10 @@ const SortableExercise = ({ ex, exIdx, isExpanded, setExpandedExercise, updateWo
                 >
                     <GripVertical className="w-4 h-4 text-muted-foreground" />
                 </button>
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-primary/10 text-primary flex items-center justify-center text-[9px] sm:text-[10px] font-black">
+                <div className={cn(
+                    "w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl flex items-center justify-center text-[9px] sm:text-[10px] font-black",
+                    error ? "bg-red-500 text-white" : "bg-primary/10 text-primary"
+                )}>
                     {exIdx + 1}
                 </div>
                 <button
@@ -215,12 +221,15 @@ const SortableExercise = ({ ex, exIdx, isExpanded, setExpandedExercise, updateWo
                     <div className="flex-1 text-left min-w-0">
                         <p className={cn(
                             "text-[10px] sm:text-[12px] font-black uppercase tracking-tight truncate",
-                            ex.name ? "text-foreground" : "text-muted-foreground italic"
+                            ex.name ? (error ? "text-red-500" : "text-foreground") : "text-muted-foreground italic"
                         )}>
                             {ex.name || 'New Exercise'}
                         </p>
-                        <p className="text-[8px] sm:text-[9px] text-muted-foreground">
-                            {metricsText()}
+                        <p className={cn(
+                            "text-[8px] sm:text-[9px]",
+                            error ? "text-red-400 font-bold" : "text-muted-foreground"
+                        )}>
+                            {error ? "Incomplete Data" : metricsText()}
                         </p>
                     </div>
                 </button>
@@ -234,7 +243,7 @@ const SortableExercise = ({ ex, exIdx, isExpanded, setExpandedExercise, updateWo
                     onClick={handleToggleExpand}
                     className={cn(
                         "w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center transition-transform duration-200",
-                        isExpanded ? "bg-primary text-white rotate-180" : "bg-secondary text-muted-foreground"
+                        isExpanded ? (error ? "bg-red-500 text-white rotate-180" : "bg-primary text-white rotate-180") : "bg-secondary text-muted-foreground"
                     )}
                 >
                     <ChevronDown className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
@@ -244,18 +253,31 @@ const SortableExercise = ({ ex, exIdx, isExpanded, setExpandedExercise, updateWo
             <div
                 className={cn(
                     "overflow-hidden transition-all duration-200 ease-out",
-                    isExpanded ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                    isExpanded ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
                 )}
             >
                 <div className="px-3 sm:px-4 pb-3 sm:pb-4 pt-3 sm:pt-4 border-t border-border/50 space-y-3 sm:space-y-4">
                     <div className="space-y-1">
-                        <label className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Exercise Name</label>
+                        <label className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-1">Exercise Name</label>
                         <input 
                             className="w-full h-9 sm:h-10 px-3 sm:px-4 bg-background border border-border rounded-lg sm:rounded-xl focus:border-primary/50 outline-none text-[10px] sm:text-xs font-semibold transition-all"
                             value={ex.name}
                             placeholder="e.g. Bench Press"
                             onChange={(e) => updateWorkout(exIdx, { name: e.target.value })}
                         />
+                    </div>
+
+                    <div className="space-y-1">
+                        <TargetMusclesInput 
+                            muscles={ex.target_muscles}
+                            onUpdate={(newMuscles) => updateWorkout(exIdx, { target_muscles: newMuscles })}
+                            className={cn(error?.target_muscles && "ring-1 ring-red-500/30 rounded-2xl p-1")}
+                        />
+                        {error?.target_muscles && (
+                            <p className="text-[8px] font-bold text-red-500 ml-1 uppercase flex items-center gap-1">
+                                <AlertCircle className="w-2.5 h-2.5" /> {error.target_muscles}
+                            </p>
+                        )}
                     </div>
 
                     <div className="space-y-1.5 sm:space-y-2">
@@ -271,7 +293,7 @@ const SortableExercise = ({ ex, exIdx, isExpanded, setExpandedExercise, updateWo
     );
 };
 
-const Step2 = ({ data, updateData }) => {
+const Step2 = ({ data, updateData, errors = {} }) => {
     const [activeDay, setActiveDay] = useState('Mon');
     const [expandedExercise, setExpandedExercise] = useState(null);
     const synced = useRef(false);
@@ -307,6 +329,7 @@ const Step2 = ({ data, updateData }) => {
     const plan = data.plan || { name: '', start_date: '', end_date: '', is_active: true };
 
     const dayData = weeklySplit[activeDay] || { target_muscles: [], workouts: [] };
+    const dayErrors = errors[activeDay] || {};
 
     const updatePlan = (updates) => {
         updateData({ plan: { ...plan, ...updates } });
@@ -322,6 +345,7 @@ const Step2 = ({ data, updateData }) => {
         const newEx = { 
             name: '', 
             sample_video_link: '',
+            target_muscles: [],
             metrics: {
                 type: 'strength',
                 data: { sets: 3, reps: 10, rest: 60 }
@@ -398,7 +422,7 @@ const Step2 = ({ data, updateData }) => {
             </div>
 
             <div className="bg-card border-2 border-border rounded-2xl sm:rounded-3xl p-4 sm:p-5 space-y-4">
-                <SectionHeader title="Plan Details" icon={Calendar} />
+                <SectionHeader title="Plan Details" icon={CalendarDays} />
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                     <div className="space-y-1.5 sm:col-span-4">
                         <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Plan Name</label>
@@ -490,6 +514,7 @@ const Step2 = ({ data, updateData }) => {
                         const isActive = activeDay === day;
                         const dData = weeklySplit[day] || { workouts: [] };
                         const hasWorkouts = dData.workouts?.length > 0 && dData.workouts.some(w => w.name);
+                        const hasErrors = errors[day] && Object.keys(errors[day]).length > 0;
                         
                         return (
                             <button 
@@ -500,18 +525,23 @@ const Step2 = ({ data, updateData }) => {
                                     setExpandedExercise(dayWorkouts.length > 0 ? 0 : null);
                                 }}
                                 className={cn(
-                                    "flex-1 py-2 sm:py-3 px-1 sm:px-2 rounded-lg sm:rounded-xl text-[8px] sm:text-[10px] font-black uppercase tracking-tight transition-all flex flex-col items-center gap-0.5 sm:gap-1 shrink-0 min-w-[36px] sm:min-w-[44px]",
+                                    "flex-1 py-2 sm:py-3 px-1 sm:px-2 rounded-lg sm:rounded-xl text-[8px] sm:text-[10px] font-black uppercase tracking-tight transition-all flex flex-col items-center gap-0.5 sm:gap-1 shrink-0 min-w-[36px] sm:min-w-[44px] relative",
                                     isActive 
                                         ? "bg-primary text-white shadow-lg shadow-primary/20" 
-                                        : "text-muted-foreground hover:bg-secondary"
+                                        : hasErrors
+                                            ? "bg-red-500/10 text-red-500 border border-red-500/20"
+                                            : "text-muted-foreground hover:bg-secondary"
                                 )}
                             >
                                 <span>{day}</span>
-                                {hasWorkouts && (
+                                {hasWorkouts && !hasErrors && (
                                     <div className={cn(
                                         "w-1 sm:w-1.5 h-1 sm:h-1.5 rounded-full",
                                         isActive ? "bg-white" : "bg-primary"
                                     )} />
+                                )}
+                                {hasErrors && (
+                                    <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-red-500 animate-pulse" />
                                 )}
                             </button>
                         );
@@ -567,6 +597,7 @@ const Step2 = ({ data, updateData }) => {
                                             updateWorkout={updateWorkout}
                                             handleRemoveWorkout={handleRemoveWorkout}
                                             config={config}
+                                            error={dayErrors[exIdx]}
                                         />
                                     )
                                 ))}

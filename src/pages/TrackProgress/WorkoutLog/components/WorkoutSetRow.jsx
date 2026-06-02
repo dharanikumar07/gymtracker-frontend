@@ -55,7 +55,7 @@ const WorkoutSetRow = ({
     const handleToggleComplete = () => {
         // Run validation if we are completing it for the first time OR finishing an edit
         if (!isCompleted || isEditing) {
-            const fieldErrors = validateSetFields(set, metricsType);
+            const fieldErrors = validateSetFields(set, metricsType, showWeightInput);
             if (Object.keys(fieldErrors).length > 0) {
                 setErrors(fieldErrors);
                 return;
