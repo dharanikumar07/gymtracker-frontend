@@ -1,6 +1,7 @@
 import React from 'react';
 import { Trash2, ChevronDown, AlertCircle } from 'lucide-react';
 import WorkoutMetricEditor from '../../../../components/WorkoutMetricEditor';
+import TargetMusclesInput from '../../../../components/TargetMusclesInput';
 import { cn } from '../../../../lib/utils';
 
 const WorkoutItem = ({ 
@@ -26,6 +27,16 @@ const WorkoutItem = ({
         });
     };
 
+    const handleTargetMusclesUpdate = (newMuscles) => {
+        onUpdate(index, {
+            ...workout,
+            meta_data: {
+                ...(workout.meta_data || {}),
+                target_muscles: newMuscles
+            }
+        });
+    };
+
     const metricsText = () => {
         const { metrics_type, metrics_data } = workout;
         if (metrics_type === 'strength') {
@@ -39,6 +50,8 @@ const WorkoutItem = ({
         }
         return metrics_type?.replace('_', ' ') || 'strength';
     };
+
+    const targetMuscles = workout.meta_data?.target_muscles || [];
 
     return (
         <div className={cn(
@@ -101,30 +114,52 @@ const WorkoutItem = ({
             {isExpanded && (
                 <div className="px-4 pb-4 pt-2 border-t border-border/50 animate-in slide-in-from-top-2 duration-300">
                     <div className="space-y-4">
-                        <div className="space-y-1.5">
-                            <div className="flex items-center justify-between ml-1">
-                                <label className={cn(
-                                    "text-[9px] font-black uppercase tracking-widest",
-                                    errors?.exercise_name ? "text-red-500" : "text-muted-foreground"
-                                )}>
-                                    Exercise Name {errors?.exercise_name && <span className="text-red-500">*</span>}
-                                </label>
-                                {errors?.exercise_name && (
-                                    <span className="text-[8px] font-bold text-red-500 uppercase tracking-tighter flex items-center gap-0.5">
-                                        <AlertCircle className="w-2.5 h-2.5" /> Required
-                                    </span>
-                                )}
+                        <div className="space-y-4">
+                            <div className="space-y-1.5">
+                                <div className="flex items-center justify-between ml-1">
+                                    <label className={cn(
+                                        "text-[9px] font-black uppercase tracking-widest",
+                                        errors?.exercise_name ? "text-red-500" : "text-muted-foreground"
+                                    )}>
+                                        Exercise Name {errors?.exercise_name && <span className="text-red-500">*</span>}
+                                    </label>
+                                    {errors?.exercise_name && (
+                                        <span className="text-[8px] font-bold text-red-500 uppercase tracking-tighter flex items-center gap-0.5">
+                                            <AlertCircle className="w-2.5 h-2.5" /> Required
+                                        </span>
+                                    )}
+                                </div>
+                                <input 
+                                    className={cn(
+                                        "w-full h-10 px-4 bg-background border rounded-xl outline-none text-xs font-semibold transition-all",
+                                        errors?.exercise_name ? "border-red-500/50 bg-red-500/5 focus:border-red-500" : "border-border focus:border-primary/50"
+                                    )}
+                                    value={workout.exercise_name || ''}
+                                    placeholder="e.g. Bench Press"
+                                    onChange={(e) => handleUpdate({ exercise_name: e.target.value })}
+                                    autoFocus
+                                />
                             </div>
-                            <input 
-                                className={cn(
-                                    "w-full h-10 px-4 bg-background border rounded-xl outline-none text-xs font-semibold transition-all",
-                                    errors?.exercise_name ? "border-red-500/50 bg-red-500/5 focus:border-red-500" : "border-border focus:border-primary/50"
-                                )}
-                                value={workout.exercise_name || ''}
-                                placeholder="e.g. Bench Press"
-                                onChange={(e) => handleUpdate({ exercise_name: e.target.value })}
-                                autoFocus
-                            />
+
+                            <div className="space-y-1.5">
+                                <div className="flex items-center justify-between ml-1">
+                                    <label className={cn(
+                                        "text-[9px] font-black uppercase tracking-widest",
+                                        errors?.target_muscles ? "text-red-500" : "text-muted-foreground"
+                                    )}>
+                                        Targeted Muscles {errors?.target_muscles && <span className="text-red-500">*</span>}
+                                    </label>
+                                    {errors?.target_muscles && (
+                                        <span className="text-[8px] font-bold text-red-500 uppercase tracking-tighter flex items-center gap-0.5">
+                                            <AlertCircle className="w-2.5 h-2.5" /> Required
+                                        </span>
+                                    )}
+                                </div>
+                                <TargetMusclesInput 
+                                    muscles={targetMuscles}
+                                    onUpdate={handleTargetMusclesUpdate}
+                                />
+                            </div>
                         </div>
 
                         <div className={cn(

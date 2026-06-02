@@ -14,6 +14,7 @@ import { cn } from '../../../../lib/utils';
 import { useWorkoutLog } from '../context/WorkoutLogContext';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../../components/ui/popover';
 import WorkoutSetRow from './WorkoutSetRow';
+import TargetMusclesInput from '../../../../components/TargetMusclesInput';
 import DeleteConfirmModal from '../../../../components/ui/DeleteConfirmModal';
 
 import {
@@ -59,6 +60,7 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
 
     const [showSkipModal, setShowSkipModal] = useState(false);
     const [skipReason, setSkipReason] = useState('');
+    const [skipError, setSkipError] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     const sensors = useSensors(
@@ -100,6 +102,7 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
             },
             status: determinedStatus,
             type: slot.type || (isPending ? 'routine' : 'additional'),
+            meta_data: slot.meta_data || { target_muscles: [] },
             ...extraData
         }]);
     };
@@ -108,19 +111,19 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
         const lastSet = localSets[localSets.length - 1];
         const newSets = [
             ...localSets, 
-            { ...lastSet, id: `new-set-${Date.now()}`, completed: false }
+            { ...lastSet, id: `new-set-${Date.now()}`, completed: false, isNew: true }
         ];
         setLocalSets(newSets);
-        if (isInProgress || isCompleted) {
-            triggerSync(newSets);
-        }
     };
 
     const removeSet = (id) => {
         if (localSets.length > 1) {
+            const setToRemove = localSets.find(s => s.id === id);
             const filtered = localSets.filter(s => s.id !== id);
             setLocalSets(filtered);
-            if (isInProgress || isCompleted) {
+
+            // Trigger API only if the set was NOT newly added locally
+            if (setToRemove && !setToRemove.isNew && (isInProgress || isCompleted)) {
                 triggerSync(filtered);
             }
         }
@@ -157,16 +160,20 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
                 const oldIndex = items.findIndex(i => i.id === active.id);
                 const newIndex = items.findIndex(i => i.id === over.id);
                 const updated = arrayMove(items, oldIndex, newIndex);
-                if (isInProgress || isCompleted) triggerSync(updated);
                 return updated;
             });
         }
     };
 
     const confirmSkip = () => {
-        if (!validateSkipField(skipReason)) return;
+        const error = validateSkipField(skipReason);
+        if (error) {
+            setSkipError(error);
+            return;
+        }
         triggerSync(localSets, 'skipped', { reason: skipReason });
         setShowSkipModal(false);
+        setSkipError(null);
     };
 
     const confirmDelete = () => {
@@ -178,6 +185,7 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
     const durationUnit = slot.metrics_data?.duration_unit || 'min';
     const allDone = localSets.every(s => s.completed);
     const isSkipped = slot.status === 'skipped';
+    const targetMuscles = slot.meta_data?.target_muscles || [];
 
     if (isSkipped) {
         return (
@@ -198,6 +206,16 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
                                 </span>
                             </div>
                         </div>
+                        
+                        {targetMuscles.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                                {targetMuscles.map((muscle, idx) => (
+                                    <span key={idx} className="px-1.5 py-0.5 rounded-md bg-secondary/50 text-[7px] font-black uppercase tracking-wider text-muted-foreground/50 border border-border/50">
+                                        {muscle}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
                         
                         {slot.reason && (
                             <div className="mt-1 flex gap-2 items-start bg-orange-500/5 border border-orange-500/10 rounded-xl p-2.5">
@@ -237,22 +255,37 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
         )}>
             {/* Header: Identity & Top Actions - One Row Layout */}
             <div className="flex items-center justify-between gap-4 p-4 sm:p-5 bg-secondary/5 border-b border-border/50">
-                <div className="flex flex-col gap-1 min-w-0">
-                    <h4 className={cn(
-                        "text-[15px] font-black uppercase tracking-tight truncate leading-none",
-                        allDone ? "text-emerald-600" : "text-foreground"
-                    )}>
-                        {slot.exercise_name || "Routine Activity"}
-                    </h4>
-                    <div className="flex items-center gap-2">
-                        <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">
-                            {metricsType}
-                        </span>
-                        <div className="w-1 h-1 rounded-full bg-foreground/10" />
-                        <span className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest">
-                            {localSets.length} Sets Total
-                        </span>
+                <div className="flex flex-col gap-2 min-w-0">
+                    <div className="flex flex-col gap-1">
+                        <h4 className={cn(
+                            "text-[15px] font-black uppercase tracking-tight truncate leading-none",
+                            allDone ? "text-emerald-600" : "text-foreground"
+                        )}>
+                            {slot.exercise_name || "Routine Activity"}
+                        </h4>
+                        <div className="flex items-center gap-2">
+                            <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">
+                                {metricsType}
+                            </span>
+                            <div className="w-1 h-1 rounded-full bg-foreground/10" />
+                            <span className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest">
+                                {localSets.length} Sets Total
+                            </span>
+                        </div>
                     </div>
+
+                    {targetMuscles.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-0.5">
+                            {targetMuscles.map((muscle, idx) => (
+                                <span 
+                                    key={idx} 
+                                    className="px-2 py-0.5 rounded-lg bg-emerald-600/5 text-[8px] font-black uppercase tracking-[0.05em] text-emerald-600 border border-emerald-600/10 whitespace-nowrap"
+                                >
+                                    {muscle}
+                                </span>
+                            ))}
+                        </div>
+                    )}
                 </div>
                 
                 <div className="flex items-center gap-3 shrink-0">
@@ -316,7 +349,7 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
                 <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
                     <div 
                         className="absolute inset-0 bg-background/80 backdrop-blur-sm animate-in fade-in duration-300" 
-                        onClick={() => setShowSkipModal(false)}
+                        onClick={() => { setShowSkipModal(false); setSkipError(null); }}
                     />
                     <div className="relative bg-card border border-border rounded-2xl shadow-2xl w-full max-w-[340px] overflow-hidden animate-in zoom-in-95 duration-200">
                         <div className="p-5 space-y-4">
@@ -327,25 +360,38 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
                                 </p>
                             </div>
                             
-                            <textarea 
-                                autoFocus
-                                placeholder="e.g. Injury, lack of equipment..."
-                                className="w-full h-24 bg-secondary/20 border border-border rounded-xl p-3 text-[12px] font-bold outline-none focus:border-orange-500/50 transition-all resize-none placeholder:text-foreground/20"
-                                value={skipReason}
-                                onChange={(e) => setSkipReason(e.target.value)}
-                            />
+                            <div className="space-y-1">
+                                <textarea 
+                                    autoFocus
+                                    placeholder="e.g. Injury, lack of equipment..."
+                                    className={cn(
+                                        "w-full h-24 bg-secondary/20 border rounded-xl p-3 text-[12px] font-bold outline-none transition-all resize-none placeholder:text-foreground/20",
+                                        skipError ? "border-red-500 focus:border-red-500" : "border-border focus:border-orange-500/50"
+                                    )}
+                                    value={skipReason}
+                                    onChange={(e) => {
+                                        setSkipReason(e.target.value);
+                                        if (skipError) setSkipError(null);
+                                    }}
+                                />
+                                {skipError && (
+                                    <p className="text-[8px] font-black uppercase tracking-widest text-red-500 ml-1">
+                                        {skipError}
+                                    </p>
+                                )}
+                            </div>
                         </div>
                         
                         <div className="flex border-t border-border divide-x divide-border">
                             <button 
-                                onClick={() => setShowSkipModal(false)} 
+                                onClick={() => { setShowSkipModal(false); setSkipError(null); }} 
                                 className="flex-1 py-3 text-[10px] font-black uppercase tracking-widest text-foreground/40 hover:bg-secondary/50 transition-colors"
                             >
                                 Cancel
                             </button>
                             <button 
                                 onClick={confirmSkip} 
-                                className="flex-1 py-3 bg-orange-500/10 text-orange-600 hover:bg-orange-500 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all"
+                                className="flex-1 py-3 bg-orange-500/10 text-orange-600 hover:bg-orange-600 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all"
                             >
                                 Skip Activity
                             </button>

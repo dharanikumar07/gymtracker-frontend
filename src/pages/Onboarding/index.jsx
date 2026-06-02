@@ -40,6 +40,7 @@ const transformRoutineForApi = (formData) => {
                 name: workout.name || '',
                 exercise_order: idx + 1,
                 sample_video_link: workout.sample_video_link || '',
+                target_muscles: workout.target_muscles || [],
                 metrics: workout.metrics || { type: 'strength', data: {} }
             }))
         };
@@ -123,6 +124,27 @@ const Onboarding = () => {
         return errors;
     };
 
+    const validateStep2 = () => {
+        const weeklySplit = formData.weekly_split || {};
+        const errors = {};
+        let isValid = true;
+
+        Object.entries(weeklySplit).forEach(([day, dayData]) => {
+            const workouts = dayData.workouts || [];
+            workouts.forEach((workout, idx) => {
+                if (workout.metrics?.type !== 'rest') {
+                    if (!workout.target_muscles || workout.target_muscles.length === 0) {
+                        if (!errors[day]) errors[day] = {};
+                        errors[day][idx] = { target_muscles: "Targeted muscles are required" };
+                        isValid = false;
+                    }
+                }
+            });
+        });
+
+        return { isValid, errors };
+    };
+
     const goToStep = async (targetStep) => {
         setDirection(targetStep > step ? 'forward' : 'backward');
         
@@ -131,6 +153,14 @@ const Onboarding = () => {
                 const errors = validateStep1();
                 if (Object.keys(errors).length > 0) {
                     setStepErrors(errors);
+                    return;
+                }
+            }
+
+            if (step === 2) {
+                const validation = validateStep2();
+                if (!validation.isValid) {
+                    setStepErrors(validation.errors);
                     return;
                 }
             }
@@ -265,7 +295,7 @@ const Onboarding = () => {
     const handleNext = () => {
         if (step === 3) {
             if (validateStep3()) {
-                handleFinalSubmit({ ...stepsStatus, 'step-3': true });
+                handleFinalSubmit(false); // Explicitly setup budget
             }
         } else {
             goToStep(step + 1);
@@ -283,20 +313,20 @@ const Onboarding = () => {
             setStepsStatus({ 'step-2': false });
             setStep(3);
         } else {
-            handleFinalSubmit({ ...stepsStatus, 'step-3': false });
+            handleFinalSubmit(true); // Skipping budget setup
         }
     };
 
-    const handleFinalSubmit = async () => {
+    const handleFinalSubmit = async (isSkip = false) => {
         setLoading(true);
         
-        const transformedExpenses = (formData.expenses || []).map(exp => ({
+        const transformedExpenses = isSkip ? [] : (formData.expenses || []).map(exp => ({
             category_name: exp.type.toLowerCase().replace(/\s+/g, '_'),
             expense_period: exp.period || 'fixed',
             default_amount: parseFloat(exp.amount) || 0
         }));
 
-        const planPayload = formData.plan ? {
+        const planPayload = (!isSkip && formData.plan) ? {
             name: formData.plan.name || 'Initial Budget',
             type: 'budget',
             start_date: format(new Date(formData.plan.start_date || new Date()), "yyyy-MM-dd"),
@@ -355,7 +385,7 @@ const Onboarding = () => {
                                     className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-secondary transition-all group"
                                 >
                                     <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary transition-colors">
-                                        <span className="text-[9px] sm:text-[10px] font-black text-primary group-hover:text-white uppercase">
+                                        <span className="text-[9px] font-black text-primary group-hover:text-white uppercase">
                                             {user?.name?.charAt(0) || 'U'}
                                         </span>
                                     </div>
@@ -447,7 +477,7 @@ const Onboarding = () => {
 
                         <div className={cn("mb-6 sm:mb-8", animationClass)} key={step}>
                             {step === 1 && <Step1 data={formData} updateData={updateFormData} errors={stepErrors} />}
-                            {step === 2 && <Step2 data={formData} updateData={updateFormData} />}
+                            {step === 2 && <Step2 data={formData} updateData={updateFormData} errors={stepErrors} />}
                             {step === 3 && <Step3 data={formData} updateData={updateFormData} isSubmitted={isStep3Submitted} />}
                         </div>
 

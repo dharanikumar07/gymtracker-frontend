@@ -8,7 +8,8 @@ import {
     Moon,
     Coffee,
     Trash2,
-    Layout
+    Layout,
+    X
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from "../../../../components/ui/button";
@@ -19,6 +20,50 @@ import { toast } from 'sonner';
 const DAYS_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const DAYS_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+
+const ConfirmSwitchModal = ({ isOpen, onConfirm, onDiscard, onCancel, targetDay }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm animate-in fade-in duration-300" onClick={onCancel} />
+            <div className="relative bg-card border border-border rounded-[2rem] shadow-2xl w-full max-w-[380px] overflow-hidden animate-in zoom-in-95 duration-200">
+                <button 
+                    onClick={onCancel}
+                    className="absolute top-5 right-5 text-red-500 hover:text-red-600 transition-colors z-10"
+                >
+                    <X className="w-5 h-5" />
+                </button>
+
+                <div className="p-8 space-y-6">
+                    <div className="space-y-2">
+                        <h3 className="text-[18px] font-black uppercase tracking-tight text-foreground">Unsaved Changes</h3>
+                        <p className="text-[11px] font-bold text-muted-foreground tracking-wider leading-relaxed">
+                            You have unsaved changes for the current day. Would you like to save them before switching to <span className="text-primary">{targetDay}</span>?
+                        </p>
+                    </div>
+
+                    <div className="flex flex-row gap-2 pt-2">
+                        <Button 
+                            onClick={onDiscard}
+                            variant="outline"
+                            className="flex-1 h-8 rounded-xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest border-red-500/20 text-red-500 hover:bg-red-500/5 hover:border-red-500/40"
+                        >
+                            Discard
+                        </Button>
+                        <Button 
+                            onClick={onConfirm}
+                            variant="green"
+                            className="flex-1 h-8 rounded-xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest shadow-lg shadow-green-500/10"
+                        >
+                            Save & Continue
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const RestSlot = ({ workout, index, onDelete, onUpdate }) => (
     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 border-2 border-primary/20 dark:border-primary/30 group">
@@ -85,17 +130,21 @@ const SlotsCard = ({ slots, units: apiUnits, metricsTypes: apiMetricsTypes, plan
     const [hasChanges, setHasChanges] = useState(false);
     const [expandedIndex, setExpandedIndex] = useState(0); 
     const [errors, setErrors] = useState({});
+    const [pendingDayIndex, setPendingDayIndex] = useState(null);
 
     const deleteSlotMutation = useDeleteWorkoutSlotMutation(planUuid);
 
-    useEffect(() => {
-        const routine = DAY_KEYS.reduce((acc, key) => {
-            acc[key] = (slots || [])
+    const initializeRoutine = (rawSlots) => {
+        return DAY_KEYS.reduce((acc, key) => {
+            acc[key] = (rawSlots || [])
                 .filter(s => s.day === key)
                 .sort((a, b) => a.exercise_order - b.exercise_order);
             return acc;
         }, {});
-        setLocalRoutine(routine);
+    };
+
+    useEffect(() => {
+        setLocalRoutine(initializeRoutine(slots));
         setHasChanges(false);
         setExpandedIndex(0); 
         setErrors({});
@@ -109,53 +158,95 @@ const SlotsCard = ({ slots, units: apiUnits, metricsTypes: apiMetricsTypes, plan
     const activeDayName = DAYS_LONG[activeDayIndex];
     const currentWorkouts = localRoutine[activeDayKey] || [];
 
+    const handleDaySwitch = (idx) => {
+        if (idx === activeDayIndex) return;
+        if (hasChanges) {
+            setPendingDayIndex(idx);
+        } else {
+            setActiveDayIndex(idx);
+        }
+    };
+
+    const confirmSaveAndSwitch = async () => {
+        if (!validate()) return;
+        
+        const currentDaySlots = (localRoutine[activeDayKey] || []).map((w, idx) => ({
+            uuid: w.uuid || null,
+            plan_uuid: planUuid,
+            exercise_name: w.exercise_name,
+            exercise_order: idx + 1,
+            day: activeDayKey,
+            metrics_type: w.metrics_type,
+            metrics_data: w.metrics_data,
+            meta_data: w.meta_data || {}
+        }));
+
+        await onSave({ slots: currentDaySlots });
+        setHasChanges(false);
+        
+        if (pendingDayIndex !== null) {
+            setActiveDayIndex(pendingDayIndex);
+            setPendingDayIndex(null);
+        }
+    };
+
+    const discardAndSwitch = () => {
+        // Re-initialize only the current day from original slots
+        const originalRoutine = initializeRoutine(slots);
+        setLocalRoutine(prev => ({
+            ...prev,
+            [activeDayKey]: originalRoutine[activeDayKey]
+        }));
+        
+        setHasChanges(false);
+        if (pendingDayIndex !== null) {
+            setActiveDayIndex(pendingDayIndex);
+            setPendingDayIndex(null);
+        }
+    };
+
     const validate = () => {
         const newErrors = {};
         let isValid = true;
 
-        DAY_KEYS.forEach(dayKey => {
-            const dayWorkouts = localRoutine[dayKey] || [];
-            dayWorkouts.forEach((w, idx) => {
-                const slotErrors = {};
-                
-                if (w.metrics_type === 'rest') return;
+        // Only validate the current day when saving or switching
+        const dayWorkouts = localRoutine[activeDayKey] || [];
+        dayWorkouts.forEach((w, idx) => {
+            const slotErrors = {};
+            
+            if (w.metrics_type === 'rest') return;
 
-                if (!w.exercise_name?.trim()) {
-                    slotErrors.exercise_name = "Required";
-                    isValid = false;
-                }
+            if (!w.exercise_name?.trim()) {
+                slotErrors.exercise_name = "Required";
+                isValid = false;
+            }
 
-                const data = w.metrics_data || {};
-                if (w.metrics_type === 'strength') {
-                    if (!data.sets) { slotErrors.sets = "Req"; isValid = false; }
-                    if (!data.reps) { slotErrors.reps = "Req"; isValid = false; }
-                    if (!data.rest) { slotErrors.rest = "Req"; isValid = false; }
-                } else if (w.metrics_type === 'timed_sets') {
-                    if (!data.sets) { slotErrors.sets = "Req"; isValid = false; }
-                    if (!data.duration) { slotErrors.duration = "Req"; isValid = false; }
-                    if (!data.rest) { slotErrors.rest = "Req"; isValid = false; }
-                } else if (w.metrics_type === 'endurance') {
-                    if (!data.duration) { slotErrors.duration = "Req"; isValid = false; }
-                }
+            if (!w.meta_data?.target_muscles || w.meta_data.target_muscles.length === 0) {
+                slotErrors.target_muscles = "Required";
+                isValid = false;
+            }
 
-                if (Object.keys(slotErrors).length > 0) {
-                    newErrors[`${dayKey}-${idx}`] = slotErrors;
-                }
-            });
+            const data = w.metrics_data || {};
+            if (w.metrics_type === 'strength') {
+                if (!data.sets) { slotErrors.sets = "Req"; isValid = false; }
+                if (!data.reps) { slotErrors.reps = "Req"; isValid = false; }
+                if (!data.rest) { slotErrors.rest = "Req"; isValid = false; }
+            } else if (w.metrics_type === 'timed_sets') {
+                if (!data.sets) { slotErrors.sets = "Req"; isValid = false; }
+                if (!data.duration) { slotErrors.duration = "Req"; isValid = false; }
+                if (!data.rest) { slotErrors.rest = "Req"; isValid = false; }
+            } else if (w.metrics_type === 'endurance') {
+                if (!data.duration) { slotErrors.duration = "Req"; isValid = false; }
+            }
+
+            if (Object.keys(slotErrors).length > 0) {
+                newErrors[`${activeDayKey}-${idx}`] = slotErrors;
+            }
         });
 
         setErrors(newErrors);
         if (!isValid) {
-            toast.error("Please fill in all required fields in the routine.");
-            const firstErrorKey = Object.keys(newErrors)[0];
-            if (firstErrorKey) {
-                const [errDay, errIdx] = firstErrorKey.split('-');
-                const dayIdx = DAY_KEYS.indexOf(errDay);
-                if (dayIdx !== -1) {
-                    setActiveDayIndex(dayIdx);
-                    setExpandedIndex(parseInt(errIdx));
-                }
-            }
+            toast.error(`Please fill in all required fields for ${activeDayName}.`);
         }
         return isValid;
     };
@@ -163,7 +254,6 @@ const SlotsCard = ({ slots, units: apiUnits, metricsTypes: apiMetricsTypes, plan
     const handleUpdateWorkout = (index, updates) => {
         setLocalRoutine(prev => {
             const newDayWorkouts = [...(prev[activeDayKey] || [])];
-            // CRITICAL: Merge updates with the existing workout object to preserve other fields
             newDayWorkouts[index] = { ...newDayWorkouts[index], ...updates };
             return { ...prev, [activeDayKey]: newDayWorkouts };
         });
@@ -223,27 +313,31 @@ const SlotsCard = ({ slots, units: apiUnits, metricsTypes: apiMetricsTypes, plan
     const handleSave = () => {
         if (!validate()) return;
 
-        const allSlots = [];
-        DAY_KEYS.forEach(dayKey => {
-            localRoutine[dayKey]?.forEach((w, idx) => {
-                allSlots.push({
-                    uuid: w.uuid || null,
-                    plan_uuid: planUuid,
-                    exercise_name: w.exercise_name,
-                    exercise_order: idx + 1,
-                    day: dayKey,
-                    metrics_type: w.metrics_type,
-                    metrics_data: w.metrics_data,
-                    meta_data: w.meta_data || {}
-                });
-            });
-        });
-        onSave({ slots: allSlots });
+        const currentDaySlots = (localRoutine[activeDayKey] || []).map((w, idx) => ({
+            uuid: w.uuid || null,
+            plan_uuid: planUuid,
+            exercise_name: w.exercise_name,
+            exercise_order: idx + 1,
+            day: activeDayKey,
+            metrics_type: w.metrics_type,
+            metrics_data: w.metrics_data,
+            meta_data: w.meta_data || {}
+        }));
+
+        onSave({ slots: currentDaySlots });
         setHasChanges(false);
     };
 
     return (
         <div className="space-y-4">
+            <ConfirmSwitchModal 
+                isOpen={pendingDayIndex !== null}
+                targetDay={pendingDayIndex !== null ? DAYS_LONG[pendingDayIndex] : ''}
+                onConfirm={confirmSaveAndSwitch}
+                onDiscard={discardAndSwitch}
+                onCancel={() => setPendingDayIndex(null)}
+            />
+
             <div className="bg-card border border-border rounded-2xl shadow-sm p-3 sm:p-4 space-y-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
@@ -255,14 +349,16 @@ const SlotsCard = ({ slots, units: apiUnits, metricsTypes: apiMetricsTypes, plan
 
                     <Button
                         onClick={handleSave}
-                        disabled={isSaving}
+                        disabled={isSaving || !hasChanges}
                         variant="green"
                         size="compact"
                         className="gap-1.5 rounded-xl h-8 px-3 min-w-[100px]"
                     >
                         {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
-                        <span className="text-[10px] font-black uppercase tracking-widest">
-                            {isSaving ? 'Saving...' : 'Save Slots'}
+                        <span className="text-[10px] font-black uppercase tracking-widest text-white whitespace-nowrap">
+                            {isSaving ? 'Saving...' : (
+                                <>Save<span className="hidden sm:inline"> Changes</span></>
+                            )}
                         </span>
                     </Button>
                 </div>
@@ -276,7 +372,7 @@ const SlotsCard = ({ slots, units: apiUnits, metricsTypes: apiMetricsTypes, plan
                         return (
                             <button 
                                 key={key} 
-                                onClick={() => setActiveDayIndex(idx)}
+                                onClick={() => handleDaySwitch(idx)}
                                 className={cn(
                                     "py-2.5 rounded-lg sm:rounded-xl text-[9px] font-black uppercase tracking-tight transition-all flex flex-col items-center gap-1 relative",
                                     isActive 

@@ -20,6 +20,7 @@ import { useWorkoutLog } from '../context/WorkoutLogContext';
 import { toast } from 'sonner';
 import { Button } from '../../../../components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../../components/ui/popover';
+import TargetMusclesInput from '../../../../components/TargetMusclesInput';
 
 import { validateManualExerciseFields } from '../validation/validation';
 
@@ -44,6 +45,7 @@ const AddWorkoutCard = ({ onClose }) => {
     const availableMetrics = (metricsDefaults?.metrics_types || ['strength', 'timed_sets', 'endurance']).filter(t => t !== 'rest');
     
     const [exerciseName, setExerciseName] = useState('');
+    const [targetMuscles, setTargetMuscles] = useState([]);
     const [metricsType, setMetricsType] = useState('strength');
     const [sets, setSets] = useState(() => buildSets('strength', 3));
     const [isSaving, setIsSaving] = useState(false);
@@ -79,7 +81,7 @@ const AddWorkoutCard = ({ onClose }) => {
     };
 
     const handleSave = () => {
-        const validation = validateManualExerciseFields(exerciseName, sets, metricsType);
+        const validation = validateManualExerciseFields(exerciseName, sets, metricsType, targetMuscles);
         
         if (!validation.isValid) {
             setErrors(validation.errors);
@@ -115,7 +117,11 @@ const AddWorkoutCard = ({ onClose }) => {
             metrics_type: metricsType, 
             metrics_data: metricsData, 
             type: 'additional', 
-            status: 'completed' 
+            status: 'completed',
+            meta_data: {
+                target_muscles: targetMuscles,
+                sample_video_link: null
+            }
         }], {
             onSuccess: () => { setIsSaving(false); onClose(); },
             onError: () => setIsSaving(false),
@@ -188,6 +194,12 @@ const AddWorkoutCard = ({ onClose }) => {
                         />
                         {errors.name && <p className="text-[8px] font-bold text-red-500 ml-1 uppercase">{errors.name}</p>}
                     </div>
+
+                    <TargetMusclesInput 
+                        muscles={targetMuscles}
+                        onUpdate={setTargetMuscles}
+                    />
+                    {errors.target_muscles && <p className="text-[8px] font-bold text-red-500 ml-1 uppercase">{errors.target_muscles}</p>}
 
                     <div className="space-y-1.5">
                         <label className="text-[8px] font-black uppercase tracking-widest text-foreground/30 ml-1">Training Style</label>
