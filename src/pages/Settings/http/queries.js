@@ -1,22 +1,24 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchUserApi, updateUserApi } from './api';
+import { fetchProfileApi, updateProfileApi } from './api';
 import { toast } from 'sonner';
 
-export const useUserQuery = () => {
+export const useProfileQuery = () => {
     return useQuery({
-        queryKey: ['user', 'me'],
-        queryFn: fetchUserApi,
+        queryKey: ['settings', 'profile'],
+        queryFn: fetchProfileApi,
     });
 };
 
-export const useUpdateUserMutation = () => {
+export const useUpdateProfileMutation = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: updateUserApi,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['user'] });
+        mutationFn: updateProfileApi,
+        onSuccess: (res) => {
+            queryClient.setQueryData(['settings', 'profile'], res);
             toast.success('Profile updated successfully');
         },
-        onError: (error) => toast.error(error.response?.data?.errors || 'Failed to update profile'),
+        onError: (error) => {
+            toast.error(error.response?.data?.message || 'Failed to update profile');
+        }
     });
 };
