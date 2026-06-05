@@ -1,46 +1,68 @@
-import React from 'react';
-import { Settings, User, Bell, Lock, Palette, HelpCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, Bell, Settings as SettingsIcon } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
-const settingsItems = [
-    { icon: User, label: 'Profile', description: 'Manage your account details' },
-    { icon: Bell, label: 'Notifications', description: 'Configure push notifications' },
-    { icon: Lock, label: 'Privacy & Security', description: 'Password and security settings' },
-    { icon: Palette, label: 'Appearance', description: 'Theme and display preferences' },
-    { icon: HelpCircle, label: 'Help & Support', description: 'FAQs and contact support' },
+import Profile from './Profile';
+import Notifications from './Notifications';
+
+const tabs = [
+    { id: 'profile', label: 'Profile', icon: User },
+    { id: 'notifications', label: 'Notifications', icon: Bell },
 ];
 
-const SettingsPage = () => {
+const Settings = () => {
+    const [activeTab, setActiveTab] = useState('profile');
+
     return (
-        <div className="h-full flex flex-col p-4 font-sans">
-            <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Settings className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                    <h1 className="text-[14px] font-black uppercase italic text-foreground">Settings</h1>
-                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Customize your experience</p>
+        <div className="h-full flex flex-col p-3 sm:p-5 lg:p-6 font-sans max-w-[1600px] mx-auto w-full">
+            {/* Navigation Bar - Matching TrackProgress */}
+            <div className="shrink-0 mb-8 px-1 sm:px-0">
+                <div className="flex items-center justify-start gap-2 p-1.5 bg-background/40 backdrop-blur-md border border-border/40 rounded-full shadow-xl relative overflow-hidden group">
+                    <div className="flex items-center gap-1 w-full">
+                        {tabs.map((tab) => {
+                            const Icon = tab.icon;
+                            const isActive = activeTab === tab.id;
+                            return (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={cn(
+                                        "relative flex items-center justify-center gap-2 h-9 sm:h-10 rounded-full transition-all duration-500 group/btn flex-1",
+                                        isActive
+                                            ? "bg-primary text-white shadow-lg shadow-primary/20 z-10"
+                                            : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
+                                    )}
+                                >
+                                    {isActive && (
+                                        <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 rounded-full animate-in fade-in zoom-in-95 duration-300" />
+                                    )}
+                                    <div className="relative flex items-center gap-2">
+                                        <Icon className={cn(
+                                            "w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-300",
+                                            isActive ? "scale-110" : "group-hover/btn:scale-110"
+                                        )} />
+                                        <span className={cn(
+                                            "text-[9px] sm:text-[10px] font-black uppercase tracking-wider transition-all duration-300",
+                                            isActive ? "block" : "hidden sm:block"
+                                        )}>
+                                            {tab.label}
+                                        </span>
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
 
-            <div className="space-y-3">
-                {settingsItems.map((item, index) => {
-                    const Icon = item.icon;
-                    return (
-                        <button key={index} className="w-full bg-card border border-border rounded-2xl p-4 flex items-center gap-4 hover:bg-secondary/30 transition-colors">
-                            <div className="w-12 h-12 rounded-xl bg-secondary/30 flex items-center justify-center">
-                                <Icon className="w-5 h-5 text-primary" />
-                            </div>
-                            <div className="flex-1 text-left">
-                                <h3 className="text-[12px] font-black text-foreground uppercase italic">{item.label}</h3>
-                                <p className="text-[9px] font-bold text-muted-foreground">{item.description}</p>
-                            </div>
-                        </button>
-                    );
-                })}
+            {/* Content Area */}
+            <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide no-scrollbar">
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+                    {activeTab === 'profile' ? <Profile /> : <Notifications />}
+                </div>
             </div>
         </div>
     );
 };
 
-export default SettingsPage;
+export default Settings;
