@@ -1,17 +1,16 @@
-import React, { useState } from 'react';
-import { User, Bell, Settings as SettingsIcon } from 'lucide-react';
+import React from 'react';
+import { User, Bell } from 'lucide-react';
+import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 
-import Profile from './Profile';
-import Notifications from './Notifications';
-
 const tabs = [
-    { id: 'profile', label: 'Profile', icon: User },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
+    { id: 'profile', label: 'Profile', icon: User, path: '/settings/profile' },
+    { id: 'notifications', label: 'Notifications', icon: Bell, path: '/settings/notifications' },
 ];
 
 const Settings = () => {
-    const [activeTab, setActiveTab] = useState('profile');
+    const navigate = useNavigate();
+    const location = useLocation();
 
     return (
         <div className="h-full flex flex-col p-3 sm:p-5 lg:p-6 font-sans max-w-[1600px] mx-auto w-full">
@@ -21,11 +20,11 @@ const Settings = () => {
                     <div className="flex items-center gap-1 w-full">
                         {tabs.map((tab) => {
                             const Icon = tab.icon;
-                            const isActive = activeTab === tab.id;
+                            const isActive = location.pathname === tab.path;
                             return (
                                 <button
                                     key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
+                                    onClick={() => navigate(tab.path)}
                                     className={cn(
                                         "relative flex items-center justify-center gap-2 h-9 sm:h-10 rounded-full transition-all duration-500 group/btn flex-1",
                                         isActive
@@ -58,7 +57,7 @@ const Settings = () => {
             {/* Content Area */}
             <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide no-scrollbar">
                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
-                    {activeTab === 'profile' ? <Profile /> : <Notifications />}
+                    <Outlet />
                 </div>
             </div>
         </div>

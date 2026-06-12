@@ -143,7 +143,34 @@
     background: hsl(240 3.7% 35%);
   }
 
-  .dark ::-webkit-scrollbar-thumb:hover {
-    background: hsl(240 3.7% 50%);
+  /* Hide scrollbars but keep functionality */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Style native time picker indicators */
+  input[type="time"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    border-radius: 4px;
+    margin-right: 2px;
+    transition: all 0.2s;
+  }
+
+  /* Dark mode specific indicator adjustment */
+  .dark input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.5;
+  }
+
+  .dark input[type="time"] {
+    color-scheme: dark;
+  }
+
+  .dark input[type="time"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
   }
 }
