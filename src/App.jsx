@@ -14,6 +14,15 @@ import PublicRoute from './components/PublicRoute';
 import { Toaster } from 'sonner';
 import { useUserQuery } from './pages/Authentication/http/authQueries';
 
+import Dashboard from './pages/Dashboard/index.jsx';
+import Analytics from './pages/Analytics/index.jsx';
+import TrackProgress from './pages/TrackProgress/index.jsx';
+import TrackExpense from './pages/TrackExpense/index.jsx';
+import SettingsPage from './pages/Settings/index.jsx';
+import Billing from './pages/Billing/index.jsx';
+import Profile from './pages/Settings/Profile/index.jsx';
+import Notifications from './pages/Settings/Notifications/index.jsx';
+
 function App() {
     useUserQuery();
 
@@ -35,12 +44,20 @@ function App() {
                 {/* Protected Routes */}
                 <Route element={<ProtectedRoute />}>
                     <Route path="/onboarding" element={<Onboarding />} />
-                    <Route path="/dashboard" element={<DashboardLayout />} />
-                    <Route path="/analytics" element={<DashboardLayout />} />
-                    <Route path="/track-progress" element={<DashboardLayout />} />
-                    <Route path="/track-expense" element={<DashboardLayout />} />
-                    <Route path="/settings" element={<DashboardLayout />} />
-                    <Route path="/billing" element={<DashboardLayout />} />
+                    
+                    <Route element={<DashboardLayout />}>
+                        <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="/analytics" element={<Analytics />} />
+                        <Route path="/track-progress" element={<TrackProgress />} />
+                        <Route path="/track-expense" element={<TrackExpense />} />
+                        <Route path="/billing" element={<Billing />} />
+                        
+                        <Route path="/settings" element={<SettingsPage />}>
+                            <Route index element={<Navigate to="profile" replace />} />
+                            <Route path="profile" element={<Profile />} />
+                            <Route path="notifications" element={<Notifications />} />
+                        </Route>
+                    </Route>
                 </Route>
 
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
