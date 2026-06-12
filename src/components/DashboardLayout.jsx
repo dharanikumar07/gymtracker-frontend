@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { 
     Home, BarChart3, Dumbbell, Wallet, Settings, CreditCard,
     ChevronDown, ChevronLeft, LogOut, Menu
@@ -8,20 +8,13 @@ import { useAuthStore } from '../store/authStore';
 import { cn } from '../lib/utils';
 import ThemeToggle from './ThemeToggle';
 
-import Dashboard from '../pages/Dashboard/index.jsx';
-import Analytics from '../pages/Analytics/index.jsx';
-import TrackProgress from '../pages/TrackProgress/index.jsx';
-import TrackExpense from '../pages/TrackExpense/index.jsx';
-import SettingsPage from '../pages/Settings/index.jsx';
-import Billing from '../pages/Billing/index.jsx';
-
 const menuItems = [
-    { id: 'dashboard', label: 'Home', icon: Home, path: '/dashboard', component: Dashboard },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/analytics', component: Analytics },
-    { id: 'progress', label: 'Progress', icon: Dumbbell, path: '/track-progress', component: TrackProgress },
-    { id: 'expenses', label: 'Expenses', icon: Wallet, path: '/track-expense', component: TrackExpense },
-    { id: 'billing', label: 'Billing', icon: CreditCard, path: '/billing', component: Billing },
-    { id: 'settings', label: 'Settings', icon: Settings, path: '/settings', component: SettingsPage },
+    { id: 'dashboard', label: 'Home', icon: Home, path: '/dashboard' },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/analytics' },
+    { id: 'progress', label: 'Progress', icon: Dumbbell, path: '/track-progress' },
+    { id: 'expenses', label: 'Expenses', icon: Wallet, path: '/track-expense' },
+    { id: 'billing', label: 'Billing', icon: CreditCard, path: '/billing' },
+    { id: 'settings', label: 'Settings', icon: Settings, path: '/settings' },
 ];
 
 const DashboardLayout = () => {
@@ -31,8 +24,9 @@ const DashboardLayout = () => {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-    const activeItem = menuItems.find(item => location.pathname === item.path) || menuItems[0];
-    const ActiveComponent = activeItem.component;
+    const activeItem = menuItems.find(item => 
+        location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path))
+    ) || menuItems[0];
 
     const handleLogout = () => {
         logout();
@@ -70,7 +64,7 @@ const DashboardLayout = () => {
                     <nav className="flex-1 px-3 space-y-1 mt-4 overflow-y-auto no-scrollbar">
                         {menuItems.map((item) => {
                             const Icon = item.icon;
-                            const isActive = location.pathname === item.path;
+                            const isActive = location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
                             return (
                                 <button
                                     key={item.id}
@@ -98,7 +92,7 @@ const DashboardLayout = () => {
             <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-lg border-t border-border px-4 h-16 flex items-center justify-between pb-safe overflow-x-auto no-scrollbar gap-2">
                 {menuItems.map((item) => {
                     const Icon = item.icon;
-                    const isActive = location.pathname === item.path;
+                    const isActive = location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
                     return (
                         <button
                             key={item.id}
@@ -171,7 +165,7 @@ const DashboardLayout = () => {
                 {/* Scrollable Content */}
                 <main className="flex-1 overflow-y-auto bg-background/50 pb-20 lg:pb-6">
                     <div className="max-w-[1600px] mx-auto h-full">
-                        <ActiveComponent />
+                        <Outlet />
                     </div>
                 </main>
             </div>
