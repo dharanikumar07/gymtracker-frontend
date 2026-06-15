@@ -19,7 +19,6 @@ import Analytics from './pages/Analytics/index.jsx';
 import TrackProgress from './pages/TrackProgress/index.jsx';
 import TrackExpense from './pages/TrackExpense/index.jsx';
 import SettingsPage from './pages/Settings/index.jsx';
-import Billing from './pages/Billing/index.jsx';
 import Profile from './pages/Settings/Profile/index.jsx';
 import Notifications from './pages/Settings/Notifications/index.jsx';
 
@@ -50,8 +49,6 @@ function App() {
                         <Route path="/analytics" element={<Analytics />} />
                         <Route path="/track-progress" element={<TrackProgress />} />
                         <Route path="/track-expense" element={<TrackExpense />} />
-                        <Route path="/billing" element={<Billing />} />
-                        
                         <Route path="/settings" element={<SettingsPage />}>
                             <Route index element={<Navigate to="profile" replace />} />
                             <Route path="profile" element={<Profile />} />

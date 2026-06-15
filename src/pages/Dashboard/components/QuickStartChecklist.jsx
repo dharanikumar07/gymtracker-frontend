@@ -9,7 +9,6 @@ import {
     User,
     Dumbbell,
     Wallet,
-    CreditCard,
     ArrowRight,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
@@ -18,7 +17,6 @@ const iconMap = {
     profile: User,
     fitness: Dumbbell,
     budget: Wallet,
-    billing: CreditCard,
 };
 
 const QuickStartChecklist = ({ quickStart }) => {
@@ -35,7 +33,6 @@ const QuickStartChecklist = ({ quickStart }) => {
         profile: '/profile',
         fitness: '/workout',
         budget: '/expenses',
-        billing: '/billing',
     };
 
     return (
