@@ -1,9 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
+import {
     Clock,
     Dumbbell,
-    UtensilsCrossed,
     Wallet,
     ArrowRight,
 } from 'lucide-react';
@@ -11,19 +10,16 @@ import { cn } from '../../../lib/utils';
 
 const iconMap = {
     workout: Dumbbell,
-    diet: UtensilsCrossed,
     expense: Wallet,
 };
 
 const colorMap = {
     workout: 'bg-primary/10 text-primary',
-    diet: 'bg-green-500/10 text-green-500',
     expense: 'bg-red-500/10 text-red-500',
 };
 
 const routeMap = {
     workout: '/workout',
-    diet: '/diet',
     expense: '/expenses',
 };
 

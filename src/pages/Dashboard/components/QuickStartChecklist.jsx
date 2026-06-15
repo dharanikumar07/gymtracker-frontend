@@ -1,14 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { 
+import {
     Rocket,
     Check,
     ChevronDown,
     ChevronUp,
     User,
     Dumbbell,
-    UtensilsCrossed,
     Wallet,
     CreditCard,
     ArrowRight,
@@ -18,7 +17,6 @@ import { cn } from '../../../lib/utils';
 const iconMap = {
     profile: User,
     fitness: Dumbbell,
-    diet: UtensilsCrossed,
     budget: Wallet,
     billing: CreditCard,
 };
@@ -36,7 +34,6 @@ const QuickStartChecklist = ({ quickStart }) => {
     const routeMap = {
         profile: '/profile',
         fitness: '/workout',
-        diet: '/diet',
         budget: '/expenses',
         billing: '/billing',
     };

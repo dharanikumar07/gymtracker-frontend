@@ -1,8 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
+import {
     Dumbbell,
-    UtensilsCrossed,
     Wallet,
     Check,
     ArrowRight,
@@ -13,12 +12,10 @@ const TodaySnapshot = ({ today }) => {
     const navigate = useNavigate();
 
     const fitness = today?.fitness || {};
-    const diet = today?.diet || {};
     const budget = today?.budget || {};
 
     const completedCount = [
         fitness?.percentage >= 100,
-        diet?.percentage >= 80,
         budget?.percentage <= 100,
     ].filter(Boolean).length;
 
@@ -30,12 +27,12 @@ const TodaySnapshot = ({ today }) => {
                         Today's Snapshot
                     </h3>
                     <span className="text-[9px] font-black text-muted-foreground uppercase">
-                        {completedCount}/3
+                        {completedCount}/2
                     </span>
                 </div>
             </div>
 
-            <div className="p-4 grid grid-cols-3 gap-3">
+            <div className="p-4 grid grid-cols-2 gap-3">
                 <button 
                     onClick={() => navigate('/workout')}
                     className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-secondary/30 hover:bg-secondary/50 transition-colors"
@@ -56,36 +53,7 @@ const TodaySnapshot = ({ today }) => {
                     </span>
                 </button>
 
-                <button 
-                    onClick={() => navigate('/diet')}
-                    className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-secondary/30 hover:bg-secondary/50 transition-colors"
-                >
-                    <div className="relative w-10 h-10">
-                        <svg className="w-full h-full transform -rotate-90">
-                            <circle cx="20" cy="20" r="16" strokeWidth="4" stroke="currentColor" className="text-secondary" fill="none" />
-                            <circle
-                                cx="20"
-                                cy="20"
-                                r="16"
-                                strokeWidth="4"
-                                strokeLinecap="round"
-                                stroke="currentColor"
-                                className="text-green-500 transition-all"
-                                fill="none"
-                                strokeDasharray={`${(diet?.percentage || 0) * 1} 100`}
-                            />
-                        </svg>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <UtensilsCrossed className="w-4 h-4 text-green-500" />
-                        </div>
-                    </div>
-                    <span className="text-[8px] font-black uppercase text-muted-foreground">Diet</span>
-                    <span className="text-[10px] font-black italic text-foreground">
-                        {diet?.consumed || 0}
-                    </span>
-                </button>
-
-                <button 
+                <button
                     onClick={() => navigate('/expenses')}
                     className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-secondary/30 hover:bg-secondary/50 transition-colors"
                 >

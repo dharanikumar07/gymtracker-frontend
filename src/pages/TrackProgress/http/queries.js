@@ -5,13 +5,8 @@ import {
     deletePlanApi,
     fetchRoutineApi,
     fetchRoutineTrackingApi,
-    fetchDietRoutineApi,
-    fetchDietTrackingApi,
     updateRoutineApi,
     logWorkoutApi,
-    generateDietPlanApi,
-    updateDietRoutineApi,
-    logDietApi,
 } from './api';
 import { QUERY_KEYS } from '../../../constants/query.constants';
 import { toast } from 'sonner';
@@ -89,57 +84,5 @@ export const useLogWorkoutMutation = () => {
             toast.success('Workout logged successfully');
         },
         onError: (error) => toast.error(error.response?.data?.errors || 'Failed to log workout'),
-    });
-};
-
-// ─── Diet Queries ───
-export const useDietRoutineQuery = () => {
-    return useQuery({
-        queryKey: QUERY_KEYS.PROGRESS.DIET_ROUTINE(),
-        queryFn: () => fetchDietRoutineApi(),
-    });
-};
-
-export const useDietTrackingQuery = (date) => {
-    return useQuery({
-        queryKey: QUERY_KEYS.PROGRESS.DIET_TRACKING(date),
-        queryFn: () => fetchDietTrackingApi(date),
-        enabled: !!date,
-    });
-};
-
-export const useGenerateDietPlanMutation = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: generateDietPlanApi,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROGRESS.DIET_ROUTINE() });
-            toast.success('Diet plan generated successfully');
-        },
-        onError: (error) => toast.error(error.response?.data?.errors || 'Failed to generate diet plan'),
-    });
-};
-
-export const useUpdateDietRoutineMutation = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: updateDietRoutineApi,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROGRESS.DIET_ROUTINE() });
-            toast.success('Diet routine updated successfully');
-        },
-        onError: (error) => toast.error(error.response?.data?.errors || 'Failed to update diet routine'),
-    });
-};
-
-export const useLogDietMutation = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: logDietApi,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROGRESS.DIET_TRACKING() });
-            toast.success('Diet logged successfully');
-        },
-        onError: (error) => toast.error(error.response?.data?.errors || 'Failed to log diet'),
     });
 };
