@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { fetchMeApi, logoutApi } from '../pages/Authentication/http/authApi';
+import { removeDeviceTokenApi } from '../pages/Settings/http/api';
 
 export const useAuthStore = create((set, get) => ({
     user: null,
@@ -39,6 +40,17 @@ export const useAuthStore = create((set, get) => ({
 
     logout: async () => {
         try {
+            // Deactivate FCM device token before logout
+            const fcmToken = localStorage.getItem('fcm_device_token');
+            if (fcmToken) {
+                try {
+                    await removeDeviceTokenApi({ fcm_token: fcmToken });
+                } catch (e) {
+                    console.error('Failed to deactivate device token:', e);
+                }
+                localStorage.removeItem('fcm_device_token');
+            }
+
             await logoutApi();
         } catch (error) {
             console.error('Logout error:', error);
