@@ -1,17 +1,17 @@
 /* eslint-disable no-undef */
 // Firebase Messaging Service Worker
 // Handles background push notifications when the app is not in focus
+// NOTE: This is a template — Vite injects env values at build time.
 
 importScripts('https://www.gstatic.com/firebasejs/11.9.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/11.9.1/firebase-messaging-compat.js');
 
-// Firebase config — these are public keys, safe to include in client code
 firebase.initializeApp({
-    apiKey: 'AIzaSyCBTDT-_iOnT4SXwZPwg7sxFap3uGGm2KE',
-    authDomain: 'tracker-app-staging.firebaseapp.com',
-    projectId: 'tracker-app-staging',
-    messagingSenderId: '246501319743',
-    appId: '1:246501319743:web:f4aecd07d4c0351ac2c48a',
+    apiKey: '__VITE_FIREBASE_API_KEY__',
+    authDomain: '__VITE_FIREBASE_AUTH_DOMAIN__',
+    projectId: '__VITE_FIREBASE_PROJECT_ID__',
+    messagingSenderId: '__VITE_FIREBASE_MESSAGING_SENDER_ID__',
+    appId: '__VITE_FIREBASE_APP_ID__',
 });
 
 const messaging = firebase.messaging();
