@@ -1,18 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Dumbbell, Activity } from 'lucide-react';
+import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 
-import Routine from './Routine';
-import WorkoutLog from './WorkoutLog';
-
 const tabs = [
-    { id: 'routine', label: 'Routine', icon: Activity },
-    { id: 'workout', label: 'Workout', icon: Dumbbell },
+    { id: 'routine', label: 'Routine', icon: Activity, path: '/track-progress/routine' },
+    { id: 'workout', label: 'Workout', icon: Dumbbell, path: '/track-progress/workout' },
 ];
 
 const TrackProgress = () => {
-    const [activeTab, setActiveTab] = useState('routine');
-
+    const navigate = useNavigate();
+    const location = useLocation();
     return (
         <div className="h-full flex flex-col p-3 sm:p-5 lg:p-6 font-sans max-w-[1600px] mx-auto w-full">
             {/* Navigation Bar */}
@@ -21,11 +19,11 @@ const TrackProgress = () => {
                     <div className="flex items-center gap-1 w-full sm:w-auto">
                         {tabs.map((tab) => {
                             const Icon = tab.icon;
-                            const isActive = activeTab === tab.id;
+                            const isActive = location.pathname === tab.path;
                             return (
                                 <button
                                     key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
+                                    onClick={() => navigate(tab.path)}
                                     className={cn(
                                         "relative flex items-center justify-center gap-2 h-9 sm:h-10 rounded-full transition-all duration-500 group/btn",
                                         isActive
@@ -57,8 +55,7 @@ const TrackProgress = () => {
 
             <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide no-scrollbar">
                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-400">
-                    {activeTab === 'routine' && <Routine />}
-                    {activeTab === 'workout' && <WorkoutLog />}
+                    <Outlet />
                 </div>
             </div>
         </div>

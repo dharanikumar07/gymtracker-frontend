@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { Target, CreditCard, AlertCircle } from 'lucide-react';
+import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 
-import ExpenseSetup from './Setup';
-import ExpenseLog from './Log';
-import { ExpenseProvider, useExpense } from './Setup/context/ExpenseContext';
+import { ExpenseProvider } from './Setup/context/ExpenseContext';
 import { ExpenseLogProvider, useExpenseLog } from './Log/ExpenseLogContext';
 
 const tabs = [
-    { id: 'setup', label: 'Setup', icon: Target },
-    { id: 'log', label: 'Log', icon: CreditCard },
+    { id: 'setup', label: 'Setup', icon: Target, path: '/track-expense/setup' },
+    { id: 'log', label: 'Log', icon: CreditCard, path: '/track-expense/log' },
 ];
 
 const UnsavedChangesModal = ({ isOpen, onCancel, onConfirm }) => {
@@ -28,13 +27,13 @@ const UnsavedChangesModal = ({ isOpen, onCancel, onConfirm }) => {
                     </p>
                 </div>
                 <div className="flex border-t border-border">
-                    <button 
+                    <button
                         onClick={onCancel}
                         className="flex-1 h-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:bg-secondary/50 transition-colors border-r border-border"
                     >
                         Stay
                     </button>
-                    <button 
+                    <button
                         onClick={onConfirm}
                         className="flex-1 h-12 text-[10px] font-black uppercase tracking-widest text-amber-500 hover:bg-amber-500/5 transition-colors"
                     >
@@ -46,37 +45,42 @@ const UnsavedChangesModal = ({ isOpen, onCancel, onConfirm }) => {
     );
 };
 
-const TrackExpenseContent = ({ activeTab, setActiveTab }) => {
-    const [pendingTab, setPendingTab] = useState(null);
-    const { hasUnsavedChanges: hasLogChanges, clearUnsavedChanges: clearLogChanges } = useExpenseLog();
-    const { hasUnsavedChanges: hasSetupChanges, clearUnsavedChanges: clearSetupChanges } = useExpense();
+const TrackExpenseContent = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [pendingPath, setPendingPath] = useState(null);
 
-    const hasAnyUnsavedChanges = hasLogChanges || hasSetupChanges;
+    let hasLogChanges = false;
+    let clearLogChanges = () => {};
+    try {
+        const ctx = useExpenseLog();
+        hasLogChanges = ctx.hasUnsavedChanges;
+        clearLogChanges = ctx.clearUnsavedChanges;
+    } catch (e) {
+        // Context not available on setup route
+    }
 
-    const handleTabClick = (tabId) => {
-        if (activeTab === tabId) return;
-        
-        // Only show modal if navigating AWAY FROM the log tab and there are LOG-SPECIFIC unsaved changes
-        // (Ignoring setup changes while on the log tab)
-        if (activeTab === 'log' && hasLogChanges) {
-            setPendingTab(tabId);
+    const handleTabClick = (path) => {
+        if (location.pathname === path) return;
+
+        if (location.pathname === '/track-expense/log' && hasLogChanges) {
+            setPendingPath(path);
         } else {
-            setActiveTab(tabId);
+            navigate(path);
         }
     };
 
     const confirmNavigation = () => {
         clearLogChanges();
-        clearSetupChanges();
-        setActiveTab(pendingTab);
-        setPendingTab(null);
+        navigate(pendingPath);
+        setPendingPath(null);
     };
 
     return (
         <div className="h-full flex flex-col p-3 sm:p-5 lg:p-6 font-sans max-w-[1600px] mx-auto w-full">
-            <UnsavedChangesModal 
-                isOpen={!!pendingTab}
-                onCancel={() => setPendingTab(null)}
+            <UnsavedChangesModal
+                isOpen={!!pendingPath}
+                onCancel={() => setPendingPath(null)}
                 onConfirm={confirmNavigation}
             />
 
@@ -86,11 +90,11 @@ const TrackExpenseContent = ({ activeTab, setActiveTab }) => {
                     <div className="flex items-center gap-1 w-full sm:w-auto">
                         {tabs.map((tab) => {
                             const Icon = tab.icon;
-                            const isActive = activeTab === tab.id;
+                            const isActive = location.pathname === tab.path;
                             return (
                                 <button
                                     key={tab.id}
-                                    onClick={() => handleTabClick(tab.id)}
+                                    onClick={() => handleTabClick(tab.path)}
                                     className={cn(
                                         "relative flex items-center justify-center gap-2 h-9 sm:h-10 rounded-full transition-all duration-500 group/btn",
                                         isActive
@@ -122,8 +126,7 @@ const TrackExpenseContent = ({ activeTab, setActiveTab }) => {
 
             <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide no-scrollbar">
                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-400 space-y-6 w-full mx-auto px-4 sm:px-6 lg:px-8">
-                    {activeTab === 'setup' && <ExpenseSetup />}
-                    {activeTab === 'log' && <ExpenseLog />}
+                    <Outlet />
                 </div>
             </div>
         </div>
@@ -131,12 +134,14 @@ const TrackExpenseContent = ({ activeTab, setActiveTab }) => {
 };
 
 const TrackExpense = () => {
-    const [activeTab, setActiveTab] = useState('setup');
+    const location = useLocation();
+    const isSetup = location.pathname.includes('/setup') || location.pathname === '/track-expense';
+    const isLog = location.pathname.includes('/log');
 
     return (
-        <ExpenseProvider isActive={activeTab === 'setup'}>
-            <ExpenseLogProvider isActive={activeTab === 'log'}>
-                <TrackExpenseContent activeTab={activeTab} setActiveTab={setActiveTab} />
+        <ExpenseProvider isActive={isSetup}>
+            <ExpenseLogProvider isActive={isLog}>
+                <TrackExpenseContent />
             </ExpenseLogProvider>
         </ExpenseProvider>
     );

@@ -16,17 +16,20 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Handle background messages
+// v2 — data-only messages, manual notification display
+// Handle background messages (data-only — no 'notification' key from server)
 messaging.onBackgroundMessage((payload) => {
-    const notificationTitle = payload.notification?.title || 'Reminder';
-    const notificationOptions = {
-        body: payload.notification?.body || '',
+    console.log('[FCM SW] Background payload:', JSON.stringify(payload));
+    const title = payload.data?.title || 'Reminder';
+    const options = {
+        body: payload.data?.body || '',
         icon: '/vite.svg',
         badge: '/vite.svg',
+        tag: `${payload.data?.module || 'default'}-${payload.data?.type || 'reminder'}`,
         data: payload.data || {},
     };
 
-    self.registration.showNotification(notificationTitle, notificationOptions);
+    self.registration.showNotification(title, options);
 });
 
 // Handle notification click — open the app

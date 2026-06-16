@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { messaging, getToken, onMessage } from '../lib/firebase';
+import { useState, useEffect, useCallback } from 'react';
+import { messaging, getToken } from '../lib/firebase';
 import { saveDeviceTokenApi, removeDeviceTokenApi } from '../pages/Settings/http/api';
 import { toast } from 'sonner';
 
@@ -19,8 +19,6 @@ const FCM_TOKEN_KEY = 'fcm_device_token';
  * }}
  */
 export function useFirebaseMessaging() {
-    const unsubscribeRef = useRef(null);
-
     const isSupported = 'Notification' in window && 'serviceWorker' in navigator && messaging !== null;
 
     const [permissionStatus, setPermissionStatus] = useState(
@@ -122,26 +120,6 @@ export function useFirebaseMessaging() {
         } finally {
             localStorage.removeItem(FCM_TOKEN_KEY);
         }
-    }, []);
-
-    // Listen for foreground messages
-    useEffect(() => {
-        if (!messaging) return;
-
-        const unsubscribe = onMessage(messaging, (payload) => {
-            const title = payload.notification?.title || 'Reminder';
-            const body = payload.notification?.body || '';
-
-            toast.info(`${title}: ${body}`, { duration: 6000 });
-        });
-
-        unsubscribeRef.current = unsubscribe;
-
-        return () => {
-            if (unsubscribeRef.current) {
-                unsubscribeRef.current();
-            }
-        };
     }, []);
 
     return {
