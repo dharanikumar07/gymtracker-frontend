@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { 
-    Home, BarChart3, Dumbbell, Wallet, Settings, CreditCard,
+    Home, BarChart3, Dumbbell, Wallet, Settings,
     ChevronDown, ChevronLeft, LogOut, Menu
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
@@ -13,7 +13,6 @@ const menuItems = [
     { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/analytics' },
     { id: 'progress', label: 'Progress', icon: Dumbbell, path: '/track-progress' },
     { id: 'expenses', label: 'Expenses', icon: Wallet, path: '/track-expense' },
-    { id: 'billing', label: 'Billing', icon: CreditCard, path: '/billing' },
     { id: 'settings', label: 'Settings', icon: Settings, path: '/settings' },
 ];
 

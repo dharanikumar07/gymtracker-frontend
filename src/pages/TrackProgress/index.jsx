@@ -1,17 +1,13 @@
 import React, { useState } from 'react';
-import { Dumbbell, UtensilsCrossed, Activity, Apple } from 'lucide-react';
+import { Dumbbell, Activity } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 import Routine from './Routine';
 import WorkoutLog from './WorkoutLog';
-import Diet from './Diet';
-import DietLog from './DietLog';
 
 const tabs = [
     { id: 'routine', label: 'Routine', icon: Activity },
     { id: 'workout', label: 'Workout', icon: Dumbbell },
-    { id: 'diet', label: 'Diet Setup', icon: UtensilsCrossed },
-    { id: 'diet_log', label: 'Diet Log', icon: Apple },
 ];
 
 const TrackProgress = () => {
@@ -63,8 +59,6 @@ const TrackProgress = () => {
                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-400">
                     {activeTab === 'routine' && <Routine />}
                     {activeTab === 'workout' && <WorkoutLog />}
-                    {activeTab === 'diet' && <Diet />}
-                    {activeTab === 'diet_log' && <DietLog />}
                 </div>
             </div>
         </div>
