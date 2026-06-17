@@ -322,7 +322,7 @@ const Notifications = () => {
     }
 
     return (
-        <div className="w-full px-4 sm:px-[10%] pb-10">
+        <div className="w-full px-6 sm:px-6">
             <div className="max-w-4xl mx-auto space-y-6">
                 <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
@@ -330,10 +330,10 @@ const Notifications = () => {
                             <Bell className="w-6 h-6 text-emerald-500" />
                         </div>
                         <div>
-                            <h2 className="text-[16px] font-black uppercase tracking-tight text-foreground leading-none mb-1">
+                            <h2 className="text-[16px] font-black tracking-tight text-foreground leading-none mb-1">
                                 Notification Center
                             </h2>
-                            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-70">
+                            <p className="text-[9px] font-bold text-muted-foreground tracking-widest opacity-70">
                                 Manage your daily reminders
                             </p>
                         </div>
