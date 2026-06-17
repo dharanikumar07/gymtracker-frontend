@@ -5,6 +5,7 @@ export const QUERY_KEYS = {
   },
   DASHBOARD: {
     ALL: ['dashboard'],
+    CHECKLIST: ['dashboard', 'checklist'],
   },
   EXPENSES: {
     ALL: ['expenses'],
