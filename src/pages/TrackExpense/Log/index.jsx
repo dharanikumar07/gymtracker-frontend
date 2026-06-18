@@ -45,7 +45,7 @@ const ExpenseLogContent = () => {
             <div className="w-4 h-4 rounded-full bg-emerald-600/10 flex items-center justify-center shrink-0">
                 <Info className="w-2.5 h-2.5 text-emerald-600" />
             </div>
-            <p className="text-[8px] font-black text-emerald-600 tracking-widest leading-tight italic">
+            <p className="text-[8px] font-black text-emerald-600 leading-tight italic">
                 Switch dates to browse your financial history
             </p>
         </div>
@@ -65,7 +65,7 @@ const ExpenseLogContent = () => {
                             <div className="min-w-0">
                                 {planSummary ? (
                                     <>
-                                        <h2 className="text-[13px] sm:text-[15px] font-black uppercase tracking-tight text-foreground truncate leading-none mb-1 sm:mb-1.5">
+                                        <h2 className="text-[13px] sm:text-[15px] font-black text-foreground truncate leading-none mb-1 sm:mb-1.5">
                                             {planSummary.name}
                                         </h2>
                                         <div className="flex items-center gap-2 sm:gap-3">
@@ -86,10 +86,10 @@ const ExpenseLogContent = () => {
                                     </>
                                 ) : (
                                     <>
-                                        <h2 className="text-[13px] sm:text-[15px] font-black uppercase tracking-tight text-foreground truncate leading-none mb-1 sm:mb-1.5">
+                                        <h2 className="text-[13px] sm:text-[15px] font-black text-foreground truncate leading-none mb-1 sm:mb-1.5">
                                             No Active Plan
                                         </h2>
-                                        <p className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest text-nowrap">Setup budget in settings</p>
+                                        <p className="text-[8px] font-bold text-muted-foreground/40 text-nowrap">Setup budget in settings</p>
                                     </>
                                 )}
                             </div>
@@ -103,10 +103,10 @@ const ExpenseLogContent = () => {
                         {/* Right Side: Date Picker */}
                         <div className="flex items-center gap-3 shrink-0">
                             <div className="hidden sm:block text-right">
-                                <p className="text-[10px] font-black uppercase text-foreground">
+                                <p className="text-[10px] font-black text-foreground">
                                     {format(selectedDate, 'dd MMMM')}
                                 </p>
-                                <p className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">
+                                <p className="text-[8px] font-bold text-muted-foreground/40">
                                     {format(selectedDate, 'EEEE')}
                                 </p>
                             </div>

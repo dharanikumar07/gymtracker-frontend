@@ -130,7 +130,7 @@ const LogItem = ({ log }) => (
             </div>
             <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-0.5">
-                    <h4 className="text-[11px] font-black uppercase tracking-tight text-foreground truncate">
+                    <h4 className="text-[11px] font-black text-foreground truncate">
                         {log.workout_name}
                     </h4>
                     <span className={cn(
@@ -141,7 +141,7 @@ const LogItem = ({ log }) => (
                     </span>
                 </div>
                 <div className="flex items-center gap-3">
-                    <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-tighter">
+                    <span className="text-[9px] font-bold text-muted-foreground/60">
                         {log.metrics_type?.replace('_', ' ')}
                     </span>
                 </div>
@@ -158,7 +158,7 @@ const DateGroup = ({ date, workouts }) => (
     <div className="space-y-3">
         <div className="flex items-center gap-3 px-2">
             <div className="h-px flex-1 bg-border/40" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground whitespace-nowrap">
+            <span className="text-[10px] font-black text-muted-foreground whitespace-nowrap">
                 {format(parseISO(date), 'EEEE, dd MMMM')}
             </span>
             <div className="h-px flex-1 bg-border/40" />
@@ -177,8 +177,8 @@ const SectionHeader = ({ icon: Icon, title, subtitle, colorClass = "bg-primary/1
             <Icon className="w-4 h-4" />
         </div>
         <div className="min-w-0">
-            <h3 className="text-[11px] font-black uppercase tracking-widest text-foreground truncate">{title}</h3>
-            <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest italic truncate">{subtitle}</p>
+            <h3 className="text-[11px] font-black text-foreground truncate">{title}</h3>
+            <p className="text-[8px] font-bold text-muted-foreground italic truncate">{subtitle}</p>
         </div>
     </div>
 );
@@ -317,7 +317,7 @@ const Workout = () => {
                                     {planDetails?.pa_type || 'Strength Training'}
                                 </span>
                             </div>
-                            <h2 className="text-sm sm:text-base font-black uppercase tracking-tight text-foreground truncate max-w-[200px] sm:max-w-none">
+                            <h2 className="text-sm sm:text-base font-black text-foreground truncate max-w-[200px] sm:max-w-none">
                                 {planDetails?.name || 'My Transformation Plan'}
                             </h2>
                         </div>
@@ -422,7 +422,7 @@ const Workout = () => {
                                 ) : (
                                     <div className="py-12 text-center bg-secondary/10 rounded-[2rem] border border-dashed border-border">
                                         <History className="w-8 h-8 text-muted-foreground/20 mx-auto mb-3" />
-                                        <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">No logs found for this period</p>
+                                        <p className="text-[9px] font-black text-muted-foreground">No logs found for this period</p>
                                     </div>
                                 )}
                             </div>
@@ -651,8 +651,8 @@ const Workout = () => {
                                         ) : (
                                             <div className="flex flex-col items-center justify-center opacity-20 text-center animate-in fade-in zoom-in duration-500">
                                                 <PieChartIcon className="w-12 h-12 mb-3 text-emerald-500" />
-                                                <p className="text-[10px] font-black uppercase tracking-[0.2em]">No Muscle Logs Found</p>
-                                                <p className="text-[8px] font-bold uppercase tracking-widest mt-1">Try changing the period</p>
+                                                <p className="text-[10px] font-black">No Muscle Logs Found</p>
+                                                <p className="text-[8px] font-bold mt-1">Try changing the period</p>
                                             </div>
                                         )}
                                     </div>

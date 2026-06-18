@@ -60,7 +60,7 @@ const CustomCalendar = ({ selectedDate, onSelect, onClose }) => {
                     <button onClick={prevMonth} className="p-2 hover:bg-background rounded-xl transition-colors">
                         <ChevronLeft className="w-4 h-4 text-muted-foreground" />
                     </button>
-                    <h4 className="text-sm font-black uppercase tracking-widest text-foreground italic">
+                    <h4 className="text-sm font-black text-foreground italic">
                         {monthName} {year}
                     </h4>
                     <button onClick={nextMonth} className="p-2 hover:bg-background rounded-xl transition-colors">

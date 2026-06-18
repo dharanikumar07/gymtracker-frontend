@@ -74,7 +74,7 @@ const WorkoutItem = ({
                 <div className="flex-1 min-w-0">
                     <div className="flex flex-col">
                         <p className={cn(
-                            "text-[12px] font-black uppercase tracking-tight truncate",
+                            "text-[12px] font-black truncate",
                             !workout.exercise_name && "text-muted-foreground/40 italic",
                             errors?.exercise_name ? "text-red-500" : "text-foreground"
                         )}>
@@ -118,13 +118,13 @@ const WorkoutItem = ({
                             <div className="space-y-1.5">
                                 <div className="flex items-center justify-between ml-1">
                                     <label className={cn(
-                                        "text-[9px] font-black uppercase tracking-widest",
+                                        "text-[9px] font-black",
                                         errors?.exercise_name ? "text-red-500" : "text-muted-foreground"
                                     )}>
                                         Exercise Name {errors?.exercise_name && <span className="text-red-500">*</span>}
                                     </label>
                                     {errors?.exercise_name && (
-                                        <span className="text-[8px] font-bold text-red-500 uppercase tracking-tighter flex items-center gap-0.5">
+                                        <span className="text-[8px] font-bold text-red-500 flex items-center gap-0.5">
                                             <AlertCircle className="w-2.5 h-2.5" /> Required
                                         </span>
                                     )}
@@ -144,13 +144,13 @@ const WorkoutItem = ({
                             <div className="space-y-1.5">
                                 <div className="flex items-center justify-between ml-1">
                                     <label className={cn(
-                                        "text-[9px] font-black uppercase tracking-widest",
+                                        "text-[9px] font-black",
                                         errors?.target_muscles ? "text-red-500" : "text-muted-foreground"
                                     )}>
                                         Targeted Muscles {errors?.target_muscles && <span className="text-red-500">*</span>}
                                     </label>
                                     {errors?.target_muscles && (
-                                        <span className="text-[8px] font-bold text-red-500 uppercase tracking-tighter flex items-center gap-0.5">
+                                        <span className="text-[8px] font-bold text-red-500 flex items-center gap-0.5">
                                             <AlertCircle className="w-2.5 h-2.5" /> Required
                                         </span>
                                     )}

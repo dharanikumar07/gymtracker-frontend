@@ -49,7 +49,7 @@ const Routine = () => {
                 <div className="w-20 h-20 rounded-[2.5rem] bg-secondary flex items-center justify-center mb-6 shadow-inner relative z-10">
                     <Layout className="w-10 h-10 text-muted-foreground/30" />
                 </div>
-                <h3 className="text-[16px] font-black uppercase tracking-tight text-foreground mb-3 relative z-10">No Plans Found</h3>
+                <h3 className="text-[16px] font-black text-foreground mb-3 relative z-10">No Plans Found</h3>
                 <p className="text-[11px] text-muted-foreground leading-relaxed font-medium mb-8 relative z-10">
                     Create your first training plan to begin.
                 </p>

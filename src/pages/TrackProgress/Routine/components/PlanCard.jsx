@@ -116,7 +116,7 @@ const PlanCard = ({ plans, selectedPlan, onSave, onSelect, onDelete }) => {
         }
     };
 
-    const labelClasses = "text-[9px] sm:text-[8px] font-black uppercase text-muted-foreground tracking-widest ml-1 mb-1 block";
+    const labelClasses = "text-[9px] sm:text-[8px] font-black text-muted-foreground ml-1 mb-1 block";
 
     const renderDatePicker = (date, setDate, placeholder) => (
         <Popover>

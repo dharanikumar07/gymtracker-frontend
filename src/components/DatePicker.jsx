@@ -59,7 +59,7 @@ const DatePicker = ({ value, onChange, placeholder = "Select Date", triggerClass
         >
             <div className="flex items-center justify-between mb-4">
                 <button onClick={handlePrevMonth} className="p-1 hover:bg-secondary rounded-lg transition-colors"><ChevronLeft className="w-4 h-4"/></button>
-                <div className="text-[11px] font-black uppercase tracking-widest text-foreground">
+                <div className="text-[11px] font-black text-foreground">
                     {MONTHS[month]} {year}
                 </div>
                 <button onClick={handleNextMonth} className="p-1 hover:bg-secondary rounded-lg transition-colors"><ChevronRight className="w-4 h-4"/></button>

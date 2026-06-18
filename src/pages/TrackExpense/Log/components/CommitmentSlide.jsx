@@ -37,7 +37,7 @@ const CommitmentItem = ({ commitment }) => {
             </div>
             
             <div className="min-w-0">
-                <h4 className="text-[10px] font-black tracking-tight text-foreground truncate uppercase mb-0.5">
+                <h4 className="text-[10px] font-black text-foreground truncate mb-0.5">
                     {commitment.name}
                 </h4>
                 <p className="text-sm font-black text-foreground tracking-tighter">
@@ -73,7 +73,7 @@ const CommitmentSlide = ({ commitments }) => {
         <div className="space-y-3 mt-6">
             <div className="flex items-center justify-between px-1">
                 <div className="flex items-center gap-2">
-                    <h3 className="text-[11px] font-black uppercase tracking-widest text-foreground">Commitments</h3>
+                    <h3 className="text-[11px] font-black text-foreground">Commitments</h3>
                     <span className="text-[9px] font-black px-1.5 py-0.5 bg-emerald-500/10 text-emerald-600 rounded-md">
                         {paidCount}/{commitments.length}
                     </span>

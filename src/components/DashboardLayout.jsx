@@ -116,7 +116,7 @@ const DashboardLayout = () => {
                 {/* Header */}
                 <header className="h-16 bg-card border-b border-border flex items-center justify-between px-4 sm:px-6 shrink-0 sticky top-0 z-40">
                     <div className="flex items-center gap-4 text-foreground">
-                        <h2 className="text-sm font-black uppercase tracking-[0.2em] text-muted-foreground">
+                        <h2 className="text-sm font-black text-muted-foreground">
                             {activeItem.label}
                         </h2>
                     </div>
@@ -143,7 +143,7 @@ const DashboardLayout = () => {
                                     <div className="fixed inset-0 z-10" onClick={() => setIsProfileOpen(false)} />
                                     <div className="absolute right-0 mt-2 w-52 bg-card border border-border rounded-2xl shadow-2xl z-20 py-2 animate-in fade-in zoom-in-95 duration-200">
                                         <div className="px-4 py-3 border-b border-border mb-1 bg-secondary/20">
-                                            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Account</p>
+                                            <p className="text-[10px] font-black text-muted-foreground mb-1">Account</p>
                                             <p className="text-xs font-bold text-foreground truncate">{user?.email}</p>
                                         </div>
                                         <button 

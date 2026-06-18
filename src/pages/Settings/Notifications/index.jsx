@@ -34,8 +34,8 @@ const SectionHeader = ({ icon: Icon, title, isEnabled, onToggle }) => (
                 <Icon className={cn("w-5 h-5", isEnabled ? "text-white" : "")} />
             </div>
             <div>
-                <h3 className="text-[14px] font-black uppercase tracking-tight text-foreground">{title}</h3>
-                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
+                <h3 className="text-[14px] font-black text-foreground">{title}</h3>
+                <p className="text-[9px] font-bold text-muted-foreground">
                     {isEnabled ? 'Reminders Active' : 'Notifications Disabled'}
                 </p>
             </div>
@@ -98,7 +98,7 @@ const NotificationSection = ({
                 !is_enabled && "opacity-60"
             )}>
                 <div className="space-y-2">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                    <label className="text-[9px] font-black text-muted-foreground ml-1">
                         How many times need to remind you
                     </label>
                     <div className="flex gap-2 p-1 bg-secondary/5 rounded-xl border border-border/40 w-fit">
@@ -122,7 +122,7 @@ const NotificationSection = ({
                 </div>
 
                 <div className="space-y-3">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                    <label className="text-[9px] font-black text-muted-foreground ml-1">
                         Reminder Schedule
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -195,10 +195,10 @@ const NotificationBlockedGuide = ({ onClose }) => {
                             <Bell className="w-5 h-5 text-amber-500" />
                         </div>
                         <div>
-                            <h3 className="text-[14px] font-black uppercase tracking-tight text-foreground">
+                            <h3 className="text-[14px] font-black text-foreground">
                                 Notifications Blocked
                             </h3>
-                            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
+                            <p className="text-[9px] font-bold text-muted-foreground">
                                 Enable in browser settings
                             </p>
                         </div>
@@ -316,7 +316,7 @@ const Notifications = () => {
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px]">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                <p className="mt-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Loading Settings...</p>
+                <p className="mt-4 text-[10px] font-black text-muted-foreground">Loading Settings...</p>
             </div>
         );
     }
@@ -330,10 +330,10 @@ const Notifications = () => {
                             <Bell className="w-6 h-6 text-emerald-500" />
                         </div>
                         <div>
-                            <h2 className="text-[16px] font-black tracking-tight text-foreground leading-none mb-1">
+                            <h2 className="text-[16px] font-black text-foreground leading-none mb-1">
                                 Notification Center
                             </h2>
-                            <p className="text-[9px] font-bold text-muted-foreground tracking-widest opacity-70">
+                            <p className="text-[9px] font-bold text-muted-foreground opacity-70">
                                 Manage your daily reminders
                             </p>
                         </div>

@@ -164,7 +164,7 @@ const AddWorkoutCard = ({ onClose }) => {
                         <div className="w-7 h-7 rounded-xl bg-emerald-600/10 flex items-center justify-center">
                             <Plus className="w-3.5 h-3.5 text-emerald-600" />
                         </div>
-                        <h3 className="text-[13px] font-black uppercase tracking-tight text-foreground">Add New Exercise</h3>
+                        <h3 className="text-[13px] font-black text-foreground">Add New Exercise</h3>
                     </div>
                     <button 
                         onClick={onClose} 
@@ -177,7 +177,7 @@ const AddWorkoutCard = ({ onClose }) => {
 
                 <div className="space-y-6">
                     <div className="space-y-1.5">
-                        <label className="text-[8px] font-black uppercase tracking-widest text-foreground/30 ml-1">Exercise Identity</label>
+                        <label className="text-[8px] font-black text-foreground/30 ml-1">Exercise Identity</label>
                         <input
                             value={exerciseName}
                             placeholder="e.g. Bench Press..."
@@ -192,17 +192,17 @@ const AddWorkoutCard = ({ onClose }) => {
                                 errors.name ? "border-red-500 bg-red-500/5" : "border-border focus:border-emerald-600/50"
                             )}
                         />
-                        {errors.name && <p className="text-[8px] font-bold text-red-500 ml-1 uppercase">{errors.name}</p>}
+                        {errors.name && <p className="text-[8px] font-bold text-red-500 ml-1">{errors.name}</p>}
                     </div>
 
                     <TargetMusclesInput 
                         muscles={targetMuscles}
                         onUpdate={setTargetMuscles}
                     />
-                    {errors.target_muscles && <p className="text-[8px] font-bold text-red-500 ml-1 uppercase">{errors.target_muscles}</p>}
+                    {errors.target_muscles && <p className="text-[8px] font-bold text-red-500 ml-1">{errors.target_muscles}</p>}
 
                     <div className="space-y-1.5">
-                        <label className="text-[8px] font-black uppercase tracking-widest text-foreground/30 ml-1">Training Style</label>
+                        <label className="text-[8px] font-black text-foreground/30 ml-1">Training Style</label>
                         <div className="flex gap-1.5 p-1 bg-secondary/30 rounded-xl border border-border overflow-x-auto no-scrollbar">
                             {availableMetrics.map((type) => {
                                 const config = METRIC_CONFIG[type] || METRIC_CONFIG.strength;
@@ -234,7 +234,7 @@ const AddWorkoutCard = ({ onClose }) => {
 
                     <div className="space-y-3">
                         <div className="flex items-center justify-between px-1">
-                            <label className="text-[8px] font-black uppercase tracking-widest text-foreground/30">Initial Stats</label>
+                            <label className="text-[8px] font-black text-foreground/30">Initial Stats</label>
                             <button 
                                 onClick={() => setSets([...sets, { id: `added-${Date.now()}`, weight: '', weight_unit: 'kg', reps: '', duration: '', duration_unit: 'seconds', completed: true, showWeight: false }])}
                                 className="flex items-center justify-center sm:justify-start gap-1.5 px-2.5 sm:px-3 h-7 rounded-lg border border-dashed border-emerald-600/30 hover:border-emerald-600 text-emerald-600 transition-all text-[8px] font-black uppercase tracking-widest"
@@ -252,7 +252,7 @@ const AddWorkoutCard = ({ onClose }) => {
                                             <div className="w-5 h-5 rounded-full bg-emerald-600/10 flex items-center justify-center text-[9px] font-black text-emerald-600">
                                                 {idx + 1}
                                             </div>
-                                            <span className="text-[9px] font-black uppercase text-foreground/30 tracking-widest">Set Details</span>
+                                            <span className="text-[9px] font-black text-foreground/30">Set Details</span>
                                         </div>
                                         <div className="flex items-center gap-1">
                                             {(metricsType === 'timed_sets' || metricsType === 'endurance') && (
@@ -296,7 +296,7 @@ const AddWorkoutCard = ({ onClose }) => {
                                                         (val) => updateSet(set.id, 'weight_unit', val)
                                                     )}
                                                 </div>
-                                                {errors.sets[idx]?.weight && <p className="text-[7px] font-bold text-red-500 ml-1 uppercase">{errors.sets[idx].weight}</p>}
+                                                {errors.sets[idx]?.weight && <p className="text-[7px] font-bold text-red-500 ml-1">{errors.sets[idx].weight}</p>}
                                             </div>
                                         )}
                                         
@@ -316,7 +316,7 @@ const AddWorkoutCard = ({ onClose }) => {
                                                     />
                                                     <div className="px-3 text-[8px] font-black text-emerald-600 uppercase">REPS</div>
                                                 </div>
-                                                {errors.sets[idx]?.reps && <p className="text-[7px] font-bold text-red-500 ml-1 uppercase">{errors.sets[idx].reps}</p>}
+                                                {errors.sets[idx]?.reps && <p className="text-[7px] font-bold text-red-500 ml-1">{errors.sets[idx].reps}</p>}
                                             </div>
                                         )}
 
@@ -340,7 +340,7 @@ const AddWorkoutCard = ({ onClose }) => {
                                                         (val) => updateSet(set.id, 'duration_unit', val)
                                                     )}
                                                 </div>
-                                                {errors.sets[idx]?.duration && <p className="text-[7px] font-bold text-red-500 ml-1 uppercase">{errors.sets[idx].duration}</p>}
+                                                {errors.sets[idx]?.duration && <p className="text-[7px] font-bold text-red-500 ml-1">{errors.sets[idx].duration}</p>}
                                             </div>
                                         )}
                                     </div>

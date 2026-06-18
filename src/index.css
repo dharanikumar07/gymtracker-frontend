@@ -21,6 +21,7 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --radius: 0.5rem;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {

@@ -70,7 +70,7 @@ const WorkoutMetricEditor = ({ metrics, units, onUpdate, errors }) => {
     );
     
     const labelClasses = (hasError) => cn(
-        "text-[8px] font-black uppercase tracking-widest mb-1 ml-1 flex items-center gap-1",
+        "text-[8px] font-black mb-1 ml-1 flex items-center gap-1",
         hasError ? "text-red-500" : "text-muted-foreground"
     );
 
@@ -209,7 +209,7 @@ const WorkoutMetricEditor = ({ metrics, units, onUpdate, errors }) => {
                 <div className="flex flex-wrap gap-2 mt-2">
                     {Object.entries(errors).map(([field, msg]) => (
                         field !== 'exercise_name' && (
-                            <span key={field} className="text-[7px] font-black uppercase text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded-md flex items-center gap-1">
+                            <span key={field} className="text-[7px] font-black text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded-md flex items-center gap-1">
                                 <AlertCircle className="w-2 h-2" /> {field}: {msg}
                             </span>
                         )

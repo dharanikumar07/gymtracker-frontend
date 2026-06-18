@@ -81,7 +81,7 @@ const CategoryCombobox = ({ categories = [], selectedCategory, onSelect, isLoadi
                                     >
                                         <div className="flex flex-col min-w-0">
                                             <span className="text-[10px] font-black uppercase truncate">{cat.name}</span>
-                                            <span className="text-[7px] font-bold opacity-40 uppercase tracking-tighter">
+                                            <span className="text-[7px] font-bold opacity-40">
                                                 {cat.type}
                                             </span>
                                         </div>
@@ -91,7 +91,7 @@ const CategoryCombobox = ({ categories = [], selectedCategory, onSelect, isLoadi
                             ) : (
                                 search && (
                                     <div className="py-8 text-center">
-                                        <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
+                                        <p className="text-[9px] font-black text-muted-foreground/40">
                                             No results found
                                         </p>
                                     </div>

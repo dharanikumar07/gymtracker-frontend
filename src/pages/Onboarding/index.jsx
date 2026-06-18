@@ -373,7 +373,7 @@ const Onboarding = () => {
                         </div>
                         <div className="hidden lg:block" />
                         <div className="flex items-center gap-3 sm:gap-4">
-                            <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:block">
+                            <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground hidden sm:block">
                                 Step {step} of 3
                             </span>
                             
@@ -397,7 +397,7 @@ const Onboarding = () => {
                                         <div className="fixed inset-0 z-10" onClick={() => setIsProfileOpen(false)} />
                                         <div className="absolute right-0 mt-2 w-52 bg-card border border-border rounded-2xl shadow-2xl z-20 py-2 animate-in fade-in zoom-in-95 duration-200">
                                             <div className="px-4 py-3 border-b border-border mb-1 bg-secondary/20">
-                                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Account</p>
+                                                <p className="text-[10px] font-black text-muted-foreground mb-1">Account</p>
                                                 <p className="text-xs font-bold text-foreground truncate">{user?.email}</p>
                                             </div>
                                             <button 
@@ -442,7 +442,7 @@ const Onboarding = () => {
                                         </div>
                                         <div className="hidden sm:block">
                                             <p className={cn(
-                                                "text-[10px] sm:text-xs font-bold uppercase tracking-wide transition-colors",
+                                                "text-[10px] sm:text-xs font-bold transition-colors",
                                                 isCurrent ? "text-foreground" : "text-muted-foreground"
                                             )}>
                                                 {s.title}
@@ -467,7 +467,7 @@ const Onboarding = () => {
                 <div className="flex-1 overflow-y-auto h-0 min-h-0">
                     <div className="px-4 sm:px-6 lg:px-10 py-6 sm:py-8 max-w-xl mx-auto w-full">
                         <div className="mb-6 sm:mb-8">
-                            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black uppercase tracking-tight text-foreground mb-1 sm:mb-2">
+                            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground mb-1 sm:mb-2">
                                 {STEP_TITLES[step]?.title || 'Loading...'}
                             </h2>
                             <p className="text-xs sm:text-sm text-muted-foreground">

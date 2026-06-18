@@ -50,14 +50,14 @@ const ResetPassword = () => {
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary mb-4">
                             <Lock className="w-8 h-8" />
                         </div>
-                        <h2 className="text-2xl font-black uppercase tracking-tight">Create New Password</h2>
+                        <h2 className="text-2xl font-black">Create New Password</h2>
                         <p className="text-muted-foreground text-xs font-medium">Set a strong password for your account.</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="space-y-5">
                             <div className="space-y-1">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-0.5">
+                                <label className="text-[10px] font-black text-muted-foreground ml-0.5">
                                     Account
                                 </label>
                                 <p className="w-full bg-transparent border-b border-border py-3 text-sm text-foreground/80 truncate">
@@ -66,7 +66,7 @@ const ResetPassword = () => {
                             </div>
 
                             <div className="space-y-1 group">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-0.5" htmlFor="password">
+                                <label className="text-[10px] font-black text-muted-foreground ml-0.5" htmlFor="password">
                                     New Password
                                 </label>
                                 <div className="relative">
@@ -84,7 +84,7 @@ const ResetPassword = () => {
                             </div>
 
                             <div className="space-y-1 group">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-0.5" htmlFor="password_confirmation">
+                                <label className="text-[10px] font-black text-muted-foreground ml-0.5" htmlFor="password_confirmation">
                                     Confirm Password
                                 </label>
                                 <div className="relative">

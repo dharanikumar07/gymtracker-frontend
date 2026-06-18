@@ -195,7 +195,7 @@ const WorkoutSetRow = ({
                 {/* Weight Input */}
                 {(isStrength || showWeightInput) && (
                     <div className="space-y-1">
-                        <label className="text-[8px] font-black uppercase tracking-widest text-foreground/30 ml-1">Weight</label>
+                        <label className="text-[8px] font-black text-foreground/30 ml-1">Weight</label>
                         <div className={cn(
                             "flex items-center gap-3 px-3 py-1.5 rounded-lg border transition-all",
                             errors.weight ? "border-red-500 bg-red-500/5" : "border-border focus-within:border-emerald-600 focus-within:ring-1 focus-within:ring-emerald-600/20"
@@ -213,14 +213,14 @@ const WorkoutSetRow = ({
                             />
                             <span className="text-[9px] font-black text-emerald-600 uppercase w-6 text-right">{weightUnit}</span>
                         </div>
-                        {errors.weight && <p className="text-[8px] font-bold text-red-500 ml-1 uppercase">{errors.weight}</p>}
+                        {errors.weight && <p className="text-[8px] font-bold text-red-500 ml-1">{errors.weight}</p>}
                     </div>
                 )}
 
                 {/* Reps Input */}
                 {isStrength && (
                     <div className="space-y-1">
-                        <label className="text-[8px] font-black uppercase tracking-widest text-foreground/30 ml-1">Reps</label>
+                        <label className="text-[8px] font-black text-foreground/30 ml-1">Reps</label>
                         <div className={cn(
                             "flex items-center gap-3 px-3 py-1.5 rounded-lg border transition-all",
                             errors.reps ? "border-red-500 bg-red-500/5" : "border-border focus-within:border-emerald-600 focus-within:ring-1 focus-within:ring-emerald-600/20"
@@ -238,14 +238,14 @@ const WorkoutSetRow = ({
                             />
                             <span className="text-[9px] font-black text-emerald-600 uppercase w-6 text-right">Reps</span>
                         </div>
-                        {errors.reps && <p className="text-[8px] font-bold text-red-500 ml-1 uppercase">{errors.reps}</p>}
+                        {errors.reps && <p className="text-[8px] font-bold text-red-500 ml-1">{errors.reps}</p>}
                     </div>
                 )}
 
                 {/* Duration Input */}
                 {(isTimed || isEndurance) && (
                     <div className="space-y-1">
-                        <label className="text-[8px] font-black uppercase tracking-widest text-foreground/30 ml-1">Duration</label>
+                        <label className="text-[8px] font-black text-foreground/30 ml-1">Duration</label>
                         <div className={cn(
                             "flex items-center gap-3 px-3 py-1.5 rounded-lg border transition-all",
                             errors.duration ? "border-red-500 bg-red-500/5" : "border-border focus-within:border-emerald-600 focus-within:ring-1 focus-within:ring-emerald-600/20"
@@ -263,7 +263,7 @@ const WorkoutSetRow = ({
                             />
                             <span className="text-[9px] font-black text-emerald-600 uppercase w-6 text-right">{currentDurationUnit.slice(0, 3)}</span>
                         </div>
-                        {errors.duration && <p className="text-[8px] font-bold text-red-500 ml-1 uppercase">{errors.duration}</p>}
+                        {errors.duration && <p className="text-[8px] font-bold text-red-500 ml-1">{errors.duration}</p>}
                     </div>
                 )}
             </div>

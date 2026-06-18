@@ -158,7 +158,7 @@ const BudgetPlanCard = () => {
         </div>
     );
 
-    const labelClasses = "text-[9px] font-black uppercase text-muted-foreground/90 tracking-widest ml-1 block";
+    const labelClasses = "text-[9px] font-black text-muted-foreground/90 ml-1 block";
 
     return (
         <div className="relative w-full overflow-hidden">
@@ -278,7 +278,7 @@ const BudgetPlanCard = () => {
                                     )}
                                     placeholder="e.g. Monthly Budget"
                                 />
-                                {errors.name && <p className="text-[8px] font-black text-red-500 mt-1 ml-1 uppercase tracking-tighter">{errors.name}</p>}
+                                {errors.name && <p className="text-[8px] font-black text-red-500 mt-1 ml-1">{errors.name}</p>}
                             </div>
 
                             <div className="flex flex-col gap-1.5">
@@ -295,7 +295,7 @@ const BudgetPlanCard = () => {
                                     )}
                                     placeholder="0.00"
                                 />
-                                {errors.amount && <p className="text-[8px] font-black text-red-500 mt-1 ml-1 uppercase tracking-tighter">{errors.amount}</p>}
+                                {errors.amount && <p className="text-[8px] font-black text-red-500 mt-1 ml-1">{errors.amount}</p>}
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
@@ -364,7 +364,7 @@ const BudgetPlanCard = () => {
                                     )}
                                     placeholder="e.g. May Budget"
                                 />
-                                {errors.name && <p className="text-[8px] font-black text-red-500 mt-1 ml-1 uppercase tracking-tighter">{errors.name}</p>}
+                                {errors.name && <p className="text-[8px] font-black text-red-500 mt-1 ml-1">{errors.name}</p>}
                             </div>
 
                             <div className="flex flex-col gap-1.5">
@@ -381,7 +381,7 @@ const BudgetPlanCard = () => {
                                     )}
                                     placeholder="0.00"
                                 />
-                                {errors.amount && <p className="text-[8px] font-black text-red-500 mt-1 ml-1 uppercase tracking-tighter">{errors.amount}</p>}
+                                {errors.amount && <p className="text-[8px] font-black text-red-500 mt-1 ml-1">{errors.amount}</p>}
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
@@ -419,7 +419,7 @@ const BudgetPlanCard = () => {
                                 <div className="flex flex-col gap-1.5">
                                     <label className={labelClasses}>Start <span className="text-red-500">*</span></label>
                                     {renderDatePicker(startDate, setStartDate, "Start Date", 'start_date')}
-                                    {errors.start_date && <p className="text-[8px] font-black text-red-500 mt-1 ml-1 uppercase tracking-tighter">{errors.start_date}</p>}
+                                    {errors.start_date && <p className="text-[8px] font-black text-red-500 mt-1 ml-1">{errors.start_date}</p>}
                                 </div>
                             </div>
                         </div>
@@ -432,7 +432,7 @@ const BudgetPlanCard = () => {
                                 <Info className="w-4 h-4 text-emerald-600" />
                             </div>
                             <div className="flex flex-col gap-0.5">
-                                <h4 className="text-[10px] font-black uppercase tracking-widest text-emerald-700">Budget Transition Rule</h4>
+                                <h4 className="text-[10px] font-black text-emerald-700">Budget Transition Rule</h4>
                                 <p className="text-[10px] font-bold text-emerald-600/80 leading-relaxed">
                                     Activating this plan will terminate your current active cycle on <span className="text-emerald-700 underline underline-offset-2">
                                         {startDate ? format(new Date(new Date(startDate).setDate(startDate.getDate() - 1)), "PPP") : 'the previous day'}

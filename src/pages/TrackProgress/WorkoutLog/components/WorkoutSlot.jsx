@@ -193,7 +193,7 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
                 <div className="flex items-start justify-between p-4 sm:p-5">
                     <div className="flex flex-col gap-2 min-w-0">
                         <div className="flex flex-col gap-1">
-                            <h4 className="text-[14px] font-black uppercase tracking-tight text-foreground/40 truncate leading-none line-through">
+                            <h4 className="text-[14px] font-black text-foreground/40 truncate leading-none line-through">
                                 {slot.exercise_name || "Routine Activity"}
                             </h4>
                             <div className="flex items-center gap-2">
@@ -258,7 +258,7 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
                 <div className="flex flex-col gap-2 min-w-0">
                     <div className="flex flex-col gap-1">
                         <h4 className={cn(
-                            "text-[15px] font-black uppercase tracking-tight truncate leading-none",
+                            "text-[15px] font-black truncate leading-none",
                             allDone ? "text-emerald-600" : "text-foreground"
                         )}>
                             {slot.exercise_name || "Routine Activity"}
@@ -354,7 +354,7 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
                     <div className="relative bg-card border border-border rounded-2xl shadow-2xl w-full max-w-[340px] overflow-hidden animate-in zoom-in-95 duration-200">
                         <div className="p-5 space-y-4">
                             <div className="flex flex-col gap-1.5">
-                                <h3 className="text-[14px] font-black uppercase tracking-tight text-foreground">Skip Exercise</h3>
+                                <h3 className="text-[14px] font-black text-foreground">Skip Exercise</h3>
                                 <p className="text-[11px] text-muted-foreground font-medium leading-relaxed">
                                     Provide a brief reason for skipping <span className="text-foreground font-bold">"{slot.exercise_name || "Activity"}"</span>.
                                 </p>
@@ -375,7 +375,7 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
                                     }}
                                 />
                                 {skipError && (
-                                    <p className="text-[8px] font-black uppercase tracking-widest text-red-500 ml-1">
+                                    <p className="text-[8px] font-black text-red-500 ml-1">
                                         {skipError}
                                     </p>
                                 )}

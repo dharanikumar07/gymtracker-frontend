@@ -28,7 +28,7 @@ const templates = [
 const SectionHeader = ({ title }) => (
     <div className="flex items-center gap-2 mb-3 mt-1">
         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-        <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">{title}</h3>
+        <h3 className="text-[9px] font-black text-muted-foreground">{title}</h3>
     </div>
 );
 
@@ -76,7 +76,7 @@ const Step3 = ({ data = {}, updateData, isSubmitted = false }) => {
         handleExpenseChange(updated);
     };
 
-    const labelClasses = "text-[9px] font-black uppercase text-muted-foreground/90 tracking-widest ml-1 block mb-1.5";
+    const labelClasses = "text-[9px] font-black text-muted-foreground/90 ml-1 block mb-1.5";
     const inputClasses = "w-full h-9 bg-background border border-border/50 px-3 rounded-xl text-[11px] font-bold text-foreground outline-none focus:ring-1 focus:ring-emerald-500/30 transition-all placeholder:text-muted-foreground/30";
 
     return (
@@ -98,7 +98,7 @@ const Step3 = ({ data = {}, updateData, isSubmitted = false }) => {
                                     placeholder="e.g. Monthly Budget"
                                 />
                                 {isSubmitted && !plan.name && (
-                                    <p className="text-[8px] font-black text-red-500 mt-1 uppercase tracking-tighter ml-1 italic">Name is required</p>
+                                    <p className="text-[8px] font-black text-red-500 mt-1 ml-1 italic">Name is required</p>
                                 )}
                             </div>
                             <div className="space-y-1">
@@ -114,7 +114,7 @@ const Step3 = ({ data = {}, updateData, isSubmitted = false }) => {
                                     />
                                 </div>
                                 {isSubmitted && (!plan.amount || plan.amount <= 0) && (
-                                    <p className="text-[8px] font-black text-red-500 mt-1 uppercase tracking-tighter ml-1 italic">Valid amount required</p>
+                                    <p className="text-[8px] font-black text-red-500 mt-1 ml-1 italic">Valid amount required</p>
                                 )}
                             </div>
                         </div>
@@ -194,7 +194,7 @@ const Step3 = ({ data = {}, updateData, isSubmitted = false }) => {
                                             )}
                                         />
                                     </button>
-                                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight min-w-[45px]">
+                                    <span className="text-[10px] font-bold text-muted-foreground min-w-[45px]">
                                         {plan.is_active ? 'Active' : 'Inactive'}
                                     </span>
                                 </div>
@@ -228,7 +228,7 @@ const Step3 = ({ data = {}, updateData, isSubmitted = false }) => {
                                         <Icon className="w-2.5 h-2.5" />
                                     </div>
                                     <span className={cn(
-                                        "text-[8px] font-black uppercase tracking-tight truncate",
+                                        "text-[8px] font-black truncate",
                                         isAdded ? "text-emerald-600" : "text-foreground/70"
                                     )}>
                                         {template.type}
@@ -302,7 +302,7 @@ const Step3 = ({ data = {}, updateData, isSubmitted = false }) => {
                                         </button>
                                     </div>
                                     {isExpenseInvalid && (
-                                        <p className="text-[8px] font-bold text-red-500/70 uppercase tracking-tighter ml-3 italic">
+                                        <p className="text-[8px] font-bold text-red-500/70 ml-3 italic">
                                             {!expense.type ? 'Category is required' : 'Enter a valid non-negative amount'}
                                         </p>
                                     )}
@@ -315,7 +315,7 @@ const Step3 = ({ data = {}, updateData, isSubmitted = false }) => {
                                 <div className="w-10 h-10 rounded-full bg-secondary/30 flex items-center justify-center mx-auto mb-3">
                                     <PlusCircle className="w-5 h-5 text-muted-foreground/30" />
                                 </div>
-                                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">
+                                <p className="text-[10px] font-black text-muted-foreground/50">
                                     No expenses added
                                 </p>
                             </div>
@@ -331,12 +331,12 @@ const Step3 = ({ data = {}, updateData, isSubmitted = false }) => {
                         <Wallet className="w-4 h-4" />
                     </div>
                     <div>
-                        <p className="text-[8px] font-black uppercase tracking-widest text-white/60 leading-none mb-1">Monthly Fixed Total</p>
+                        <p className="text-[8px] font-black text-white/60 leading-none mb-1">Monthly Fixed Total</p>
                         <p className="text-sm font-black">₹ {expenses.reduce((acc, exp) => acc + (parseFloat(exp.amount) || 0), 0).toLocaleString()}</p>
                     </div>
                 </div>
                 <div className="text-right">
-                    <p className="text-[8px] font-black uppercase tracking-widest text-white/60 leading-none mb-1">Items</p>
+                    <p className="text-[8px] font-black text-white/60 leading-none mb-1">Items</p>
                     <p className="text-sm font-black tracking-widest">{expenses.length}</p>
                 </div>
             </div>

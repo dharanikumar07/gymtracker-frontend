@@ -57,7 +57,7 @@ const WorkoutLogContent = () => {
         return (
             <div className="w-full flex flex-col items-center justify-center min-h-[300px] p-8 text-center bg-secondary/5 border-2 border-dashed border-border rounded-3xl">
                 <AlertCircle className="w-10 h-10 text-foreground/10 mb-4" />
-                <h3 className="text-[14px] font-black uppercase text-foreground/40">No Active Workout Plan</h3>
+                <h3 className="text-[14px] font-black text-foreground/40">No Active Workout Plan</h3>
                 <p className="text-[11px] text-foreground/20 mt-2 max-w-[200px]">Activate a plan in the Routine tab to start logging.</p>
             </div>
         );
@@ -88,7 +88,7 @@ const WorkoutLogContent = () => {
                                 <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                             </div>
                             <div className="min-w-0">
-                                <h2 className="text-[13px] sm:text-[15px] font-black uppercase tracking-tight text-foreground truncate leading-none mb-1 sm:mb-1.5">
+                                <h2 className="text-[13px] sm:text-[15px] font-black text-foreground truncate leading-none mb-1 sm:mb-1.5">
                                     {activePlan?.name}
                                 </h2>
                                 <div className="flex items-center gap-2">
@@ -228,7 +228,7 @@ const WorkoutLogContent = () => {
                 {hasNoActivities && (
                     <div className="py-20 flex flex-col items-center text-center">
                         <CheckCircle2 className="w-10 h-10 text-foreground/5 mb-4" />
-                        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-foreground/30">No Activities Scheduled</p>
+                        <p className="text-[11px] font-black text-foreground/30">No Activities Scheduled</p>
                     </div>
                 )}
             </div>
@@ -239,7 +239,7 @@ const WorkoutLogContent = () => {
 const SectionLabel = ({ label, count, color = "bg-emerald-600", active }) => (
     <div className="flex items-center gap-3 px-2">
         <div className={cn("w-2 h-2 rounded-full", color, active && "animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]")} />
-        <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-foreground/50">
+        <h3 className="text-[10px] font-black text-foreground/50">
             {label}
         </h3>
         <span className="text-[9px] font-black text-foreground/30 ml-auto">

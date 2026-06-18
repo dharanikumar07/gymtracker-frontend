@@ -36,13 +36,13 @@ const ForgotPassword = () => {
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary mb-4">
                             <Mail className="w-8 h-8" />
                         </div>
-                        <h2 className="text-2xl font-black uppercase tracking-tight">Reset Password</h2>
+                        <h2 className="text-2xl font-black">Reset Password</h2>
                         <p className="text-muted-foreground text-xs font-medium">We will send a password reset link.</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="space-y-1 group">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-0.5" htmlFor="email">
+                            <label className="text-[10px] font-black text-muted-foreground ml-0.5" htmlFor="email">
                                 Email
                             </label>
                             <div className="relative">
@@ -72,7 +72,7 @@ const ForgotPassword = () => {
                                 )}
                             </button>
 
-                            <Link to="/login" className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors py-2">
+                            <Link to="/login" className="flex items-center justify-center gap-2 text-[10px] font-black text-muted-foreground hover:text-primary transition-colors py-2">
                                 <ArrowLeft className="w-3.5 h-3.5" /> Back to Base
                             </Link>
                         </div>

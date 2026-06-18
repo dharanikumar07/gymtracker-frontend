@@ -15,7 +15,7 @@ const InstallAppModal = ({ onCancel, onConfirm, hasPrompt, needsManualGuide }) =
                             <Home className="w-5 h-5 text-emerald-500" />
                         </div>
                         <div>
-                            <h3 className="text-[14px] font-black uppercase tracking-tight text-foreground">
+                            <h3 className="text-[14px] font-black tracking-tight text-foreground">
                                 Install App
                             </h3>
                             <p className="text-[10px] text-muted-foreground font-medium mt-0.5">

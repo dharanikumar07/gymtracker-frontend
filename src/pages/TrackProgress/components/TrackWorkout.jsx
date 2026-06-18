@@ -86,8 +86,8 @@ const TrackWorkout = () => {
                         <Dumbbell className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                        <h3 className="text-[12px] font-black uppercase italic text-foreground">Track Workout</h3>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Log your daily exercises</p>
+                        <h3 className="text-[12px] font-black italic text-foreground">Track Workout</h3>
+                        <p className="text-[9px] font-bold text-muted-foreground">Log your daily exercises</p>
                     </div>
                 </div>
                 
@@ -120,13 +120,13 @@ const TrackWorkout = () => {
             {isLoading || isFetching ? (
                 <div className="flex flex-col items-center justify-center py-12">
                     <Loader2 className="w-8 h-8 animate-spin text-primary mb-2" />
-                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Loading...</p>
+                    <p className="text-[10px] font-black text-muted-foreground">Loading...</p>
                 </div>
             ) : exercises.length === 0 ? (
                 <div className="bg-card border border-border rounded-3xl p-5">
                     <div className="flex flex-col items-center justify-center py-8 text-center">
                         <Dumbbell className="w-10 h-10 text-muted-foreground/30 mb-3" />
-                        <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Rest Day</p>
+                        <p className="text-[11px] font-bold text-muted-foreground">Rest Day</p>
                         <p className="text-[9px] text-muted-foreground/60 mt-1">No exercises scheduled for this day</p>
                     </div>
                 </div>
@@ -137,7 +137,7 @@ const TrackWorkout = () => {
                         return (
                             <div key={exercise.slot_uuid} className="bg-card border border-border rounded-3xl p-4">
                                 <div className="flex items-center justify-between mb-3">
-                                    <h4 className="text-[11px] font-black uppercase text-foreground">{exercise.exercise_name}</h4>
+                                    <h4 className="text-[11px] font-black text-foreground">{exercise.exercise_name}</h4>
                                     <span className="text-[9px] font-bold text-muted-foreground uppercase">{exercise.metrics_type}</span>
                                 </div>
                                 

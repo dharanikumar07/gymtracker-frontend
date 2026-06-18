@@ -63,7 +63,7 @@ const ExerciseCombobox = ({ exercises = [], selectedExercise, onSelect, isLoadin
                             >
                                 <div className="flex flex-col min-w-0">
                                     <span className="text-[10px] font-black uppercase truncate">{ex.name}</span>
-                                    <span className="text-[7px] font-bold opacity-40 uppercase tracking-tighter">
+                                    <span className="text-[7px] font-bold opacity-40">
                                         {ex.targeted_muscle || 'General'}
                                     </span>
                                 </div>
@@ -72,7 +72,7 @@ const ExerciseCombobox = ({ exercises = [], selectedExercise, onSelect, isLoadin
                         ))
                     ) : (
                         <div className="py-8 text-center">
-                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
+                            <p className="text-[9px] font-black text-muted-foreground/40">
                                 No results found
                             </p>
                         </div>

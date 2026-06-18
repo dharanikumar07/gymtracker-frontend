@@ -44,7 +44,7 @@ const ACTIVITY_TYPES = [
 
 const InputField = ({ icon: Icon, label, value, onChange, type = "text", placeholder, disabled }) => (
     <div className="space-y-1.5">
-        <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+        <label className="text-[9px] font-black text-muted-foreground ml-1">
             {label}
         </label>
         <div className="relative group">
@@ -65,7 +65,7 @@ const InputField = ({ icon: Icon, label, value, onChange, type = "text", placeho
 
 const SelectPill = ({ label, value, onChange, options, disabled }) => (
     <div className="space-y-2">
-        <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+        <label className="text-[9px] font-black text-muted-foreground ml-1">
             {label}
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
@@ -177,7 +177,7 @@ const Profile = () => {
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px]">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                <p className="mt-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Loading Profile...</p>
+                <p className="mt-4 text-[10px] font-black text-muted-foreground">Loading Profile...</p>
             </div>
         );
     }
@@ -192,7 +192,7 @@ const Profile = () => {
                     <div className="flex items-center justify-between border-b border-border/40 pb-3">
                         <div className="flex items-center gap-3">
                             <UserCircle className="w-5 h-5 text-primary" />
-                            <h3 className="text-[12px] font-black uppercase tracking-tight text-foreground">Account</h3>
+                            <h3 className="text-[12px] font-black text-foreground">Account</h3>
                         </div>
                         <SaveButton onSave={handleSave} isSaving={isSaving} />
                     </div>
@@ -222,7 +222,7 @@ const Profile = () => {
                 <div className="bg-card border border-border/60 rounded-[1.5rem] p-5 shadow-sm space-y-5">
                     <div className="flex items-center gap-3 border-b border-border/40 pb-3">
                         <Activity className="w-5 h-5 text-blue-500" />
-                        <h3 className="text-[12px] font-black uppercase tracking-tight text-foreground">Physical Stats</h3>
+                        <h3 className="text-[12px] font-black text-foreground">Physical Stats</h3>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -237,7 +237,7 @@ const Profile = () => {
                                 disabled={isSaving}
                             />
                             <div className="space-y-1.5">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Gender</label>
+                                <label className="text-[9px] font-black text-muted-foreground ml-1">Gender</label>
                                 <Popover>
                                     <PopoverTrigger asChild>
                                         <button 
@@ -296,7 +296,7 @@ const Profile = () => {
                 <div className="bg-card border border-border/60 rounded-[1.5rem] p-5 shadow-sm space-y-5">
                     <div className="flex items-center gap-3 border-b border-border/40 pb-3">
                         <Target className="w-5 h-5 text-emerald-500" />
-                        <h3 className="text-[12px] font-black uppercase tracking-tight text-foreground">Goals & Training</h3>
+                        <h3 className="text-[12px] font-black text-foreground">Goals & Training</h3>
                     </div>
 
                     <div className="space-y-6">

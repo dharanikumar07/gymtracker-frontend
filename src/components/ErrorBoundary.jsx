@@ -101,7 +101,7 @@ const ErrorFallback = ({ onReset }) => {
                         </div>
 
                         {/* Text */}
-                        <h1 className="text-[18px] font-black uppercase tracking-tight text-foreground mb-3">
+                        <h1 className="text-[18px] font-black text-foreground mb-3">
                             Something went wrong
                         </h1>
                         <p className="text-[12px] text-muted-foreground leading-relaxed max-w-xs mx-auto mb-8">
@@ -132,7 +132,7 @@ const ErrorFallback = ({ onReset }) => {
 
                     {/* Footer */}
                     <div className="px-8 py-4 bg-secondary/30 border-t border-border/40">
-                        <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest text-center">
+                        <p className="text-[9px] font-bold text-muted-foreground/50 text-center">
                             If this keeps happening, try clearing your browser cache
                         </p>
                     </div>

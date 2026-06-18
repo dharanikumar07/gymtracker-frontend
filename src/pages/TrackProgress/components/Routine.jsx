@@ -15,7 +15,7 @@ const Routine = () => {
         return (
             <div className="flex flex-col items-center justify-center h-60">
                 <Loader2 className="w-8 h-8 animate-spin text-primary mb-2" />
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Loading...</p>
+                <p className="text-[10px] font-black text-muted-foreground">Loading...</p>
             </div>
         );
     }
@@ -25,7 +25,7 @@ const Routine = () => {
             <div className="bg-card border border-border rounded-3xl p-5">
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                     <Dumbbell className="w-10 h-10 text-muted-foreground/30 mb-3" />
-                    <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">No routine found</p>
+                    <p className="text-[11px] font-bold text-muted-foreground">No routine found</p>
                     <p className="text-[9px] text-muted-foreground/60 mt-1">Complete onboarding to set up your workout plan</p>
                 </div>
             </div>
@@ -42,12 +42,12 @@ const Routine = () => {
                         <Activity className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                        <h3 className="text-[12px] font-black uppercase italic text-foreground">Weekly Routine</h3>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Your workout plan</p>
+                        <h3 className="text-[12px] font-black italic text-foreground">Weekly Routine</h3>
+                        <p className="text-[9px] font-bold text-muted-foreground">Your workout plan</p>
                     </div>
                 </div>
                 <div className="flex flex-col items-center justify-center py-6 text-center">
-                    <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Rest days only</p>
+                    <p className="text-[11px] font-bold text-muted-foreground">Rest days only</p>
                     <p className="text-[9px] text-muted-foreground/60 mt-1">No exercises scheduled</p>
                 </div>
             </div>
@@ -62,8 +62,8 @@ const Routine = () => {
                         <Activity className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                        <h3 className="text-[12px] font-black uppercase italic text-foreground">Weekly Routine</h3>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{data?.data?.plan?.name || 'Your workout plan'}</p>
+                        <h3 className="text-[12px] font-black italic text-foreground">Weekly Routine</h3>
+                        <p className="text-[9px] font-bold text-muted-foreground">{data?.data?.plan?.name || 'Your workout plan'}</p>
                     </div>
                 </div>
                 

@@ -52,14 +52,14 @@ const Register = () => {
             <div className="w-full max-w-sm">
                 <div className="bg-card border border-border rounded-3xl shadow-sm p-6 sm:p-8 space-y-8">
                     <div className="space-y-1">
-                        <h2 className="text-2xl font-black tracking-tight uppercase">Create Account</h2>
+                        <h2 className="text-2xl font-black">Create Account</h2>
                         <p className="text-muted-foreground text-xs font-medium">Start your personalized plan.</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="space-y-5">
                             <div className="space-y-1 group">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-0.5" htmlFor="name">
+                                <label className="text-[10px] font-black text-muted-foreground ml-0.5" htmlFor="name">
                                     Name
                                 </label>
                                 <div className="relative">
@@ -77,7 +77,7 @@ const Register = () => {
                             </div>
 
                             <div className="space-y-1 group">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-0.5" htmlFor="email">
+                                <label className="text-[10px] font-black text-muted-foreground ml-0.5" htmlFor="email">
                                     Email
                                 </label>
                                 <div className="relative">
@@ -96,7 +96,7 @@ const Register = () => {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1 group">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-0.5" htmlFor="password">
+                                    <label className="text-[10px] font-black text-muted-foreground ml-0.5" htmlFor="password">
                                         Password
                                     </label>
                                     <div className="relative">
@@ -114,7 +114,7 @@ const Register = () => {
                                 </div>
 
                                 <div className="space-y-1 group">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-0.5" htmlFor="password_confirmation">
+                                    <label className="text-[10px] font-black text-muted-foreground ml-0.5" htmlFor="password_confirmation">
                                         Confirm
                                     </label>
                                     <div className="relative">
@@ -150,8 +150,8 @@ const Register = () => {
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t border-border"></div>
                         </div>
-                        <div className="relative flex justify-center text-[10px] font-black uppercase">
-                            <span className="bg-background px-4 text-muted-foreground tracking-widest">Third-Party Auth</span>
+                        <div className="relative flex justify-center text-[10px] font-black">
+                            <span className="bg-background px-4 text-muted-foreground">Third-Party Auth</span>
                         </div>
                     </div>
 
@@ -166,7 +166,7 @@ const Register = () => {
 
                     <p className="text-center text-sm text-muted-foreground">
                         Already have an account?{' '}
-                        <Link to="/login" className="text-primary font-black uppercase tracking-wide hover:underline ml-1">
+                        <Link to="/login" className="text-primary font-black hover:underline ml-1">
                             Sign in
                         </Link>
                     </p>

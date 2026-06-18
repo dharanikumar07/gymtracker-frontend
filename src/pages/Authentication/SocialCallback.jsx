@@ -71,8 +71,8 @@ const SocialCallback = () => {
                             <ShieldCheck className="absolute inset-0 m-auto w-7 h-7 text-primary animate-pulse" />
                         </div>
                         <div className="space-y-2">
-                            <h2 className="text-xl font-black uppercase tracking-tight text-foreground">Authorizing</h2>
-                            <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest">Verifying {provider} login...</p>
+                            <h2 className="text-xl font-black text-foreground">Authorizing</h2>
+                            <p className="text-muted-foreground text-xs font-medium">Verifying {provider} login...</p>
                         </div>
                     </div>
                 ) : (
@@ -81,10 +81,10 @@ const SocialCallback = () => {
                             <AlertCircle className="w-8 h-8" />
                         </div>
                         <div className="space-y-2">
-                            <h2 className="text-xl font-black uppercase tracking-tight">Authentication Error</h2>
-                            <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest text-rose-500">{error}</p>
+                            <h2 className="text-xl font-black">Authentication Error</h2>
+                            <p className="text-muted-foreground text-xs font-medium text-rose-500">{error}</p>
                         </div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground animate-pulse">Redirecting to sign in...</p>
+                        <p className="text-[10px] font-black text-muted-foreground animate-pulse">Redirecting to sign in...</p>
                     </div>
                 )}
             </div>

@@ -37,8 +37,8 @@ const ConfirmSwitchModal = ({ isOpen, onConfirm, onDiscard, onCancel, targetDay 
 
                 <div className="p-8 space-y-6">
                     <div className="space-y-2">
-                        <h3 className="text-[18px] font-black uppercase tracking-tight text-foreground">Unsaved Changes</h3>
-                        <p className="text-[11px] font-bold text-muted-foreground tracking-wider leading-relaxed">
+                        <h3 className="text-[18px] font-black text-foreground">Unsaved Changes</h3>
+                        <p className="text-[11px] font-bold text-muted-foreground leading-relaxed">
                             You have unsaved changes for the current day. Would you like to save them before switching to <span className="text-primary">{targetDay}</span>?
                         </p>
                     </div>
@@ -74,17 +74,17 @@ const RestSlot = ({ workout, index, onDelete, onUpdate }) => (
                 <Moon className="w-7 h-7 text-primary" />
             </div>
             
-            <h3 className="text-sm font-black uppercase tracking-wider text-foreground mb-1">
+            <h3 className="text-sm font-black text-foreground mb-1">
                 Rest Day
             </h3>
             
             {workout.exercise_name && (
-                <p className="text-[11px] font-black uppercase text-primary/60 mb-1 italic">
+                <p className="text-[11px] font-black text-primary/60 mb-1 italic">
                     {workout.exercise_name}
                 </p>
             )}
             
-            <p className="text-[10px] text-muted-foreground text-center max-w-[200px] font-bold uppercase tracking-tight">
+            <p className="text-[10px] text-muted-foreground text-center max-w-[200px] font-bold">
                 Recovery is part of progress. Take it easy today.
             </p>
             
@@ -344,7 +344,7 @@ const SlotsCard = ({ slots, units: apiUnits, metricsTypes: apiMetricsTypes, plan
                         <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                             <ClipboardList className="w-4.5 h-4.5 text-primary" />
                         </div>
-                        <h3 className="text-[13px] font-black uppercase italic tracking-tight text-foreground">Weekly Split</h3>
+                        <h3 className="text-[13px] font-black italic text-foreground">Weekly Split</h3>
                     </div>
 
                     <Button
@@ -401,7 +401,7 @@ const SlotsCard = ({ slots, units: apiUnits, metricsTypes: apiMetricsTypes, plan
 
             <div className="flex items-center justify-between px-1">
                 <div className="flex items-center gap-2.5">
-                    <span className="text-[10px] font-black uppercase tracking-[0.15em] text-foreground">{activeDayName}'s Exercises</span>
+                    <span className="text-[10px] font-black text-foreground">{activeDayName}'s Exercises</span>
                     {currentWorkouts.length > 0 && (
                         <span className="px-1.5 py-0.5 bg-secondary text-[8px] font-black rounded-md text-muted-foreground">
                             {currentWorkouts.length}
@@ -447,8 +447,8 @@ const SlotsCard = ({ slots, units: apiUnits, metricsTypes: apiMetricsTypes, plan
                 ) : (
                     <div className="bg-secondary/10 border-2 border-dashed border-border rounded-[2.5rem] p-10 flex flex-col items-center text-center">
                         <Dumbbell className="w-8 h-8 text-muted-foreground/20 mb-3" />
-                        <h4 className="text-[11px] font-black uppercase text-foreground mb-1">Rest Day</h4>
-                        <p className="text-[9px] text-muted-foreground max-w-[180px] leading-relaxed font-bold uppercase tracking-tight mb-5">
+                        <h4 className="text-[11px] font-black text-foreground mb-1">Rest Day</h4>
+                        <p className="text-[9px] text-muted-foreground max-w-[180px] leading-relaxed font-bold mb-5">
                             No exercises for {activeDayName}.
                         </p>
                         <Button 

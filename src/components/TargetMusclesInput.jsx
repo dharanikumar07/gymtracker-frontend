@@ -24,7 +24,7 @@ const TargetMusclesInput = ({ muscles = [], onUpdate, editable = true, className
         <div className={cn("space-y-2", className)}>
             {editable && (
                 <div className="space-y-1">
-                    <label className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-1">
+                    <label className="text-[8px] sm:text-[9px] font-bold text-muted-foreground ml-1">
                         Targeted Muscles
                     </label>
                     <div className="relative group">

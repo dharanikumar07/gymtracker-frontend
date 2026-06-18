@@ -31,7 +31,7 @@ const VALIDATION_SCHEMA = {
 const SectionHeader = ({ title }) => (
     <div className="flex items-center gap-2 mb-3">
         <div className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_10px_rgba(var(--primary))]" />
-        <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">{title}</h3>
+        <h3 className="text-[10px] font-black text-muted-foreground">{title}</h3>
     </div>
 );
 
@@ -112,7 +112,7 @@ const Step1 = ({ data, updateData, errors = {} }) => {
                     <Icon className={act.id === 'strength_training' ? 'w-5 h-5' : 'w-4 h-4'} />
                 </div>
                 <span className={cn(
-                    "text-[10px] sm:text-[11px] font-black uppercase tracking-tight",
+                    "text-[10px] sm:text-[11px] font-black",
                     isActive ? "text-primary" : "text-foreground"
                 )}>
                     {act.label}
@@ -190,7 +190,7 @@ const Step1 = ({ data, updateData, errors = {} }) => {
                 <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Age</label>
+                            <label className="text-[10px] font-black text-muted-foreground ml-1">Age</label>
                             <div className="relative mt-1">
                                 <input
                                     type="text"
@@ -206,7 +206,7 @@ const Step1 = ({ data, updateData, errors = {} }) => {
                             )}
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Gender</label>
+                            <label className="text-[10px] font-black text-muted-foreground ml-1">Gender</label>
                             <div className="relative mt-1">
                                 <select
                                     value={localData.gender}
@@ -227,7 +227,7 @@ const Step1 = ({ data, updateData, errors = {} }) => {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Height (cm)</label>
+                            <label className="text-[10px] font-black text-muted-foreground ml-1">Height (cm)</label>
                             <div className="relative mt-1">
                                 <input
                                     type="text"
@@ -243,7 +243,7 @@ const Step1 = ({ data, updateData, errors = {} }) => {
                             )}
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Weight (kg)</label>
+                            <label className="text-[10px] font-black text-muted-foreground ml-1">Weight (kg)</label>
                             <div className="relative mt-1">
                                 <input
                                     type="text"
@@ -305,7 +305,7 @@ const Step1 = ({ data, updateData, errors = {} }) => {
                                 </div>
                                 <div className="text-center space-y-0.5">
                                     <p className={cn(
-                                        "text-[10px] sm:text-xs font-black uppercase tracking-wide",
+                                        "text-[10px] sm:text-xs font-black",
                                         isActive ? "text-primary" : "text-foreground"
                                     )}>
                                         {goal.label}

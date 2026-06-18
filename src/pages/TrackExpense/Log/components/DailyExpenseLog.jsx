@@ -50,7 +50,7 @@ const DailyExpenseLog = ({ dailyLogs, categories }) => {
         <div className="space-y-6">
             <div className="flex items-center justify-between px-1">
                 <div className="flex flex-col">
-                    <h3 className="text-xs font-black uppercase tracking-widest text-foreground">Daily Tracking</h3>
+                    <h3 className="text-xs font-black text-foreground">Daily Tracking</h3>
                     <p className="hidden sm:block text-[10px] font-medium text-muted-foreground italic">Log your variable spending</p>
                 </div>
                 
@@ -93,7 +93,7 @@ const DailyExpenseLog = ({ dailyLogs, categories }) => {
                         <div className="w-16 h-16 bg-secondary/50 rounded-3xl flex items-center justify-center mx-auto mb-6">
                             <IndianRupee className="w-8 h-8 text-muted-foreground/10" />
                         </div>
-                        <p className="text-[11px] font-black text-muted-foreground/30 uppercase tracking-[0.2em]">No Spending Logged</p>
+                        <p className="text-[11px] font-black text-muted-foreground/30">No Spending Logged</p>
                     </div>
                 )}
             </div>

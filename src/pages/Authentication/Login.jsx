@@ -61,14 +61,14 @@ const Login = () => {
             <div className="w-full max-w-sm">
                 <div className="bg-card border border-border rounded-3xl shadow-sm p-6 sm:p-8 space-y-8">
                     <div className="space-y-1">
-                        <h2 className="text-2xl font-black tracking-tight uppercase">Sign In</h2>
+                        <h2 className="text-2xl font-black">Sign In</h2>
                         <p className="text-muted-foreground text-xs font-medium">Continue your fitness journey.</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="space-y-5">
                             <div className="space-y-1 group">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-0.5" htmlFor="email">
+                                <label className="text-[10px] font-black text-muted-foreground ml-0.5" htmlFor="email">
                                     Email
                                 </label>
                                 <div className="relative">
@@ -87,10 +87,10 @@ const Login = () => {
 
                             <div className="space-y-1 group">
                                 <div className="flex justify-between items-center px-0.5">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground" htmlFor="password">
+                                    <label className="text-[10px] font-black text-muted-foreground" htmlFor="password">
                                         Password
                                     </label>
-                                    <Link to="/forgot-password" hidden className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline">
+                                    <Link to="/forgot-password" hidden className="text-[10px] font-black text-primary hover:underline">
                                         Forgot?
                                     </Link>
                                 </div>
@@ -107,7 +107,7 @@ const Login = () => {
                                     />
                                 </div>
                                 <div className="flex justify-end pt-1">
-                                    <Link to="/forgot-password" title="Forgot Password" className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline">
+                                    <Link to="/forgot-password" title="Forgot Password" className="text-[10px] font-black text-primary hover:underline">
                                         Forgot Password?
                                     </Link>
                                 </div>
@@ -131,8 +131,8 @@ const Login = () => {
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t border-border"></div>
                         </div>
-                        <div className="relative flex justify-center text-[10px] font-black uppercase">
-                            <span className="bg-background px-4 text-muted-foreground tracking-widest">Third-Party Auth</span>
+                        <div className="relative flex justify-center text-[10px] font-black">
+                            <span className="bg-background px-4 text-muted-foreground">Third-Party Auth</span>
                         </div>
                     </div>
 
@@ -147,7 +147,7 @@ const Login = () => {
 
                     <p className="text-center text-sm text-muted-foreground">
                         New here?{' '}
-                        <Link to="/register" className="text-primary font-black uppercase tracking-wide hover:underline ml-1">
+                        <Link to="/register" className="text-primary font-black hover:underline ml-1">
                             Create account
                         </Link>
                     </p>

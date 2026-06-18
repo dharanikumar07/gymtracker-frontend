@@ -36,12 +36,12 @@ const LeftBanner = () => {
                     </div>
                     <div>
                         <span className="text-2xl font-black uppercase tracking-tight italic" style={{ color: 'var(--logo-text, black)' }}>GymOS</span>
-                        <p className="text-[10px] font-medium uppercase tracking-widest" style={{ color: 'var(--logo-subtext, #4b5563)' }}>Fitness Tracker</p>
+                        <p className="text-[10px] font-medium" style={{ color: 'var(--logo-subtext, #4b5563)' }}>Fitness Tracker</p>
                     </div>
                 </div>
                 
                 {/* Hero Title */}
-                <h1 className="text-4xl xl:text-5xl font-black uppercase tracking-tight leading-tight mb-4" style={{ color: 'var(--hero-text, black)' }}>
+                <h1 className="text-4xl xl:text-5xl font-black leading-tight mb-4" style={{ color: 'var(--hero-text, black)' }}>
                     Build Your <span style={{ color: 'var(--hero-subtext, #374151)' }}>Legacy.</span>
                 </h1>
                 
@@ -61,7 +61,7 @@ const LeftBanner = () => {
                             style={{ backgroundColor: 'var(--card-bg, white)' }}
                         >
                             <Icon className="w-5 h-5 text-primary mb-2" />
-                            <p className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--card-title, black)' }}>{feature.title}</p>
+                            <p className="text-xs font-bold" style={{ color: 'var(--card-title, black)' }}>{feature.title}</p>
                             <p className="text-[9px] mt-0.5" style={{ color: 'var(--card-desc, #4b5563)' }}>{feature.desc}</p>
                         </div>
                     );
@@ -73,7 +73,7 @@ const LeftBanner = () => {
                 <div className="w-8 h-8 rounded-lg bg-white dark:bg-white/10 border-2 border-primary/30 dark:border-primary/50 flex items-center justify-center">
                     <Heart className="w-4 h-4 text-primary" />
                 </div>
-                <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--footer-text, #4b5563)' }}>
+                <p className="text-[10px] font-semibold" style={{ color: 'var(--footer-text, #4b5563)' }}>
                     Made for fitness enthusiasts
                 </p>
             </div>

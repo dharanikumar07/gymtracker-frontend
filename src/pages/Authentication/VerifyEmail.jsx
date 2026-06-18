@@ -63,8 +63,8 @@ const VerifyEmail = () => {
                             <UserCheck className="absolute inset-0 m-auto w-7 h-7 text-primary animate-pulse" />
                         </div>
                         <div className="space-y-2">
-                            <h2 className="text-xl font-black uppercase tracking-tight">Verifying Identity</h2>
-                            <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest">Synchronizing credentials...</p>
+                            <h2 className="text-xl font-black">Verifying Identity</h2>
+                            <p className="text-muted-foreground text-xs font-medium">Synchronizing credentials...</p>
                         </div>
                     </div>
                 )}
@@ -75,13 +75,13 @@ const VerifyEmail = () => {
                             <CheckCircle className="w-8 h-8" />
                         </div>
                         <div className="space-y-2">
-                            <h2 className="text-xl font-black uppercase tracking-tight text-emerald-500">Access Granted</h2>
-                            <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest">Redirecting to operations...</p>
+                            <h2 className="text-xl font-black text-emerald-500">Access Granted</h2>
+                            <p className="text-muted-foreground text-xs font-medium">Redirecting to operations...</p>
                         </div>
                         <div className="pt-2">
                             <button 
                                 onClick={() => navigate('/dashboard')}
-                                className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:underline"
+                                className="inline-flex items-center gap-2 text-[10px] font-black text-primary hover:underline"
                             >
                                 Manual Override <ArrowRight className="w-3.5 h-3.5" />
                             </button>
@@ -95,8 +95,8 @@ const VerifyEmail = () => {
                             <XCircle className="w-8 h-8" />
                         </div>
                         <div className="space-y-2">
-                            <h2 className="text-xl font-black uppercase tracking-tight text-rose-500">Verification Failed</h2>
-                            <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest">Link expired or invalid protocol.</p>
+                            <h2 className="text-xl font-black text-rose-500">Verification Failed</h2>
+                            <p className="text-muted-foreground text-xs font-medium">Link expired or invalid protocol.</p>
                         </div>
                         <div className="pt-2">
                             <Link 

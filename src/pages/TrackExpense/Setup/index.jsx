@@ -50,7 +50,7 @@ const CreateFirstPlan = () => {
         });
     };
 
-    const labelClasses = "text-[9px] font-black uppercase text-muted-foreground/90 tracking-widest ml-1 block";
+    const labelClasses = "text-[9px] font-black text-muted-foreground/90 ml-1 block";
 
     return (
         <div className="flex items-center justify-center min-h-[50vh]">
@@ -63,7 +63,7 @@ const CreateFirstPlan = () => {
                                 <Wallet className="w-4 h-4 text-emerald-500" />
                             </div>
                             <div>
-                                <h3 className="text-[14px] font-black tracking-tight text-foreground">
+                                <h3 className="text-[14px] font-black text-foreground">
                                     Create a budget plan
                                 </h3>
                                 <p className="text-[10px] font-medium text-muted-foreground mt-0.5">
@@ -91,7 +91,7 @@ const CreateFirstPlan = () => {
                                 )}
                                 placeholder="e.g. Monthly Budget"
                             />
-                            {errors.name && <p className="text-[8px] font-black text-red-500 ml-1 uppercase tracking-tighter">{errors.name}</p>}
+                            {errors.name && <p className="text-[8px] font-black text-red-500 ml-1">{errors.name}</p>}
                         </div>
 
                         {/* Amount */}
@@ -110,7 +110,7 @@ const CreateFirstPlan = () => {
                                 )}
                                 placeholder="0.00"
                             />
-                            {errors.amount && <p className="text-[8px] font-black text-red-500 ml-1 uppercase tracking-tighter">{errors.amount}</p>}
+                            {errors.amount && <p className="text-[8px] font-black text-red-500 ml-1">{errors.amount}</p>}
                         </div>
 
                         {/* Cycle + Start Date row */}
@@ -171,7 +171,7 @@ const CreateFirstPlan = () => {
                                         />
                                     </PopoverContent>
                                 </Popover>
-                                {errors.start_date && <p className="text-[8px] font-black text-red-500 ml-1 uppercase tracking-tighter">{errors.start_date}</p>}
+                                {errors.start_date && <p className="text-[8px] font-black text-red-500 ml-1">{errors.start_date}</p>}
                             </div>
                         </div>
                     </div>
@@ -216,8 +216,8 @@ const ExpenseSetupContent = () => {
         <div className="space-y-6 animate-in fade-in duration-500">
             <div className="space-y-4">
                 <div className="flex flex-col px-1">
-                    <h3 className="text-[13px] font-black uppercase tracking-tight text-foreground leading-normal mb-1">Budget Framework</h3>
-                    <p className="text-[10px] font-bold text-muted-foreground tracking-widest opacity-80">Define your spending limits and cycles</p>
+                    <h3 className="text-[13px] font-black text-foreground leading-normal mb-1">Budget Framework</h3>
+                    <p className="text-[10px] font-bold text-muted-foreground opacity-80">Define your spending limits and cycles</p>
                 </div>
                 <BudgetPlanCard />
             </div>

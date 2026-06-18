@@ -21,7 +21,7 @@ const UnsavedChangesModal = ({ isOpen, onCancel, onConfirm }) => {
                     <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <AlertCircle className="w-6 h-6 text-amber-500" />
                     </div>
-                    <h3 className="text-[14px] font-black uppercase tracking-tight text-foreground mb-2">Unsaved Changes</h3>
+                    <h3 className="text-[14px] font-black text-foreground mb-2">Unsaved Changes</h3>
                     <p className="text-[11px] font-medium text-muted-foreground/60 leading-relaxed px-4">
                         You have pending edits. Switching menus will discard these changes. Continue?
                     </p>

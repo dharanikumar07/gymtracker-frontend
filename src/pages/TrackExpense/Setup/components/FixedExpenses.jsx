@@ -50,7 +50,7 @@ const FixedExpenseRow = ({ expense, onChange, onDelete, isDeleting, error, nameE
                         placeholder="Expense Name"
                     />
                     {nameError && (
-                        <p className="text-[8px] font-black text-red-500 mt-1 uppercase tracking-tighter ml-1">
+                        <p className="text-[8px] font-black text-red-500 mt-1 ml-1">
                             {nameError}
                         </p>
                     )}
@@ -80,7 +80,7 @@ const FixedExpenseRow = ({ expense, onChange, onDelete, isDeleting, error, nameE
                         />
                     </div>
                     {error && (
-                        <p className="text-[8px] font-black text-red-500 mt-1 uppercase tracking-tighter mr-1">
+                        <p className="text-[8px] font-black text-red-500 mt-1 mr-1">
                             {error}
                         </p>
                     )}
@@ -224,7 +224,7 @@ const FixedExpenses = () => {
             {/* Fixed Expenses List */}
             <div className="bg-card border border-border rounded-[2rem] overflow-hidden shadow-sm">
                 <div className="p-4 border-b border-border bg-secondary/10 flex items-center justify-between">
-                    <h3 className="text-[11px] font-black uppercase tracking-widest text-foreground flex items-center gap-2">
+                    <h3 className="text-[11px] font-black text-foreground flex items-center gap-2">
                         <DollarSign className="w-4 h-4 text-emerald-600" />
                         Active Commitments ({fixedExpenses.length})
                     </h3>
@@ -274,7 +274,7 @@ const FixedExpenses = () => {
                                         autoFocus={!exp.name}
                                     />
                                     {errors[`${exp.id}_name`] && (
-                                        <p className="text-[8px] font-black text-red-500 mt-1 uppercase tracking-tighter ml-1">
+                                        <p className="text-[8px] font-black text-red-500 mt-1 ml-1">
                                             {errors[`${exp.id}_name`]}
                                         </p>
                                     )}
@@ -298,7 +298,7 @@ const FixedExpenses = () => {
                                         />
                                     </div>
                                     {errors[exp.id] && (
-                                        <p className="text-[8px] font-black text-red-500 mt-1 uppercase tracking-tighter mr-1">
+                                        <p className="text-[8px] font-black text-red-500 mt-1 mr-1">
                                             {errors[exp.id]}
                                         </p>
                                     )}
@@ -328,7 +328,7 @@ const FixedExpenses = () => {
                             <div className="w-12 h-12 rounded-full bg-secondary/30 flex items-center justify-center mb-4">
                                 <PlusCircle className="w-6 h-6 text-muted-foreground/40" />
                             </div>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground italic">
+                            <p className="text-[10px] font-black text-muted-foreground italic">
                                 No recurring expenses added yet
                             </p>
                         </div>

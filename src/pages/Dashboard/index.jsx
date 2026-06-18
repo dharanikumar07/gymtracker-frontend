@@ -22,7 +22,7 @@ const Dashboard = () => {
             <div className="h-full flex items-center justify-center">
                 <div className="text-center">
                     <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-3" />
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Loading...</p>
+                    <p className="text-[10px] font-bold tracking-widest text-muted-foreground">Loading...</p>
                 </div>
             </div>
         );

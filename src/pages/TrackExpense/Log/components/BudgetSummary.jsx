@@ -16,7 +16,7 @@ const StatCard = ({ icon: Icon, label, value, subValue, colorClass, trend }) => 
             )}
         </div>
         <div>
-            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 mb-0.5">{label}</p>
+            <p className="text-[9px] font-black text-muted-foreground/40 mb-0.5">{label}</p>
             <div className="flex items-baseline gap-1.5 flex-wrap">
                 <h4 className="text-sm sm:text-base font-black tracking-tight text-foreground">{value}</h4>
                 {subValue && <span className="text-[8px] font-bold text-muted-foreground/60">{subValue}</span>}
@@ -32,8 +32,8 @@ const BudgetSummary = ({ planSummary, onDateClick, selectedDate }) => {
                 <div className="w-12 h-12 bg-secondary rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Wallet className="w-6 h-6 text-muted-foreground/20" />
                 </div>
-                <h4 className="text-[11px] font-black uppercase tracking-widest text-foreground/40">No Active Budget Plan</h4>
-                <p className="text-[9px] text-muted-foreground/40 mt-2 max-w-[180px] mx-auto uppercase leading-relaxed font-bold">
+                <h4 className="text-[11px] font-black text-foreground/40">No Active Budget Plan</h4>
+                <p className="text-[9px] text-muted-foreground/40 mt-2 max-w-[180px] mx-auto leading-relaxed font-bold">
                     Go to setup to activate a budget plan and start tracking
                 </p>
             </div>
@@ -60,7 +60,7 @@ const BudgetSummary = ({ planSummary, onDateClick, selectedDate }) => {
                             <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tighter leading-none mb-1">
                                 ₹{safeToSpend.toLocaleString()}
                             </h2>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 italic">
+                            <p className="text-[9px] font-black text-muted-foreground/60 italic">
                                 Safe to Spend for daily needs
                             </p>
                         </div>
@@ -68,14 +68,14 @@ const BudgetSummary = ({ planSummary, onDateClick, selectedDate }) => {
 
                     <div className="grid grid-cols-2 gap-4 sm:gap-6 border-t sm:border-t-0 sm:border-l border-border/40 pt-4 sm:pt-0 sm:pl-6">
                         <div>
-                            <p className="text-[8px] font-black uppercase text-muted-foreground/40 tracking-widest mb-1">Reserved</p>
+                            <p className="text-[8px] font-black text-muted-foreground/40 mb-1">Reserved</p>
                             <div className="flex items-center gap-2">
                                 <div className="w-1 h-3 bg-blue-500 rounded-full" />
                                 <p className="text-[11px] font-black text-foreground italic">₹{planSummary.planned_fixed_total.toLocaleString()}</p>
                             </div>
                         </div>
                         <div>
-                            <p className="text-[8px] font-black uppercase text-muted-foreground/40 tracking-widest mb-1">Remaining</p>
+                            <p className="text-[8px] font-black text-muted-foreground/40 mb-1">Remaining</p>
                             <div className="flex items-center gap-2">
                                 <div className="w-1 h-3 bg-emerald-500 rounded-full" />
                                 <p className="text-[11px] font-black text-foreground italic">₹{planSummary.remaining_amount.toLocaleString()}</p>

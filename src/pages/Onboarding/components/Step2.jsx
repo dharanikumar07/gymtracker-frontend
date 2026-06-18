@@ -93,7 +93,7 @@ const transformApiResponse = (apiData) => {
 const SectionHeader = ({ title, icon: Icon }) => (
     <div className="flex items-center gap-2 mb-3">
         <div className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_10px_rgba(var(--primary))]" />
-        <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">{title}</h3>
+        <h3 className="text-[10px] font-black text-muted-foreground">{title}</h3>
     </div>
 );
 
@@ -106,7 +106,7 @@ const RestSlot = ({ ex, exIdx, handleRemoveWorkout, updateWorkout }) => (
                 <Moon className="w-7 h-7 sm:w-9 sm:h-9 text-primary" />
             </div>
             
-            <h3 className="text-base sm:text-lg font-black uppercase tracking-wider text-foreground mb-1 sm:mb-2">
+            <h3 className="text-base sm:text-lg font-black text-foreground mb-1 sm:mb-2">
                 Rest Day
             </h3>
             
@@ -220,7 +220,7 @@ const SortableExercise = ({ ex, exIdx, isExpanded, setExpandedExercise, updateWo
                 >
                     <div className="flex-1 text-left min-w-0">
                         <p className={cn(
-                            "text-[10px] sm:text-[12px] font-black uppercase tracking-tight truncate",
+                            "text-[10px] sm:text-[12px] font-black truncate",
                             ex.name ? (error ? "text-red-500" : "text-foreground") : "text-muted-foreground italic"
                         )}>
                             {ex.name || 'New Exercise'}
@@ -258,7 +258,7 @@ const SortableExercise = ({ ex, exIdx, isExpanded, setExpandedExercise, updateWo
             >
                 <div className="px-3 sm:px-4 pb-3 sm:pb-4 pt-3 sm:pt-4 border-t border-border/50 space-y-3 sm:space-y-4">
                     <div className="space-y-1">
-                        <label className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-1">Exercise Name</label>
+                        <label className="text-[8px] sm:text-[9px] font-bold text-muted-foreground ml-1">Exercise Name</label>
                         <input 
                             className="w-full h-9 sm:h-10 px-3 sm:px-4 bg-background border border-border rounded-lg sm:rounded-xl focus:border-primary/50 outline-none text-[10px] sm:text-xs font-semibold transition-all"
                             value={ex.name}
@@ -274,7 +274,7 @@ const SortableExercise = ({ ex, exIdx, isExpanded, setExpandedExercise, updateWo
                             className={cn(error?.target_muscles && "ring-1 ring-red-500/30 rounded-2xl p-1")}
                         />
                         {error?.target_muscles && (
-                            <p className="text-[8px] font-bold text-red-500 ml-1 uppercase flex items-center gap-1">
+                            <p className="text-[8px] font-bold text-red-500 ml-1 flex items-center gap-1">
                                 <AlertCircle className="w-2.5 h-2.5" /> {error.target_muscles}
                             </p>
                         )}
@@ -405,7 +405,7 @@ const Step2 = ({ data, updateData, errors = {} }) => {
                         <IconComponent className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <h3 className="text-xs sm:text-base font-black uppercase tracking-tight text-foreground truncate">
+                        <h3 className="text-xs sm:text-base font-black text-foreground truncate">
                             {plan.name || 'Your Training Plan'}
                         </h3>
                         <p className="text-[8px] sm:text-[10px] text-muted-foreground font-medium">
@@ -425,7 +425,7 @@ const Step2 = ({ data, updateData, errors = {} }) => {
                 <SectionHeader title="Plan Details" icon={CalendarDays} />
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                     <div className="space-y-1.5 sm:col-span-4">
-                        <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Plan Name</label>
+                        <label className="text-[9px] sm:text-[10px] font-black text-muted-foreground ml-1">Plan Name</label>
                         <input 
                             className="w-full h-10 px-4 bg-secondary/30 border border-border rounded-xl focus:border-primary/50 outline-none text-xs font-semibold transition-all"
                             value={plan.name} 
@@ -434,7 +434,7 @@ const Step2 = ({ data, updateData, errors = {} }) => {
                         />
                     </div>
                     <div className="space-y-1.5 relative sm:col-span-2">
-                        <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">Start Date</label>
+                        <label className="text-[9px] sm:text-[10px] font-black text-muted-foreground ml-1">Start Date</label>
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button
@@ -457,7 +457,7 @@ const Step2 = ({ data, updateData, errors = {} }) => {
                         </Popover>
                     </div>
                     <div className="space-y-1.5 relative sm:col-span-2">
-                        <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-muted-foreground ml-1">End Date</label>
+                        <label className="text-[9px] sm:text-[10px] font-black text-muted-foreground ml-1">End Date</label>
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button
@@ -481,13 +481,13 @@ const Step2 = ({ data, updateData, errors = {} }) => {
                     </div>
                 </div>
                 <div className="flex items-center justify-between pt-2 border-t border-border/50">
-                    <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-muted-foreground">Activation</span>
+                    <span className="text-[9px] sm:text-[10px] font-black text-muted-foreground">Activation</span>
                     <button 
                         onClick={() => updatePlan({ is_active: !plan.is_active })}
                         className="flex items-center gap-2"
                     >
                         <span className={cn(
-                            "text-[10px] sm:text-[11px] font-black uppercase tracking-wider transition-colors",
+                            "text-[10px] sm:text-[11px] font-black transition-colors",
                             plan.is_active ? "text-primary" : "text-muted-foreground"
                         )}>
                             {plan.is_active ? 'Active' : 'Inactive'}
@@ -552,7 +552,7 @@ const Step2 = ({ data, updateData, errors = {} }) => {
             <div className="bg-card border-2 border-border rounded-2xl sm:rounded-3xl p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
                     <div className="flex items-center gap-2 sm:gap-3">
-                        <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-foreground">{activeDay}'s Exercises</span>
+                        <span className="text-[9px] sm:text-[10px] font-black text-foreground">{activeDay}'s Exercises</span>
                         {dayData.workouts?.length > 0 && (
                             <span className="px-1.5 sm:px-2 py-0.5 bg-secondary text-[8px] sm:text-[9px] font-bold rounded-full text-muted-foreground">
                                 {dayData.workouts.length}
@@ -607,7 +607,7 @@ const Step2 = ({ data, updateData, errors = {} }) => {
                 ) : (
                     <div className="py-8 sm:py-12 text-center bg-secondary/20 rounded-2xl sm:rounded-3xl border-2 border-dashed border-border">
                         <Dumbbell className="w-8 h-8 sm:w-10 sm:h-10 text-muted-foreground/30 mx-auto mb-2 sm:mb-3" />
-                        <p className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-muted-foreground mb-1">
+                        <p className="text-[10px] sm:text-[11px] font-black text-muted-foreground mb-1">
                             Rest Day
                         </p>
                         <p className="text-[9px] sm:text-[10px] text-muted-foreground/60 mb-3 sm:mb-4">

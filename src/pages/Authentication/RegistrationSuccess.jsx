@@ -17,20 +17,20 @@ const RegistrationSuccess = () => {
                         </div>
                     </div>
                     
-                    <h1 className="text-2xl font-black uppercase tracking-tight">Check your email</h1>
+                    <h1 className="text-2xl font-black">Check your email</h1>
                     
                     <p className="text-muted-foreground text-xs font-medium leading-relaxed">
                         We sent a verification link to your email. Open it to activate your account and start your journey.
                     </p>
 
                     <div className="pt-2 space-y-6">
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                        <p className="text-[10px] font-bold text-muted-foreground/60">
                             Didn't receive the email? Check your spam folder.
                         </p>
                         
                         <Link 
                             to="/login" 
-                            className="flex items-center justify-center gap-2 text-primary font-black uppercase text-[10px] tracking-widest hover:underline group"
+                            className="flex items-center justify-center gap-2 text-primary font-black text-[10px] hover:underline group"
                         >
                             <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-1 transition-transform" />
                             Back to sign in

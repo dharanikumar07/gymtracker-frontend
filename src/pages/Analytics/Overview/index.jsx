@@ -28,14 +28,14 @@ const PlanDetailCard = ({ title, icon: Icon, details, colorClass }) => (
             <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg", colorClass)}>
                 <Icon className="w-5 h-5 text-white" />
             </div>
-            <h3 className="text-[14px] font-black uppercase tracking-tight text-foreground">{title}</h3>
+            <h3 className="text-[14px] font-black text-foreground">{title}</h3>
         </div>
         
         <div className="grid grid-cols-2 gap-y-4 gap-x-6">
             {details.map((item, idx) => (
                 <div key={idx} className="min-w-0">
                     <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">{item.label}</p>
-                    <p className="text-[11px] font-bold text-foreground truncate uppercase italic">
+                    <p className="text-[11px] font-bold text-foreground truncate italic">
                         {item.value || 'N/A'}
                     </p>
                 </div>
@@ -144,7 +144,7 @@ const Overview = () => {
             <div className="space-y-3">
                 <div className="flex items-center gap-2 px-1">
                     <PieChart className="w-3 h-3 text-muted-foreground" />
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">Financial Health</span>
+                    <span className="text-[9px] font-black text-muted-foreground">Financial Health</span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                     <StatCard 
@@ -189,7 +189,7 @@ const Overview = () => {
             <div className="space-y-3">
                 <div className="flex items-center gap-2 px-1">
                     <Trophy className="w-3 h-3 text-muted-foreground" />
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">Physical Vitality</span>
+                    <span className="text-[9px] font-black text-muted-foreground">Physical Vitality</span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <StatCard 
@@ -227,7 +227,7 @@ const Overview = () => {
             <div className="space-y-3">
                 <div className="flex items-center gap-2 px-1">
                     <Settings2 className="w-3 h-3 text-muted-foreground" />
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">Plan Details</span>
+                    <span className="text-[9px] font-black text-muted-foreground">Plan Details</span>
                 </div>
                 <div className="flex flex-col lg:flex-row gap-4">
                     <PlanDetailCard 
@@ -248,7 +248,7 @@ const Overview = () => {
             {/* Empty State Guard */}
             {!expense?.has_plan && !workout?.has_plan && (
                 <div className="bg-secondary/10 border-2 border-dashed border-border rounded-[2.5rem] p-10 text-center">
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] leading-relaxed">
+                    <p className="text-[10px] font-black text-muted-foreground leading-relaxed">
                         No active plans found for this period
                     </p>
                 </div>

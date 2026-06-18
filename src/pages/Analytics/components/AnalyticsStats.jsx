@@ -3,7 +3,7 @@ import { cn } from '../../../lib/utils';
 export const SectionHeader = ({ icon: Icon, label }) => (
     <div className="flex items-center gap-2 px-1">
         <Icon className="w-3 h-3 text-muted-foreground" />
-        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">{label}</span>
+        <span className="text-[9px] font-black text-muted-foreground">{label}</span>
     </div>
 );
 
@@ -21,10 +21,10 @@ export const StatCard = ({ icon: Icon, label, value, subValue, colorClass, trend
             )}
         </div>
         <div>
-            <p className="text-[9px] font-black uppercase tracking-tight text-muted-foreground mb-0.5">{label}</p>
+            <p className="text-[9px] font-black text-muted-foreground mb-0.5">{label}</p>
             <div className="flex items-baseline gap-2 flex-wrap">
                 <h4 className="text-[15px] font-black tracking-tighter text-foreground truncate max-w-full">{value}</h4>
-                {subValue && <span className="text-[8px] font-bold text-muted-foreground uppercase whitespace-nowrap">{subValue}</span>}
+                {subValue && <span className="text-[8px] font-bold text-muted-foreground whitespace-nowrap">{subValue}</span>}
             </div>
         </div>
     </div>
@@ -55,9 +55,9 @@ export const ProgressCircle = ({ percentage, label, icon: Icon, colorClass, seco
                 </div>
             </div>
             <div className="min-w-0">
-                <p className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-0.5">{label}</p>
+                <p className="text-[8px] font-black text-muted-foreground mb-0.5">{label}</p>
                 <h4 className="text-lg font-black text-foreground leading-none mb-1">{percentage}%</h4>
-                <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest truncate">{secondaryLabel}</p>
+                <p className="text-[8px] font-bold text-muted-foreground truncate">{secondaryLabel}</p>
             </div>
         </div>
     );

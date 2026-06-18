@@ -99,7 +99,7 @@ const LogItem = ({ log }) => (
             </div>
             <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-0.5">
-                    <h4 className="text-[11px] font-black uppercase tracking-tight text-foreground truncate">
+                    <h4 className="text-[11px] font-black text-foreground truncate">
                         {log.category_name}
                     </h4>
                     <span className="text-[10px] font-black text-foreground">
@@ -112,7 +112,7 @@ const LogItem = ({ log }) => (
                     )}>
                         {log.type}
                     </span>
-                    <span className="text-[9px] font-bold text-muted-foreground/40 uppercase">
+                    <span className="text-[9px] font-bold text-muted-foreground/40">
                         {format(parseISO(log.expense_date), 'dd MMM')}
                     </span>
                 </div>
@@ -127,8 +127,8 @@ const SectionHeader = ({ icon: Icon, title, subtitle, colorClass = "bg-primary/1
             <Icon className="w-4 h-4" />
         </div>
         <div className="min-w-0">
-            <h3 className="text-[11px] font-black uppercase tracking-widest text-foreground truncate">{title}</h3>
-            <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest italic truncate">{subtitle}</p>
+            <h3 className="text-[11px] font-black text-foreground truncate">{title}</h3>
+            <p className="text-[8px] font-bold text-muted-foreground italic truncate">{subtitle}</p>
         </div>
     </div>
 );
@@ -252,7 +252,7 @@ const ExpenseAnalytics = () => {
                                     {planDetails?.cycle_period ? `${planDetails.cycle_period} Cycle` : 'Expense Tracker'}
                                 </span>
                             </div>
-                            <h2 className="text-sm sm:text-base font-black uppercase tracking-tight text-foreground truncate max-w-[200px] sm:max-w-none">
+                            <h2 className="text-sm sm:text-base font-black text-foreground truncate max-w-[200px] sm:max-w-none">
                                 {planDetails?.name || 'Spending Analysis'}
                             </h2>
                         </div>
@@ -354,7 +354,7 @@ const ExpenseAnalytics = () => {
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-3 px-2">
                                         <div className="h-px flex-1 bg-border/40" />
-                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500 whitespace-nowrap">
+                                        <span className="text-[10px] font-black text-emerald-500 whitespace-nowrap">
                                             Fixed Expenses
                                         </span>
                                         <div className="h-px flex-1 bg-border/40" />
@@ -365,7 +365,7 @@ const ExpenseAnalytics = () => {
                                                 <LogItem key={log.uuid} log={log} />
                                             ))
                                         ) : (
-                                            <div className="col-span-full py-6 text-center opacity-30 text-[9px] font-black uppercase tracking-widest italic">
+                                            <div className="col-span-full py-6 text-center opacity-30 text-[9px] font-black italic">
                                                 No fixed expenses recorded
                                             </div>
                                         )}
@@ -376,7 +376,7 @@ const ExpenseAnalytics = () => {
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-3 px-2">
                                         <div className="h-px flex-1 bg-border/40" />
-                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500 whitespace-nowrap">
+                                        <span className="text-[10px] font-black text-emerald-500 whitespace-nowrap">
                                             Variable Expenses
                                         </span>
                                         <div className="h-px flex-1 bg-border/40" />
@@ -387,7 +387,7 @@ const ExpenseAnalytics = () => {
                                                 <LogItem key={log.uuid} log={log} />
                                             ))
                                         ) : (
-                                            <div className="col-span-full py-6 text-center opacity-30 text-[9px] font-black uppercase tracking-widest italic">
+                                            <div className="col-span-full py-6 text-center opacity-30 text-[9px] font-black italic">
                                                 No variable expenses found for this period
                                             </div>
                                         )}
@@ -643,8 +643,8 @@ const ExpenseAnalytics = () => {
                                         ) : (
                                             <div className="flex flex-col items-center justify-center opacity-20 text-center animate-in fade-in zoom-in duration-500">
                                                 <PieChartIcon className="w-12 h-12 mb-3 text-emerald-500" />
-                                                <p className="text-[10px] font-black uppercase tracking-[0.2em]">No Expense Logs Found</p>
-                                                <p className="text-[8px] font-bold uppercase tracking-widest mt-1">Try changing the period</p>
+                                                <p className="text-[10px] font-black">No Expense Logs Found</p>
+                                                <p className="text-[8px] font-bold mt-1">Try changing the period</p>
                                             </div>
                                         )}
                                     </div>
