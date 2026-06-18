@@ -6,18 +6,18 @@ import InstallAppModal from './InstallAppModal';
 
 const QuickActions = () => {
     const navigate = useNavigate();
-    const { canShowIcon, needsManualGuide, promptInstall, dismiss } = usePwaInstall();
+    const { canShowIcon, hasPrompt, needsManualGuide, promptInstall, dismiss } = usePwaInstall();
     const [showModal, setShowModal] = useState(false);
 
     const handleInstall = async () => {
-        if (needsManualGuide) {
+        if (hasPrompt) {
+            const outcome = await promptInstall();
             setShowModal(false);
-            dismiss();
-            return;
+            if (outcome === 'accepted') dismiss();
+        } else {
+            // Safari or no native prompt — just close modal
+            setShowModal(false);
         }
-        const outcome = await promptInstall();
-        setShowModal(false);
-        if (outcome === 'accepted') dismiss();
     };
 
     return (
@@ -48,6 +48,7 @@ const QuickActions = () => {
 
             {showModal && (
                 <InstallAppModal
+                    hasPrompt={hasPrompt}
                     needsManualGuide={needsManualGuide}
                     onCancel={() => setShowModal(false)}
                     onConfirm={handleInstall}

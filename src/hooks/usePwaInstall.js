@@ -84,6 +84,7 @@ export function usePwaInstall() {
         canPrompt,
         canShowIcon,
         isInstalled,
+        hasPrompt: !!deferredPrompt,
         needsManualGuide,
         promptInstall,
         dismiss,
