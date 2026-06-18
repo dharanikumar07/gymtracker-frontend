@@ -11,7 +11,8 @@ const isSafari = () => {
 };
 
 export function usePwaInstall() {
-    const [deferredPrompt, setDeferredPrompt] = useState(null);
+    // Pick up early-captured prompt from main.jsx, or null
+    const [deferredPrompt, setDeferredPrompt] = useState(() => window.__pwaInstallPrompt || null);
     const [isInstalled, setIsInstalled] = useState(isStandalone());
     const [isDismissed, setIsDismissed] = useState(
         () => localStorage.getItem(PWA_DISMISSED_KEY) === 'true'
@@ -21,19 +22,15 @@ export function usePwaInstall() {
         console.log('[PWA] Init:', {
             isStandalone: isStandalone(),
             isSafari: isSafari(),
-            userAgent: navigator.userAgent,
+            hasDeferredPrompt: !!deferredPrompt,
             protocol: window.location.protocol,
-            serviceWorker: 'serviceWorker' in navigator,
         });
 
-        if (isInstalled) {
-            console.log('[PWA] Already installed (standalone mode), skipping event listeners');
-            return;
-        }
+        if (isInstalled) return;
 
         const handler = (e) => {
             e.preventDefault();
-            console.log('[PWA] beforeinstallprompt fired!', e);
+            console.log('[PWA] beforeinstallprompt fired!');
             setDeferredPrompt(e);
         };
 
@@ -44,24 +41,6 @@ export function usePwaInstall() {
             setIsInstalled(true);
         };
         window.addEventListener('appinstalled', installedHandler);
-
-        // Check service worker status
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then((regs) => {
-                console.log('[PWA] Service workers registered:', regs.length, regs.map(r => r.scope));
-            });
-        }
-
-        // Check manifest
-        const manifestLink = document.querySelector('link[rel="manifest"]');
-        if (manifestLink) {
-            fetch(manifestLink.href)
-                .then(r => r.json())
-                .then(m => console.log('[PWA] Manifest loaded:', m))
-                .catch(e => console.error('[PWA] Manifest fetch failed:', e));
-        } else {
-            console.warn('[PWA] No <link rel="manifest"> found in document');
-        }
 
         return () => {
             window.removeEventListener('beforeinstallprompt', handler);
@@ -85,13 +64,13 @@ export function usePwaInstall() {
                     setIsInstalled(true);
                 }
                 setDeferredPrompt(null);
+                window.__pwaInstallPrompt = null;
                 return outcome;
             } catch (err) {
                 console.error('[PWA] prompt() error:', err);
             }
         } else {
-            console.warn('[PWA] No deferred prompt available. beforeinstallprompt has not fired.');
-            console.warn('[PWA] Checklist: 1) HTTPS? 2) Valid manifest with PNG icons? 3) Service worker registered? 4) Browser supports it?');
+            console.warn('[PWA] No deferred prompt available.');
         }
         return null;
     }, [deferredPrompt]);

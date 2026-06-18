@@ -13,6 +13,14 @@ const queryClient = new QueryClient({
   },
 });
 
+// Capture beforeinstallprompt early — before React mounts
+window.__pwaInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  window.__pwaInstallPrompt = e;
+  console.log('[PWA] beforeinstallprompt captured early in main.jsx');
+});
+
 // Register service worker on load for PWA install support
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/firebase-messaging-sw.js')
