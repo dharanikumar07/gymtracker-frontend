@@ -5,7 +5,6 @@ const PWA_DISMISSED_KEY = 'pwa_install_dismissed';
 const isStandalone = () =>
     window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 
-// Safari (iOS + Mac) doesn't support beforeinstallprompt — needs manual guide
 const isSafari = () => {
     const ua = navigator.userAgent;
     return /Safari/.test(ua) && !/Chrome|CriOS|Chromium|Edg|OPR/.test(ua);
@@ -19,17 +18,50 @@ export function usePwaInstall() {
     );
 
     useEffect(() => {
-        if (isInstalled) return;
+        console.log('[PWA] Init:', {
+            isStandalone: isStandalone(),
+            isSafari: isSafari(),
+            userAgent: navigator.userAgent,
+            protocol: window.location.protocol,
+            serviceWorker: 'serviceWorker' in navigator,
+        });
+
+        if (isInstalled) {
+            console.log('[PWA] Already installed (standalone mode), skipping event listeners');
+            return;
+        }
 
         const handler = (e) => {
             e.preventDefault();
+            console.log('[PWA] beforeinstallprompt fired!', e);
             setDeferredPrompt(e);
         };
 
         window.addEventListener('beforeinstallprompt', handler);
 
-        const installedHandler = () => setIsInstalled(true);
+        const installedHandler = () => {
+            console.log('[PWA] appinstalled event fired!');
+            setIsInstalled(true);
+        };
         window.addEventListener('appinstalled', installedHandler);
+
+        // Check service worker status
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then((regs) => {
+                console.log('[PWA] Service workers registered:', regs.length, regs.map(r => r.scope));
+            });
+        }
+
+        // Check manifest
+        const manifestLink = document.querySelector('link[rel="manifest"]');
+        if (manifestLink) {
+            fetch(manifestLink.href)
+                .then(r => r.json())
+                .then(m => console.log('[PWA] Manifest loaded:', m))
+                .catch(e => console.error('[PWA] Manifest fetch failed:', e));
+        } else {
+            console.warn('[PWA] No <link rel="manifest"> found in document');
+        }
 
         return () => {
             window.removeEventListener('beforeinstallprompt', handler);
@@ -38,20 +70,28 @@ export function usePwaInstall() {
     }, [isInstalled]);
 
     const needsManualGuide = isSafari() && !isInstalled;
-    // Icon always visible unless app is installed (standalone mode)
     const canShowIcon = !isInstalled;
-    // Toast respects dismiss — only shown once
     const canPrompt = !isInstalled && !isDismissed && (!!deferredPrompt || needsManualGuide);
 
     const promptInstall = useCallback(async () => {
+        console.log('[PWA] promptInstall called, deferredPrompt:', !!deferredPrompt);
+
         if (deferredPrompt) {
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'accepted') {
-                setIsInstalled(true);
+            try {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log('[PWA] User choice:', outcome);
+                if (outcome === 'accepted') {
+                    setIsInstalled(true);
+                }
+                setDeferredPrompt(null);
+                return outcome;
+            } catch (err) {
+                console.error('[PWA] prompt() error:', err);
             }
-            setDeferredPrompt(null);
-            return outcome;
+        } else {
+            console.warn('[PWA] No deferred prompt available. beforeinstallprompt has not fired.');
+            console.warn('[PWA] Checklist: 1) HTTPS? 2) Valid manifest with PNG icons? 3) Service worker registered? 4) Browser supports it?');
         }
         return null;
     }, [deferredPrompt]);
