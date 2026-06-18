@@ -45,7 +45,7 @@ const ExpenseLogContent = () => {
             <div className="w-4 h-4 rounded-full bg-emerald-600/10 flex items-center justify-center shrink-0">
                 <Info className="w-2.5 h-2.5 text-emerald-600" />
             </div>
-            <p className="text-[8px] font-black text-emerald-600 uppercase tracking-widest leading-tight italic">
+            <p className="text-[8px] font-black text-emerald-600 tracking-widest leading-tight italic">
                 Switch dates to browse your financial history
             </p>
         </div>

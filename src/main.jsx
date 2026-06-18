@@ -13,6 +13,11 @@ const queryClient = new QueryClient({
   },
 });
 
+// Register service worker on load for PWA install support
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(() => {});
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>

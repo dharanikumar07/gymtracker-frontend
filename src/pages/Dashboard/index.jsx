@@ -2,6 +2,7 @@ import React from 'react';
 import { Loader2 } from 'lucide-react';
 import { useDashboardQuery } from './http/queries';
 import { useAuthStore } from '../../store/authStore';
+import { usePwaInstallToast } from '../../hooks/usePwaInstallToast';
 
 import Greeting from './components/Greeting';
 import QuickActions from './components/QuickActions';
@@ -14,6 +15,7 @@ const Dashboard = () => {
     const { data, isLoading } = useDashboardQuery();
     const d = data?.data;
     const { user } = useAuthStore();
+    usePwaInstallToast();
 
     if (isLoading && !d) {
         return (

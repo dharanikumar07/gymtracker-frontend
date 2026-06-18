@@ -6,6 +6,13 @@ import { toast } from 'sonner';
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
 const FCM_TOKEN_KEY = 'fcm_device_token';
 
+const getDeviceType = () => {
+    const ua = navigator.userAgent;
+    if (/android/i.test(ua)) return 'android';
+    if (/iPad|iPhone|iPod/.test(ua)) return 'ios';
+    return 'web';
+};
+
 /**
  * Hook to manage Firebase Cloud Messaging.
  *
@@ -96,7 +103,7 @@ export function useFirebaseMessaging() {
 
             await saveDeviceTokenApi({
                 fcm_token: token,
-                device_type: 'web',
+                device_type: getDeviceType(),
             });
 
             localStorage.setItem(FCM_TOKEN_KEY, token);
@@ -110,16 +117,10 @@ export function useFirebaseMessaging() {
     }, [isSupported, registerServiceWorker]);
 
     const unregisterToken = useCallback(async () => {
-        const token = localStorage.getItem(FCM_TOKEN_KEY);
-        if (!token) return;
-
-        try {
-            await removeDeviceTokenApi({ fcm_token: token });
-        } catch (error) {
-            console.error('Failed to deactivate device token:', error);
-        } finally {
-            localStorage.removeItem(FCM_TOKEN_KEY);
-        }
+        // Token is kept active on the backend so the user continues
+        // to receive notifications even after logout.
+        // Only localStorage is cleared so re-login can re-register.
+        localStorage.removeItem(FCM_TOKEN_KEY);
     }, []);
 
     return {
