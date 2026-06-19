@@ -56,7 +56,7 @@ const DashboardLayout = () => {
                             <Dumbbell className="w-4 h-4 text-white" />
                         </div>
                         {isSidebarOpen && (
-                            <span className="text-lg font-black tracking-tighter uppercase italic truncate text-foreground">Vexo</span>
+                            <span className="text-lg font-black tracking-tighter uppercase italic text-foreground">Vexo</span>
                         )}
                     </div>
 
