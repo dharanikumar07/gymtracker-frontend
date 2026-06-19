@@ -38,7 +38,17 @@ function App() {
     return (
         <ErrorBoundary>
         <Router>
-            <Toaster richColors position="top-right" closeButton />
+            <Toaster
+                position="bottom-center"
+                closeButton
+                toastOptions={{
+                    classNames: {
+                        toast: 'gym-toast',
+                        closeButton: 'gym-toast-close',
+                        icon: 'gym-toast-icon',
+                    },
+                }}
+            />
             <Routes>
                 {/* Public Routes */}
                 <Route element={<PublicRoute />}>

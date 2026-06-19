@@ -34,7 +34,7 @@ const PlanDetailCard = ({ title, icon: Icon, details, colorClass }) => (
         <div className="grid grid-cols-2 gap-y-4 gap-x-6">
             {details.map((item, idx) => (
                 <div key={idx} className="min-w-0">
-                    <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">{item.label}</p>
+                    <p className="text-[9px] font-black text-muted-foreground mb-1">{item.label}</p>
                     <p className="text-[11px] font-bold text-foreground truncate italic">
                         {item.value || 'N/A'}
                     </p>
@@ -100,7 +100,7 @@ const Overview = () => {
                         )}
                     >
                         <CalendarIcon className="w-4 h-4" />
-                        <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
+                        <span className="text-[10px] font-black whitespace-nowrap">
                             {format(selectedDate, 'MMMM yyyy')}
                         </span>
                     </button>
