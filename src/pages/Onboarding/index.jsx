@@ -345,7 +345,7 @@ const Onboarding = () => {
             
             await fetchUser();
             resetOnboarding();
-            toast.success('Welcome to GymOS!');
+            toast.success('Welcome to Vexo!');
             navigate('/dashboard');
         } catch (error) {
             toast.error('Failed to complete onboarding');
@@ -369,7 +369,7 @@ const Onboarding = () => {
                             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-lg sm:rounded-xl border-2 dark:border-primary/50 dark:bg-white/10 flex items-center justify-center">
                                 <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-white dark:text-primary" />
                             </div>
-                            <span className="text-sm sm:text-lg font-black uppercase tracking-tight italic">GymOS</span>
+                            <span className="text-sm sm:text-lg font-black uppercase tracking-tight italic">Vexo</span>
                         </div>
                         <div className="hidden lg:block" />
                         <div className="flex items-center gap-3 sm:gap-4">

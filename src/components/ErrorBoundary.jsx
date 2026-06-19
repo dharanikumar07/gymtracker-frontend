@@ -66,7 +66,7 @@ const ErrorFallback = ({ onReset }) => {
                         <Shield className="w-5 h-5 text-white" />
                     </div>
                     <span className="text-xl font-black tracking-tighter uppercase italic text-foreground">
-                        GymOS
+                        Vexo
                     </span>
                 </div>
 

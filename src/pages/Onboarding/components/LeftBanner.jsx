@@ -35,7 +35,7 @@ const LeftBanner = () => {
                         <Activity className="w-6 h-6 text-white dark:text-primary" />
                     </div>
                     <div>
-                        <span className="text-2xl font-black uppercase tracking-tight italic" style={{ color: 'var(--logo-text, black)' }}>GymOS</span>
+                        <span className="text-2xl font-black uppercase tracking-tight italic" style={{ color: 'var(--logo-text, black)' }}>Vexo</span>
                         <p className="text-[10px] font-medium" style={{ color: 'var(--logo-subtext, #4b5563)' }}>Fitness Tracker</p>
                     </div>
                 </div>

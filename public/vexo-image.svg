@@ -1,0 +1,12 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="512" height="512" rx="120" fill="#0F172A"/>
+<rect x="92" y="92" width="328" height="328" rx="88" fill="#111C33"/>
+<path d="M148 250L214 332L334 174" stroke="url(#g)" stroke-width="38" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="156" cy="156" r="42" fill="#10B981"/>
+<path d="M132 156H180M142 138V174M170 138V174" stroke="white" stroke-width="12" stroke-linecap="round"/>
+<circle cx="356" cy="156" r="42" fill="#2563EB"/>
+<text x="337" y="176" font-family="Arial, sans-serif" font-size="52" font-weight="700" fill="white">₹</text>
+<circle cx="356" cy="356" r="42" fill="#7C3AED"/>
+<path d="M338 338H374M338 356H374M338 374H360" stroke="white" stroke-width="10" stroke-linecap="round"/>
+<defs><linearGradient id="g" x1="148" y1="250" x2="334" y2="174"><stop stop-color="#38BDF8"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs>
+</svg>
