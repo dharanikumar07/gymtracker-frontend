@@ -15,7 +15,7 @@ export const StatCard = ({ icon: Icon, label, value, subValue, colorClass, trend
                 <Icon className="w-4 h-4" />
             </div>
             {trend && (
-                <div className="text-[8px] font-black uppercase tracking-widest text-muted-foreground italic">
+                <div className="text-[8px] font-black text-muted-foreground italic">
                     {trend}
                 </div>
             )}

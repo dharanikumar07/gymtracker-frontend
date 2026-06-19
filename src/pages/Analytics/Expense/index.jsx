@@ -138,13 +138,13 @@ const CustomDistributionTooltip = ({ active, payload }) => {
         const data = payload[0].payload;
         return (
             <div className="bg-slate-950 border border-slate-800 p-3 rounded-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-200 min-w-[140px]">
-                <p className="text-[10px] font-black uppercase text-white mb-1 tracking-wider">{data.name}</p>
+                <p className="text-[10px] font-black text-white mb-1">{data.name}</p>
                 <div className="space-y-1">
                     <p className="text-xl font-black text-emerald-500 leading-none">
                         {data.value}<span className="text-[10px] ml-0.5 opacity-70">%</span>
                     </p>
                     <div className="pt-1.5 border-t border-white/5">
-                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Total Amount</p>
+                        <p className="text-[8px] font-bold text-slate-400">Total Amount</p>
                         <p className="text-[11px] font-black text-white">₹{data.raw_amount?.toLocaleString()}</p>
                     </div>
                 </div>
@@ -605,7 +605,7 @@ const ExpenseAnalytics = () => {
                                             <>
                                                 {/* Center Label for Donut */}
                                                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mb-10 sm:mb-0">
-                                                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none mb-1 opacity-40">Period Total</p>
+                                                    <p className="text-[10px] font-black text-muted-foreground leading-none mb-1 opacity-40">Period Total</p>
                                                     <p className="text-2xl sm:text-3xl font-black text-foreground">₹{currentDistTotal.toLocaleString()}</p>
                                                 </div>
 
