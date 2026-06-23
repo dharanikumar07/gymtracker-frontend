@@ -4,8 +4,8 @@ import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 
 const tabs = [
-    { id: 'routine', label: 'Routine', icon: Activity, path: '/track-progress/routine' },
-    { id: 'workout', label: 'Workout', icon: Dumbbell, path: '/track-progress/workout' },
+    { id: 'setup', label: 'Setup', icon: Activity, path: '/track-workouts/setup' },
+    { id: 'log', label: 'Log', icon: Dumbbell, path: '/track-workouts/log' },
 ];
 
 const TrackProgress = () => {

@@ -28,6 +28,14 @@ export const verifyEmailApi = async (uuid, hash) => {
     return await api.get(`/verify-email/${uuid}/${hash}`);
 };
 
+export const generateDemoApi = async () => {
+    return await api.get('/demo/generate');
+};
+
+export const registerDemoApi = async (data) => {
+    return await api.post('/demo/register', data);
+};
+
 export const getSocialRedirectApi = async (provider) => {
     return await api.get(`/auth/redirect/${provider}`);
 };

@@ -16,7 +16,7 @@ const formatDate = (dateStr) => {
 };
 
 const typeConfig = {
-    workout: { icon: Dumbbell, color: 'bg-primary/10 text-primary', route: '/track-progress/workout' },
+    workout: { icon: Dumbbell, color: 'bg-primary/10 text-primary', route: '/track-workouts/log' },
     expense: { icon: Wallet, color: 'bg-emerald-500/10 text-emerald-500', route: '/track-expense/log' },
 };
 

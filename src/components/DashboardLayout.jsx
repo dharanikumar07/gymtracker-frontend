@@ -11,7 +11,7 @@ import ThemeToggle from './ThemeToggle';
 const menuItems = [
     { id: 'dashboard', label: 'Home', icon: Home, path: '/dashboard' },
     { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/analytics' },
-    { id: 'progress', label: 'Progress', icon: Dumbbell, path: '/track-progress' },
+    { id: 'workouts', label: 'Workouts', icon: Dumbbell, path: '/track-workouts' },
     { id: 'expenses', label: 'Expenses', icon: Wallet, path: '/track-expense' },
     { id: 'settings', label: 'Settings', icon: Settings, path: '/settings' },
 ];
@@ -160,6 +160,18 @@ const DashboardLayout = () => {
                         <ThemeToggle className="rounded-xl border-none bg-transparent hover:bg-secondary" />
                     </div>
                 </header>
+
+                {/* Demo Banner */}
+                {user?.is_demo && user?.demo_expires_at && (
+                    <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 sm:px-6 py-2 flex items-center justify-center gap-2 shrink-0">
+                        <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+                            Demo account — expires {(() => {
+                                const days = Math.max(0, Math.ceil((new Date(user.demo_expires_at) - new Date()) / (1000 * 60 * 60 * 24)));
+                                return days === 0 ? 'today' : `in ${days} day${days !== 1 ? 's' : ''}`;
+                            })()}
+                        </span>
+                    </div>
+                )}
 
                 {/* Scrollable Content */}
                 <main className="flex-1 overflow-y-auto bg-background/50 pb-20 lg:pb-6">

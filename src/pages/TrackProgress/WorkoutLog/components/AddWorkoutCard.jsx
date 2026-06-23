@@ -186,7 +186,6 @@ const AddWorkoutCard = ({ onClose }) => {
                                 if (errors.name) setErrors(prev => ({ ...prev, name: null }));
                             }}
                             disabled={isSaving}
-                            autoFocus
                             className={cn(
                                 "w-full h-9 bg-secondary/10 border rounded-xl px-4 text-[12px] font-black outline-none transition-all placeholder:text-foreground/10",
                                 errors.name ? "border-red-500 bg-red-500/5" : "border-border focus:border-emerald-600/50"

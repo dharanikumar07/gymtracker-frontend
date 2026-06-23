@@ -361,8 +361,7 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
                             </div>
                             
                             <div className="space-y-1">
-                                <textarea 
-                                    autoFocus
+                                <textarea
                                     placeholder="e.g. Injury, lack of equipment..."
                                     className={cn(
                                         "w-full h-24 bg-secondary/20 border rounded-xl p-3 text-[12px] font-bold outline-none transition-all resize-none placeholder:text-foreground/20",

@@ -32,7 +32,7 @@ const Stats = ({ today, streak }) => {
                 value={`${fitness.completed || 0}/${fitness.target || 1}`}
                 sub={fitness.percentage >= 100 ? 'Completed' : 'In progress'}
                 color={fitness.percentage >= 100 ? 'bg-green-500/10 text-green-500' : 'bg-primary/10 text-primary'}
-                onClick={() => navigate('/track-progress/workout')}
+                onClick={() => navigate('/track-workouts/log')}
             />
             <StatCard
                 icon={Wallet}
