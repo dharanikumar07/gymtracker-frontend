@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { User, Target, Dumbbell, Zap, Wind, ShieldCheck, Check, Loader2, Activity, ChevronDown, ChartNoAxesCombined } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover';
 import { cn } from '../../../lib/utils';
 import { useFormValidation } from '../../../validation/ValidationWrapper';
 import { validationRules } from '../../../validation';
@@ -207,19 +208,37 @@ const Step1 = ({ data, updateData, errors = {} }) => {
                         </div>
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-black text-muted-foreground ml-1">Gender</label>
-                            <div className="relative mt-1">
-                                <select
-                                    value={localData.gender}
-                                    onChange={(e) => handleChange('gender', e.target.value)}
-                                    className={cn(inputClasses('gender'), "pr-10 appearance-none cursor-pointer")}
-                                >
-                                    <option value="">Select</option>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                    <option value="other">Other</option>
-                                </select>
-                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                            </div>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <button
+                                        type="button"
+                                        className={cn(inputClasses('gender'), "flex items-center justify-between text-left px-4 mt-1 cursor-pointer")}
+                                    >
+                                        <span className={localData.gender ? 'text-foreground' : 'text-muted-foreground'}>
+                                            {localData.gender ? localData.gender.charAt(0).toUpperCase() + localData.gender.slice(1) : 'Select'}
+                                        </span>
+                                        <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                                    </button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1 bg-card border border-border rounded-xl shadow-xl z-50" align="start">
+                                    {[{ value: 'male', label: 'Male' }, { value: 'female', label: 'Female' }, { value: 'other', label: 'Other' }].map((opt) => (
+                                        <button
+                                            key={opt.value}
+                                            type="button"
+                                            onClick={() => handleChange('gender', opt.value)}
+                                            className={cn(
+                                                "flex items-center justify-between w-full px-3 py-2 rounded-lg text-sm font-semibold transition-colors",
+                                                localData.gender === opt.value
+                                                    ? "bg-primary/10 text-primary"
+                                                    : "text-foreground hover:bg-secondary"
+                                            )}
+                                        >
+                                            {opt.label}
+                                            {localData.gender === opt.value && <Check className="w-3.5 h-3.5" />}
+                                        </button>
+                                    ))}
+                                </PopoverContent>
+                            </Popover>
                             {getFieldError('gender') && (
                                 <p className="text-[10px] text-red-500 font-medium px-1">{getFieldError('gender')}</p>
                             )}

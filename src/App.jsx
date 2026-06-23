@@ -74,10 +74,10 @@ function App() {
                             <Route path="expense" element={<AnalyticsExpense />} />
                         </Route>
 
-                        <Route path="/track-progress" element={<TrackProgress />}>
-                            <Route index element={<Navigate to="routine" replace />} />
-                            <Route path="routine" element={<Routine />} />
-                            <Route path="workout" element={<WorkoutLog />} />
+                        <Route path="/track-workouts" element={<TrackProgress />}>
+                            <Route index element={<Navigate to="setup" replace />} />
+                            <Route path="setup" element={<Routine />} />
+                            <Route path="log" element={<WorkoutLog />} />
                         </Route>
 
                         <Route path="/track-expense" element={<TrackExpense />}>

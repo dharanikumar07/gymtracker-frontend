@@ -16,6 +16,14 @@ const SocialCallback = () => {
 
     const params = new URLSearchParams(location.search);
     const code = params.get('code');
+    const authError = params.get('error');
+
+    // Handle OAuth denial (e.g., user clicked "Deny" on Google consent screen)
+    if (authError && !error) {
+        toast.error(authError === 'access_denied' ? 'You denied the authorization request' : 'Authorization failed');
+        navigate('/login', { replace: true });
+        return null;
+    }
 
     const handleCallback = async () => {
         if (!code) {

@@ -137,7 +137,6 @@ const WorkoutItem = ({
                                     value={workout.exercise_name || ''}
                                     placeholder="e.g. Bench Press"
                                     onChange={(e) => handleUpdate({ exercise_name: e.target.value })}
-                                    autoFocus
                                 />
                             </div>
 
