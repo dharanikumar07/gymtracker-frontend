@@ -47,13 +47,13 @@ const AddWorkoutCard = ({ onClose }) => {
     const [exerciseName, setExerciseName] = useState('');
     const [targetMuscles, setTargetMuscles] = useState([]);
     const [metricsType, setMetricsType] = useState('strength');
-    const [sets, setSets] = useState(() => buildSets('strength', 3));
+    const [sets, setSets] = useState(() => buildSets('strength', 2));
     const [isSaving, setIsSaving] = useState(false);
     const [errors, setErrors] = useState({ name: null, sets: [] });
 
     const handleMetricsTypeChange = (newType) => {
         setMetricsType(newType);
-        setSets(buildSets(newType, newType === 'endurance' ? 1 : 3));
+        setSets(buildSets(newType, newType === 'endurance' ? 1 : 2));
         setErrors({ name: null, sets: [] });
     };
 

@@ -8,7 +8,8 @@ import {
     Zap,
     MoreVertical,
     CheckCircle2,
-    ChevronRight
+    ChevronRight,
+    PencilLine
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { useWorkoutLog } from '../context/WorkoutLogContext';
@@ -32,11 +33,15 @@ import {
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 
-import { validateSkipField } from '../validation/validation';
+import { validateSkipField, validateSetFields } from '../validation/validation';
 
 const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
     const { saveLog, isSaving, deleteSlot } = useWorkoutLog();
     
+    const [isEditingWorkout, setIsEditingWorkout] = useState(false);
+    const [validationErrors, setValidationErrors] = useState({});
+    const [isSuccessAnimating, setIsSuccessAnimating] = useState(false);
+
     const [localSets, setLocalSets] = useState(() => {
         const metricsData = slot.metrics_data || {};
         const setsFromData = metricsData.sets;
@@ -44,17 +49,20 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
         if (Array.isArray(setsFromData)) {
             return setsFromData.map((s, idx) => ({
                 ...s,
-                id: s.id || `set-${idx}-${Date.now()}`
+                id: s.id || `set-${idx}-${Date.now()}`,
+                showWeight: Number(s.weight) > 0
             }));
         }
 
-        const setCount = Number(metricsData.sets) || 1;
+        // Default to exactly 2 sets for template exercises
+        const setCount = 2;
         return Array.from({ length: setCount }, (_, idx) => ({
             id: `set-${idx}-${Date.now()}`,
             reps: metricsData.reps || 0,
             weight: metricsData.weight || 0,
             duration: metricsData.duration || 0,
-            completed: false
+            completed: false,
+            showWeight: Number(metricsData.weight) > 0
         }));
     });
 
@@ -70,6 +78,8 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
         })
     );
 
+    const isEditable = isPending || isInProgress || isEditingWorkout;
+
     const triggerSync = (currentSets, forcedStatus = null, extraData = {}) => {
         const determinedStatus = forcedStatus || (currentSets.every(s => s.completed) ? 'completed' : 'in_progress');
         const metricsType = slot.metrics_type || 'strength';
@@ -80,7 +90,7 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
             metrics_type: metricsType,
             metrics_data: {
                 ...(slot.metrics_data || {}),
-                sets: currentSets.map(({ id, ...rest }, index) => {
+                sets: currentSets.map(({ id, showWeight, ...rest }, index) => {
                     const setObj = {
                         ...rest,
                         order: index + 1
@@ -107,6 +117,39 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
         }]);
     };
 
+    const handleCompleteWorkout = () => {
+        const errors = {};
+        let hasErrors = false;
+        const metricsType = slot.metrics_type || 'strength';
+
+        localSets.forEach(set => {
+            const fieldErrors = validateSetFields(set, metricsType, set.showWeight);
+            if (Object.keys(fieldErrors).length > 0) {
+                errors[set.id] = fieldErrors;
+                hasErrors = true;
+            }
+        });
+
+        if (hasErrors) {
+            setValidationErrors(errors);
+            return;
+        }
+
+        setValidationErrors({});
+        setIsSuccessAnimating(true);
+        
+        // Mark all sets as completed
+        const updatedSets = localSets.map(s => ({ ...s, completed: true }));
+        setLocalSets(updatedSets);
+        
+        triggerSync(updatedSets, 'completed');
+        
+        setTimeout(() => {
+            setIsSuccessAnimating(false);
+            setIsEditingWorkout(false);
+        }, 1000); // Wait for tick drawing animation to complete
+    };
+
     const addSet = () => {
         const lastSet = localSets[localSets.length - 1];
         const newSets = [
@@ -118,13 +161,16 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
 
     const removeSet = (id) => {
         if (localSets.length > 1) {
-            const setToRemove = localSets.find(s => s.id === id);
             const filtered = localSets.filter(s => s.id !== id);
             setLocalSets(filtered);
-
-            // Trigger API only if the set was NOT newly added locally
-            if (setToRemove && !setToRemove.isNew && (isInProgress || isCompleted)) {
-                triggerSync(filtered);
+            
+            // Clear errors for the deleted set
+            if (validationErrors[id]) {
+                setValidationErrors(prev => {
+                    const updated = { ...prev };
+                    delete updated[id];
+                    return updated;
+                });
             }
         }
     };
@@ -148,8 +194,16 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
         });
         
         setLocalSets(updated);
-        if (field === 'completed') {
-            triggerSync(updated);
+
+        // Clear field-specific error as the user edits
+        if (validationErrors[id]?.[field]) {
+            setValidationErrors(prev => ({
+                ...prev,
+                [id]: {
+                    ...prev[id],
+                    [field]: null
+                }
+            }));
         }
     };
 
@@ -251,15 +305,27 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
     return (
         <div className={cn(
             "w-full bg-card rounded-3xl border border-border overflow-hidden transition-all duration-300 shadow-sm",
-            allDone && "opacity-80"
+            allDone && !isEditingWorkout && "opacity-80"
         )}>
+            {/* Inject Tick Drawing CSS Keyframes */}
+            <style dangerouslySetInnerHTML={{ __html: `
+                @keyframes drawCircle {
+                    from { stroke-dashoffset: 63; }
+                    to { stroke-dashoffset: 0; }
+                }
+                @keyframes drawTick {
+                    from { stroke-dashoffset: 15; }
+                    to { stroke-dashoffset: 0; }
+                }
+            `}} />
+
             {/* Header: Identity & Top Actions - One Row Layout */}
             <div className="flex items-center justify-between gap-4 p-4 sm:p-5 bg-secondary/5 border-b border-border/50">
                 <div className="flex flex-col gap-2 min-w-0">
                     <div className="flex flex-col gap-1">
                         <h4 className={cn(
                             "text-[15px] font-black truncate leading-none",
-                            allDone ? "text-emerald-600" : "text-foreground"
+                            allDone && !isEditingWorkout ? "text-emerald-600" : "text-foreground"
                         )}>
                             {slot.exercise_name || "Routine Activity"}
                         </h4>
@@ -289,16 +355,28 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
                 </div>
                 
                 <div className="flex items-center gap-3 shrink-0">
-                    {/* Compact Add Set Button - Bordered Style */}
-                    <button 
-                        onClick={addSet} 
-                        disabled={isSaving}
-                        className="h-8 px-2.5 sm:px-3 flex items-center gap-1.5 border border-dashed border-emerald-600/30 hover:border-emerald-600 text-emerald-600 rounded-lg transition-all active:scale-95 disabled:opacity-50"
-                    >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-black uppercase tracking-widest hidden sm:block">Add Set</span>
-                    </button>
+                    {/* Compact Add Set Button - Visible only in Edit Mode */}
+                    {isEditable && (
+                        <button 
+                            onClick={addSet} 
+                            disabled={isSaving}
+                            className="h-8 px-2.5 sm:px-3 flex items-center gap-1.5 border border-dashed border-emerald-600/30 hover:border-emerald-600 text-emerald-600 rounded-lg transition-all active:scale-95 disabled:opacity-50"
+                        >
+                            <Plus className="w-3.5 h-3.5" />
+                            <span className="text-[10px] font-black uppercase tracking-widest hidden sm:block">Add Set</span>
+                        </button>
+                    )}
 
+                    {/* Edit Button for Completed Workouts */}
+                    {isCompleted && !isEditingWorkout && (
+                        <button 
+                            onClick={() => setIsEditingWorkout(true)}
+                            className="h-8 px-2.5 sm:px-3 flex items-center gap-1.5 border border-emerald-600/30 hover:border-emerald-600 text-emerald-600 rounded-lg transition-all active:scale-95"
+                        >
+                            <PencilLine className="w-3.5 h-3.5" />
+                            <span className="text-[10px] font-black uppercase tracking-widest hidden sm:block">Edit</span>
+                        </button>
+                    )}
 
                     {/* Delete Button - Hidden for Pending Routine Items */}
                     {!isPending && (
@@ -337,12 +415,70 @@ const WorkoutSlot = ({ slot, isPending, isInProgress, isCompleted }) => {
                                     isSaving={isSaving}
                                     onUpdate={updateSet}
                                     onRemove={removeSet}
+                                    isEditable={isEditable}
+                                    canDelete={localSets.length > 1}
+                                    errors={validationErrors[set.id] || {}}
                                 />
                             ))}
                         </div>
                     </SortableContext>
                 </DndContext>
             </div>
+
+            {/* Save/Log Action Footer */}
+            {isEditable && (
+                <div className="px-4 py-3 bg-secondary/5 border-t border-border/50 flex justify-end items-center gap-3">
+                    {isEditingWorkout && (
+                        <button
+                            onClick={() => {
+                                setIsEditingWorkout(false);
+                                setValidationErrors({});
+                                // Reset to original slot data on cancel
+                                const metricsData = slot.metrics_data || {};
+                                const setsFromData = metricsData.sets;
+                                if (Array.isArray(setsFromData)) {
+                                    setLocalSets(setsFromData.map((s, idx) => ({
+                                        ...s,
+                                        id: s.id || `set-${idx}-${Date.now()}`,
+                                        showWeight: Number(s.weight) > 0
+                                    })));
+                                }
+                            }}
+                            className="h-9 px-4 rounded-xl border border-border text-foreground/60 hover:bg-secondary/40 text-[10px] font-black uppercase tracking-widest transition-all active:scale-95"
+                        >
+                            Cancel
+                        </button>
+                    )}
+                    <button
+                        onClick={handleCompleteWorkout}
+                        disabled={isSaving || isSuccessAnimating}
+                        className="h-8 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-lg shadow-emerald-600/10 active:scale-95 flex items-center justify-center gap-2 min-w-[120px]"
+                    >
+                        {isSuccessAnimating ? (
+                            <svg className="w-4 h-4 text-white" viewBox="0 0 24 24">
+                                <circle 
+                                    cx="12" cy="12" r="10" 
+                                    stroke="white" strokeWidth="3" fill="none"
+                                    strokeDasharray="63" strokeDashoffset="63"
+                                    style={{ animation: 'drawCircle 0.4s ease-out forwards' }}
+                                />
+                                <path 
+                                    d="M8 12l3 3 5-5" 
+                                    stroke="white" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"
+                                    strokeDasharray="15" strokeDashoffset="15"
+                                    style={{ animation: 'drawTick 0.3s ease-out 0.3s forwards' }}
+                                />
+                            </svg>
+                        ) : isSaving ? (
+                            <span className="text-[10px] font-black uppercase tracking-widest animate-pulse">Saving...</span>
+                        ) : (
+                            <span className="text-[10px] font-black uppercase tracking-widest">
+                                {isEditingWorkout ? 'Save Changes' : isPending ? 'Log Exercise' : 'Complete Exercise'}
+                            </span>
+                        )}
+                    </button>
+                </div>
+            )}
 
             {/* Skip Dialog - Refactored to Compact Shadcn-style */}
             {showSkipModal && (

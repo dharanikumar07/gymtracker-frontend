@@ -281,13 +281,11 @@ const PlanCard = ({ plans, selectedPlan, onSave, onSelect, onDelete }) => {
                             </div>
 
                             <div className="sm:col-span-3">
-                                <label className={labelClasses}>Training Type <span className="text-red-500">*</span></label>
-                                <div className={cn(editValidation.getError('paType') && "ring-1 ring-red-500 rounded-xl")}>
-                                    {renderTrainingTypeSelect(paType, (val) => { setPaType(val); editValidation.clearFieldError('paType'); })}
+                                <label className={labelClasses}>Training Type</label>
+                                <div className="w-full h-9 sm:h-8 px-3 bg-secondary/10 border-2 border-emerald-500 border-dashed rounded-xl flex items-center text-[10px] font-black text-white-500 uppercase tracking-wider select-none">
+                                    {TRAINING_TYPES.find(t => t.id === paType)?.label || paType.replace('_', ' ')}
                                 </div>
-                                <div className="h-4 mt-0.5 ml-1">
-                                    {editValidation.getError('paType') && <span className="text-[8px] text-red-500 font-bold">{editValidation.getError('paType')}</span>}
-                                </div>
+                                <div className="h-4" />
                             </div>
 
                             <div className="sm:col-span-5 grid grid-cols-2 gap-3">

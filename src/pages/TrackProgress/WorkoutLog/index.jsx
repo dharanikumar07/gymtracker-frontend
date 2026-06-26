@@ -163,7 +163,7 @@ const WorkoutLogContent = () => {
                 {!isAddingWorkout ? (
                     <button 
                         onClick={() => setIsAddingWorkout(true)}
-                        className="flex items-center justify-center gap-2 h-9 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-lg shadow-emerald-600/10 active:scale-95 group"
+                        className="flex items-center justify-center gap-2 h-8 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-lg shadow-emerald-600/10 active:scale-95 group"
                     >
                         <Plus className="w-3.5 h-3.5 text-white group-hover:scale-110 transition-transform" />
                         <span className="text-[9px] font-black uppercase tracking-widest">Add Manual Exercise</span>
@@ -239,7 +239,7 @@ const WorkoutLogContent = () => {
 const SectionLabel = ({ label, count, color = "bg-emerald-600", active }) => (
     <div className="flex items-center gap-3 px-2">
         <div className={cn("w-2 h-2 rounded-full", color, active && "animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]")} />
-        <h3 className="text-[10px] font-black text-foreground/50">
+        <h3 className="text-[13px] font-black text-foreground/50">
             {label}
         </h3>
         <span className="text-[9px] font-black text-foreground/30 ml-auto">
